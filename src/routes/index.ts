@@ -1,7 +1,12 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 
 export const indexRoute = Router();
 
-indexRoute.get('/', (req: Request, res: Response) => {
-    res.send('Express Typescript server');
+indexRoute.get('/', (req, res) => {
+    res.json({ message: 'Express Typescript server' });
+});
+
+indexRoute.post('/', (req, res) => {
+    console.log(req);
+    res.end();
 });
