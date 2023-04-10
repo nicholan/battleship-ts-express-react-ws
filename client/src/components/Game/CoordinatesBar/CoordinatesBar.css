@@ -1,0 +1,27 @@
+.coordinateBar {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 23px;
+    color: var(--black-olive);
+    user-select: none;
+    text-align: center;
+    border: 1px solid var(--square-border);
+    border-bottom: none;
+    display: flex;
+}
+
+.coordinateBar > div {
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--square-border);
+    height: 100%;
+    width: 100%;
+}
+
+.flexRow {
+    flex-direction: row;
+}
+
+.flexColumn {
+    flex-direction: column;
+}
+

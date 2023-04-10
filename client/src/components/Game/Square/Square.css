@@ -1,0 +1,22 @@
+.square {
+    font-size: 45px;
+    line-height: 0px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--square-border);
+}
+
+.invalid {
+    background-color: var(--invalid-placement) !important;
+}
+
+.valid {
+    background-color: var(--valid-placement) !important;
+}
+
+.ship {
+    transition-duration: 0.5s;
+    background-color: var(--eerie-black) !important;
+    border: 1px solid var(--eerie-black);
+    color: var(--white);
+}

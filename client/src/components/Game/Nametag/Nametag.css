@@ -1,0 +1,13 @@
+.nametag {
+    letter-spacing: 1.4px;
+    font-size: 30px;
+    color: var(--white);
+    font-family: 'Bebas Neue', cursive;
+    user-select: none;
+    text-align: center;
+    display: grid;
+    align-items: center;
+    background: var(--flame-gradient-nametag);
+    box-shadow: -3px 3px 5px rgba(0, 0, 0, 0.1);
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+}

@@ -1,0 +1,23 @@
+.btn {
+    user-select: none;
+    text-transform: uppercase;
+    padding: 1rem 1.5rem 1rem 1.5rem;
+    font-family: 'Bebas Neue', cursive;
+    letter-spacing: 1.5px;
+    font-size: 1.5rem;
+    place-self: center;
+}
+
+.btn-black {
+    background-color: var(--eerie-black);
+    margin: 0 auto;
+    width: max-content;
+    cursor: pointer;
+    place-self: center;
+    box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.1);
+    color: var(--white);
+}
+
+.btn-black:hover {
+    color: var(--flame);
+}

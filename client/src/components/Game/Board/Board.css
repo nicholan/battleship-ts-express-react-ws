@@ -1,0 +1,8 @@
+.board {
+    background-color: var(--white);
+    border: 1px solid var(--eerie-black);
+    user-select: none;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.1);
+}
