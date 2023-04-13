@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Message, GameEvent, MsgType, Coordinates } from '../types/shared';
+import { Message, GameEvent, MsgType, Coordinates, ShipPlacement } from '../types/shared';
 import { useLoaderData } from 'react-router-dom';
 import type { LoaderFunctionArgs } from 'react-router-dom';
-import { Cell } from '../lib/Gameboard';
 import { uploadGameEvent, uploadPlayerBoard, uploadStartGame } from '../api/api';
 import { Game } from '../components/Game/Game';
 import { playerGameboard } from '../lib/Gameboard';
@@ -12,7 +11,7 @@ type LoaderData = {
     playerId: string,
     playerName: string,
     enemyName: string | null,
-    board: Cell[][],
+    board: ShipPlacement[],
     events: GameEvent[],
     turn: number,
     playerTurn: number,
@@ -73,7 +72,7 @@ export function Lobby() {
     }
 
     async function readyPlayer() {
-        if (!(await uploadPlayerBoard(playerGameboard.getGrid(), gameId, playerName))) return false;
+        if (!(await uploadPlayerBoard(playerGameboard.getBuildArray(), gameId, playerName))) return false;
         playerReady.current = true;
         sendMessage({
             playerId,

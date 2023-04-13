@@ -20,3 +20,7 @@
     border: 1px solid var(--eerie-black);
     color: var(--white);
 }
+
+.sunk {
+    color: var(--flame);
+}

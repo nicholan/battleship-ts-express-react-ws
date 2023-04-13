@@ -1,7 +1,6 @@
-import { GameEvent } from '../types/shared';
-import { Cell } from '../lib/Gameboard';
+import { GameEvent, ShipPlacement } from '../types/shared';
 
-export async function uploadPlayerBoard(board: Cell[][], gameId: string, playerName: string) {
+export async function uploadPlayerBoard(board: ShipPlacement[], gameId: string, playerName: string) {
     const response = await fetch(`http://localhost:3000/${gameId}/${playerName}`, {
         method: 'POST',
         mode: 'cors',

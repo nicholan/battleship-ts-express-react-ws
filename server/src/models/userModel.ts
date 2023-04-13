@@ -1,9 +1,10 @@
 import { Schema, ObjectId, model } from 'mongoose';
+import { ShipPlacement } from '../../../client/src/types/shared';
 
 export type PlayerType = {
     _id: ObjectId,
     name: string,
-    board: string[][],
+    board: ShipPlacement[],
     gameId: string,
     playerTurn: number,
     ready: boolean,

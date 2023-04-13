@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { GameEvent, Coordinates } from '../../../../client/src/types/shared';
-import { Cell } from '../../lib/Gameboard';
+import { GameEvent, Coordinates, ShipPlacement } from '../../../../client/src/types/shared';
 import { CoordinatesBar } from './CoordinatesBar/CoordinatesBar';
 import { Nametag } from './Nametag/Nametag';
 import { Board } from './Board/Board';
@@ -12,7 +11,7 @@ type Props = {
     playerId: string,
     playerName: string,
     enemyName: string | null | undefined,
-    board: Cell[][],
+    board: ShipPlacement[],
     gameEvents: GameEvent[],
     gameStarted: boolean,
     ready: boolean,
@@ -38,7 +37,7 @@ export function Game(
     const playerEvents = gameEvents.filter((evt) => { return evt.playerId === playerId; });
     const enemyEvents = gameEvents.filter((evt) => { return evt.playerId !== playerId; });
 
-    playerGameboard.parseGameData(playerEvents, board);
+    playerGameboard.buildFromDb(playerEvents, board);
     enemyGameboard.parseGameData(enemyEvents);
 
     const [shipsRemaining, setShipsRemaining] = useState(playerGameboard.getShipLength() === 0 ? false : true);
@@ -69,6 +68,7 @@ export function Game(
             <Board
                 key={dateKey}
                 isPlayerBoard={true}
+                shipsRemaining={shipsRemaining}
                 setShipsRemaining={setShipsRemaining}
                 isTurn={gameStarted && isPlayerTurn}
             />

@@ -7,6 +7,7 @@ import './Board.css';
 type Props = {
     isPlayerBoard: boolean,
     isTurn: boolean,
+    shipsRemaining?: boolean,
     setShipsRemaining?: (val: boolean) => void,
     attack?: (coordinates: Coordinates) => void,
 }
@@ -14,6 +15,7 @@ type Props = {
 export function Board(
     {
         isPlayerBoard,
+        shipsRemaining,
         setShipsRemaining,
         attack
     }: Props) {
@@ -38,6 +40,7 @@ export function Board(
     });
 
     function playerBoardMouseEventHandler(coordinates: Coordinates, isClick?: boolean, isWheel?: boolean) {
+        if (!shipsRemaining) return;
         if (isWheel) {
             toggleAxis();
         }
@@ -59,19 +62,21 @@ export function Board(
     }
 
     function mouseLeaveHandler() {
-        if (!isPlayerBoard) return;
+        if (!isPlayerBoard || !shipsRemaining) return;
         clearCellStyles();
         updateBoard();
     }
 
     function updateBoard() {
         const nodes = getNodeStack();
-        const copyGrid = [...grid];
-        nodes.forEach(node => {
-            const { x, y } = node.coordinates;
-            copyGrid[x][y].style = node.style;
+        setGrid((prev) => {
+            const copyGrid = [...prev];
+            nodes.forEach(node => {
+                const { x, y } = node.coordinates;
+                copyGrid[x][y].style = node.style;
+            });
+            return copyGrid;
         });
-        setGrid(copyGrid);
     }
 
     return (

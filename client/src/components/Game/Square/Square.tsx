@@ -11,7 +11,7 @@ type Props = {
 
 export function Square({ mouseEventHandler, coordinates, style, state }: Props) {
     let content: '×' | '';
-    let stateStyle: 'ship' | '';
+    let stateStyle: 'ship' | 'ship sunk' | '';
     switch (state) {
         case 'EMPTY':
             content = '';
@@ -28,6 +28,10 @@ export function Square({ mouseEventHandler, coordinates, style, state }: Props) 
         case 'SHIP_HIT':
             content = '×';
             stateStyle = 'ship';
+            break;
+        case 'SHIP_SUNK':
+            content = '×';
+            stateStyle = 'ship sunk';
             break;
     }
 

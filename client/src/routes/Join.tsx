@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface FormElements extends HTMLFormControlsCollection {
@@ -12,7 +12,6 @@ interface CustomForm extends HTMLFormElement {
 
 export function Join() {
     const navigate = useNavigate();
-    // const [error, setError] = useState<null | string>(null);
 
     async function handleSubmit(event: FormEvent<CustomForm>) {
         event.preventDefault();

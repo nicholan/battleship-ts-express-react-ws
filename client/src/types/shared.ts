@@ -21,6 +21,12 @@ export type Coordinates = {
     y: number,
 }
 
+export type ShipPlacement = {
+    coordinates: Coordinates,
+    axis: 'x' | 'y',
+    shipLength: number,
+}
+
 export type CellStyle = 'invalid' | 'valid' | '';
 
 export type Message = {
@@ -28,12 +34,14 @@ export type Message = {
     playerId: string,
     type: keyof typeof MsgType,
     coordinates?: Coordinates,
-    result?: 'SHOT_MISS' | 'SHIP_HIT',
+    result?: Result,
     name?: string,
 }
 
 export type GameEvent = {
     coordinates: Coordinates
     playerId: string,
-    result: 'SHOT_MISS' | 'SHIP_HIT',
+    result: Result,
 }
+
+export type Result = 'SHOT_MISS' | 'SHIP_HIT' | 'SHIP_SUNK';
