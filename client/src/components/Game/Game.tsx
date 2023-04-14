@@ -37,8 +37,8 @@ export function Game(
     const playerEvents = gameEvents.filter((evt) => { return evt.playerId === playerId; });
     const enemyEvents = gameEvents.filter((evt) => { return evt.playerId !== playerId; });
 
-    playerGameboard.buildFromDb(playerEvents, board);
-    enemyGameboard.parseGameData(enemyEvents);
+    playerGameboard.buildPlayerBoard(playerEvents, board);
+    enemyGameboard.buildEnemyBoard(enemyEvents);
 
     const [shipsRemaining, setShipsRemaining] = useState(playerGameboard.getShipLength() === 0 ? false : true);
     const [playerReady, setPlayerReady] = useState(ready);

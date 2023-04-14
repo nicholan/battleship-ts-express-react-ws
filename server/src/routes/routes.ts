@@ -50,7 +50,7 @@ routes.get('/:gameId/:playerName', async (req, res) => {
 
     const { board, _id, playerTurn, ready } = players[playerDataIdx];
 
-    const enemyDataIdx = players.findIndex(p => p.name !== playerName);
+    const enemyDataIdx = players.findIndex(({ name }) => name !== playerName);
     const enemyName = enemyDataIdx === -1 ? null : players[enemyDataIdx].name;
 
     res.json({
@@ -95,7 +95,6 @@ routes.post('/:gameId', async (req, res) => {
         await game.save();
         return res.sendStatus(200);
     }
-
     if (gameEvent) {
         game.events.push(gameEvent);
         game.turn === 0 ? game.turn = 1 : game.turn = 0;

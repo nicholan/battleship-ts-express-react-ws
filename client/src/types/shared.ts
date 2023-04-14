@@ -25,6 +25,7 @@ export type ShipPlacement = {
     coordinates: Coordinates,
     axis: 'x' | 'y',
     shipLength: number,
+    id: string,
 }
 
 export type CellStyle = 'invalid' | 'valid' | '';
@@ -42,6 +43,7 @@ export type GameEvent = {
     coordinates: Coordinates
     playerId: string,
     result: Result,
+    shipId: string | null,
 }
 
 export type Result = 'SHOT_MISS' | 'SHIP_HIT' | 'SHIP_SUNK';

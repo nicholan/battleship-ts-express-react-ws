@@ -1,4 +1,5 @@
 import { CellState, CellStyle, Coordinates, GameEvent, ShipPlacement } from '../types/shared';
+import uniqid from 'uniqid';
 
 export class Gameboard {
     #grid: Cell[][];
@@ -36,11 +37,15 @@ export class Gameboard {
 
     receiveAttack = ({ x, y }: Coordinates) => {
         const key = [x, y].toString();
-        if (this.#hits.get(key)) return;
+        if (this.#hits.get(key)) return null;
         this.#hits.set(key, true);
 
         return this.#grid[x][y].receiveAttack();
     };
+
+    getShipId({ x, y }: Coordinates) {
+        return this.#grid[x][y].getShipId();
+    }
 
     clearCellStyles = () => {
         this.#nodeStack.forEach(cell => cell.style = '');
@@ -62,16 +67,25 @@ export class Gameboard {
         this.#grid = this.#createGrid();
     };
 
-    buildFromDb = (eventArr: GameEvent[], shipArr: ShipPlacement[] = []) => {
-        shipArr.forEach(ship => {
-            this.#axis = ship.axis;
-            this.placeShip(ship.coordinates, ship.shipLength);
+    buildPlayerBoard = (eventArr: GameEvent[], shipArr: ShipPlacement[] = []) => {
+        shipArr.forEach(({ axis, coordinates, shipLength, shipId }) => {
+            this.#axis = axis;
+            this.placeShip(coordinates, shipLength, shipId);
         });
-        eventArr.forEach(evt => this.receiveAttack({ x: evt.coordinates.x, y: evt.coordinates.y }));
+        eventArr.forEach(({ coordinates }) => this.receiveAttack(coordinates));
     };
 
-    parseGameData = (eventArr: GameEvent[]) => {
-        eventArr.forEach(evt => this.#grid[evt.coordinates.x][evt.coordinates.y].state = evt.result);
+    buildEnemyBoard = (eventArr: GameEvent[]) => {
+        const copyArr = [...eventArr];
+        const sunkShips = copyArr.filter(({ result }) => result === CellState.SHIP_SUNK);
+        for (const ship of sunkShips) {
+            copyArr.forEach((evt) => {
+                if (ship.shipId === evt.shipId) {
+                    evt.result = ship.result;
+                }
+            });
+        }
+        copyArr.forEach(({ coordinates: { x, y }, result }) => this.#grid[x][y].state = result);
     };
 
     #createGrid() {
@@ -93,12 +107,12 @@ export class Gameboard {
         }
     }
 
-    placeShip = ({ x, y }: Coordinates, shipLength = this.getShipLength()) => {
+    placeShip = ({ x, y }: Coordinates, shipLength = this.getShipLength(), id: string | null = null) => {
         // Check available ships; check validity of placement; place ship on board; save ship to build array; update inventory.
         if (shipLength === 0) return;
         if (!this.isValidPlacement({ x, y }, false)) return;
 
-        const ship = new Ship(shipLength);
+        const ship = new Ship(shipLength, id);
 
         if (this.#axis === 'x') {
             for (let i = 0; i < shipLength; i++) {
@@ -116,6 +130,7 @@ export class Gameboard {
             coordinates: { x, y },
             axis: this.#axis,
             shipLength,
+            shipId: ship.id
         });
         this.#updateInventory(shipLength);
     };
@@ -207,6 +222,11 @@ class Cell {
         this.state = CellState.SHIP;
     }
 
+    getShipId() {
+        if (!this.#ship) return null;
+        return this.#ship.id;
+    }
+
     receiveAttack() {
         if (this.#ship) {
             this.state = CellState.SHIP_HIT;
@@ -216,15 +236,22 @@ class Cell {
             this.state = CellState.SHOT_MISS;
             return CellState.SHOT_MISS;
         }
+        return null;
     }
 }
 
 class Ship {
     health;
     shipNodes: Cell[] = [];
+    id: string;
 
-    constructor(length: number) {
+    constructor(length: number, id?: string | null) {
         this.health = length;
+        if (!id) {
+            this.id = uniqid();
+        } else {
+            this.id = id;
+        }
     }
 
     addCell(cell: Cell) {

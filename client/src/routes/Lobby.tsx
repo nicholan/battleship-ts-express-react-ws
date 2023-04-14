@@ -113,10 +113,16 @@ export function Lobby() {
         const result = playerGameboard.receiveAttack(coordinates);
         if (!result) return;
 
+        let shipId = null;
+        if (['SHIP_HIT', 'SHIP_SUNK'].includes(result)) {
+            shipId = playerGameboard.getShipId(coordinates);
+        }
+
         const gameEvent = {
             playerId,
             coordinates,
             result,
+            shipId,
         };
 
         if (await uploadGameEvent(gameEvent, gameId) === false) return;
@@ -126,6 +132,7 @@ export function Lobby() {
             gameId,
             coordinates,
             result,
+            shipId,
             type: MsgType.RESULT,
         });
 
@@ -133,7 +140,7 @@ export function Lobby() {
         setIsPlayerTurn(true);
     }
 
-    function processResult({ result, coordinates, ...data }: Message) {
+    function processResult({ result, coordinates, shipId, ...data }: Message) {
         // Process incoming result message, update game events.
         if (!result || !coordinates) return;
 
@@ -141,6 +148,7 @@ export function Lobby() {
             playerId: data.playerId,
             coordinates,
             result,
+            shipId,
         };
         setGameEvents(prev => [...prev, gameEvent]);
     }
