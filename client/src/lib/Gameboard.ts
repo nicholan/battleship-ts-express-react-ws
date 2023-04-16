@@ -2,7 +2,7 @@ import { CellState, CellStyle, Coordinates, GameEvent, ShipPlacement } from '../
 import uniqid from 'uniqid';
 
 export class Gameboard {
-    #grid: Cell[][];
+    #grid = this.#createGrid();
     #hits = new Map<string, boolean>();
     #buildArr: ShipPlacement[] = [];
     #axis: 'x' | 'y' = 'x';
@@ -15,10 +15,6 @@ export class Gameboard {
             { allowed: 2, length: 2, placed: 0 },
             { allowed: 2, length: 1, placed: 0 },
         ];
-
-    constructor() {
-        this.#grid = this.#createGrid();
-    }
 
     getBuildArray = () => this.#buildArr;
 
@@ -48,6 +44,7 @@ export class Gameboard {
     }
 
     clearCellStyles = () => {
+        // Placement validation visual display
         this.#nodeStack.forEach(cell => cell.style = '');
         this.#nodeStack.length = 0;
     };
@@ -68,6 +65,7 @@ export class Gameboard {
     };
 
     buildPlayerBoard = (eventArr: GameEvent[], shipArr: ShipPlacement[] = []) => {
+        // Build player board from database, mark enemy actions on player board.
         shipArr.forEach(({ axis, coordinates, shipLength, shipId }) => {
             this.#axis = axis;
             this.placeShip(coordinates, shipLength, shipId);
@@ -76,6 +74,7 @@ export class Gameboard {
     };
 
     buildEnemyBoard = (eventArr: GameEvent[]) => {
+        // Mark player actions on enemy board; misses, hits; set ships sunk.
         const copyArr = [...eventArr];
         const sunkShips = copyArr.filter(({ result }) => result === CellState.SHIP_SUNK);
         for (const ship of sunkShips) {
@@ -100,6 +99,7 @@ export class Gameboard {
     }
 
     updateCellStyle(isValid: boolean) {
+        // Placement validation visual display on board; CSS classes valid / invalid rendered by the "Square" component.
         if (isValid) {
             this.#nodeStack.forEach(cell => cell.style = 'valid');
         } else {
@@ -109,6 +109,7 @@ export class Gameboard {
 
     placeShip = ({ x, y }: Coordinates, shipLength = this.getShipLength(), id: string | null = null) => {
         // Check available ships; check validity of placement; place ship on board; save ship to build array; update inventory.
+        // Called either when player clicks on board while in build phase or when board is loaded from database.
         if (shipLength === 0) return;
         if (!this.isValidPlacement({ x, y }, false)) return;
 
@@ -177,7 +178,7 @@ export class Gameboard {
                 isValid = false;
                 break;
             }
-            if (this.#grid[x][y + i].state === CellState.SHIP) {
+            if (this.#grid[x][y + i].getShipId()) {
                 isValid = false;
                 break;
             }
@@ -196,7 +197,7 @@ export class Gameboard {
                 isValid = false;
                 break;
             }
-            if (this.#grid[x + i][y].state === CellState.SHIP) { // Ship overlap
+            if (this.#grid[x + i][y].getShipId()) {
                 isValid = false;
                 break;
             }

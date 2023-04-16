@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Coordinates } from '../../../types/shared';
 import { Square } from '../Square/Square';
 import { playerGameboard, enemyGameboard } from '../../../lib/Gameboard';
@@ -22,6 +22,7 @@ export function Board(
 
     const { getShipLength, getGrid, clearCellStyles, getNodeStack, placeShip, isValidPlacement, toggleAxis } = isPlayerBoard ? playerGameboard : enemyGameboard;
     const [grid, setGrid] = useState(getGrid());
+    const wheelTimeout = useRef(false);
     const style = isPlayerBoard ? 'player_board' : 'enemy_board';
     const mouseEventHandler = isPlayerBoard ? playerBoardMouseEventHandler : enemyBoardMouseEventHandler;
 
@@ -39,10 +40,20 @@ export function Board(
         });
     });
 
+    function handleWheel() {
+        // Handles gameboard axis toggling with a debounce.
+        if(wheelTimeout.current) return;
+        wheelTimeout.current = true;
+        toggleAxis();
+        setTimeout(() => {
+            wheelTimeout.current = false;
+        }, 300);
+    }
+
     function playerBoardMouseEventHandler(coordinates: Coordinates, isClick?: boolean, isWheel?: boolean) {
         if (!shipsRemaining) return;
         if (isWheel) {
-            toggleAxis();
+            handleWheel();
         }
         if (isClick) {
             placeShip(coordinates);
@@ -83,7 +94,8 @@ export function Board(
         <div
             className={`board ${style}`}
             onMouseLeave={mouseLeaveHandler}
-            onMouseOut={mouseLeaveHandler}>
+            onMouseOut={mouseLeaveHandler}
+            onContextMenu={(e) => { e.preventDefault(); return false; }}>
             {squares}
         </div>
     );
