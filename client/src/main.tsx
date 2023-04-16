@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom/client';
 import Root from './routes/Root';
 import { ErrorPage } from './components/Error/Error';
 import { Index } from './routes/Index';
-import { Create } from './routes/Create';
-import { Join } from './routes/Join';
 import { Lobby } from './routes/Lobby';
 import { loader as lobbyLoader } from './routes/Lobby';
 import './styles.css';
@@ -24,14 +22,6 @@ const router = createBrowserRouter([
                 path: '/',
                 index: true,
                 element: <Index />,
-            },
-            {
-                path: '/create',
-                element: <Create />,
-            },
-            {
-                path: '/join',
-                element: <Join />,
             },
             {
                 path: '/:gameId/:playerName',

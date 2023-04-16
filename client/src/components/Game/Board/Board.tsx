@@ -44,7 +44,6 @@ export function Board(
 
     function handleWheel() {
         // Handles gameboard axis toggling with a wheel debounce.
-        setLocked(true);
         if(wheelTimeout.current) return;
         wheelTimeout.current = true;
         toggleAxis();
@@ -54,6 +53,7 @@ export function Board(
     }
 
     function playerBoardMouseEventHandler(coordinates: Coordinates, isClick?: boolean, isWheel?: boolean) {
+        setLocked(true);
         if (!shipsRemaining) return;
         if (isWheel) {
             handleWheel();
