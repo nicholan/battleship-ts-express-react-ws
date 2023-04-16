@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useLockedBody } from '../../../hooks/useLockedBody';
 import { Coordinates } from '../../../types/shared';
 import { Square } from '../Square/Square';
 import { playerGameboard, enemyGameboard } from '../../../lib/Gameboard';
@@ -22,6 +23,7 @@ export function Board(
 
     const { getShipLength, getGrid, clearCellStyles, getNodeStack, placeShip, isValidPlacement, toggleAxis } = isPlayerBoard ? playerGameboard : enemyGameboard;
     const [grid, setGrid] = useState(getGrid());
+    const [locked, setLocked] = useLockedBody(false, 'root');
     const wheelTimeout = useRef(false);
     const style = isPlayerBoard ? 'player_board' : 'enemy_board';
     const mouseEventHandler = isPlayerBoard ? playerBoardMouseEventHandler : enemyBoardMouseEventHandler;
@@ -41,13 +43,14 @@ export function Board(
     });
 
     function handleWheel() {
-        // Handles gameboard axis toggling with a debounce.
+        // Handles gameboard axis toggling with a wheel debounce.
+        setLocked(true);
         if(wheelTimeout.current) return;
         wheelTimeout.current = true;
         toggleAxis();
         setTimeout(() => {
             wheelTimeout.current = false;
-        }, 300);
+        }, 400);
     }
 
     function playerBoardMouseEventHandler(coordinates: Coordinates, isClick?: boolean, isWheel?: boolean) {
@@ -73,9 +76,11 @@ export function Board(
     }
 
     function mouseLeaveHandler() {
-        if (!isPlayerBoard || !shipsRemaining) return;
+        if (!isPlayerBoard) return;
+        if (!shipsRemaining) return;
         clearCellStyles();
         updateBoard();
+        locked ? setLocked(false) : undefined;
     }
 
     function updateBoard() {

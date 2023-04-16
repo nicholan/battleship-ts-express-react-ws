@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const _productionHosts: string[] = [];
-const _devHosts: string[] = ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3001'];
+const _devHosts: string[] = ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3001', 'http://localhost:5174'];
 
 export const config = {
     // IS_DEVELOPMENT: getDefault(process.env.NODE_ENV, 'development') !== 'production',
