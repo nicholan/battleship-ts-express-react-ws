@@ -6,7 +6,7 @@ type UseLockedBodyOutput = [boolean, (locked: boolean) => void]
 
 export function useLockedBody(
     initialLocked = false,
-    rootId = '___gatsby', // Default to `___gatsby` to not introduce breaking change
+    rootId = 'root', // Default to `___gatsby` to not introduce breaking change
 ): UseLockedBodyOutput {
     const [locked, setLocked] = useState(initialLocked);
 

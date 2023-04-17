@@ -1,35 +1,47 @@
 import React, { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-interface FormElements extends HTMLFormControlsCollection {
-    playerName: HTMLInputElement;
-    gameId: HTMLInputElement;
-}
+const formSchema = z
+    .object({
+        playerName: z
+            .string()
+            .min(1, 'Name is required.')
+            .max(20, 'Name must be less than 20 characters.')
+            .trim(),
+        gameId: z
+            .string()
+            .optional()
+    });
 
-interface CustomForm extends HTMLFormElement {
-    readonly elements: FormElements;
-}
+type FormSchemaType = z.infer<typeof formSchema>;
 
 export function Index() {
     const navigate = useNavigate();
-    const [gameCode, setGameCode] = useState<string>('');
+    const {
+        register,
+        handleSubmit,
+        watch,
+        setError,
+        formState: { errors, isSubmitting },
+    } = useForm<FormSchemaType>({
+        resolver: zodResolver(formSchema),
+    });
+    const watchGameId = watch('gameId');
 
-    async function handleSubmit(event: FormEvent<CustomForm>) {
-        event.preventDefault();
-        const target = event.currentTarget;
-        const formData = new FormData(target);
-        const playerName = formData.get('playerName')?.toString().trim();
-        const gameId = formData.get('gameId')?.toString().trim();
+    const onSubmit: SubmitHandler<FormSchemaType> = async (data) => {
+        const { playerName, gameId } = data;
 
         if (!playerName) return;
-
         if (gameId) {
             await JoinGame(playerName, gameId);
             return;
         }
         await CreateGame(playerName);
         return;
-    }
+    };
 
     async function JoinGame(playerName: string, gameId: string) {
         const response = await fetch('http://localhost:3000/join', {
@@ -43,6 +55,12 @@ export function Index() {
 
         if (response.status === 200) {
             navigate(`/${gameId}/${playerName}`);
+            return;
+        }
+
+        const { message } = await response.json();
+        if (message) {
+            setError('root.api', { type: 'custom', message: message });
         }
     }
 
@@ -55,25 +73,39 @@ export function Index() {
             },
             body: JSON.stringify({ playerName })
         });
-        const res: unknown = await response.json();
+        const res = await response.json();
 
         if (res && typeof res === 'object' && 'gameId' in res && typeof res.gameId === 'string') {
             navigate(`/${res.gameId}/${playerName}`);
+            return;
         }
-        return;
+
+        const { message } = res;
+        if (message && typeof message === 'string') {
+            setError('root.api', { type: 'custom', message: message });
+        }
     }
 
     return (
         <div>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <label htmlFor="playerName">Name:
-                    <input type='text' name='playerName' required></input>
+                    <input type='text' {...register('playerName')}></input>
+                    {errors.playerName && (
+                        <div>{errors.playerName.message}</div>
+                    )}
                 </label>
                 <label htmlFor="gameId">Code:
-                    <input type='text' name='gameId' onChange={(e) => setGameCode(e.currentTarget.value)}></input>
+                    <input type='text' {...register('gameId')}></input>
+                    {errors.gameId && (
+                        <div>{errors.gameId.message}</div>
+                    )}
                 </label>
-                <button type='submit'>{gameCode.length > 0 ? 'Join' : 'Create'}</button>
+                <button type='submit' disabled={isSubmitting}>{watchGameId ? 'Join' : 'Create'}</button>
             </form>
+            {errors.root && (
+                <div>{errors.root.api.message}</div>
+            )}
         </div>
     );
 }

@@ -7,33 +7,42 @@ import uniqid from 'uniqid';
 export const routes = Router();
 
 routes.post('/create', async (req, res) => {
-    const gameId = uniqid();
+    const { playerName } = req.body;
+    if (!playerName) return res.status(403).json({ message: 'Invalid request.' });
+
+    const gameId = uniqid.time();
     const player = await Player.create({
-        name: req.body.playerName,
-        gameId: gameId
+        name: playerName,
+        gameId
     });
 
     const game = await Game.create({
-        gameId: gameId,
+        gameId,
     });
 
     game.players.push(player._id);
     await game.save();
-    res.json({ gameId: gameId });
+    res.json({ gameId });
 });
 
 routes.post('/join', async (req, res) => {
-    const game = await Game.findOne({ gameId: req.body.gameId });
+    const { gameId, playerName } = req.body;
+    if (!gameId || !playerName) return res.status(403).json({ message: 'Invalid request.' });
 
-    if (!game) return res.sendStatus(404);
-    if (game.players.length > 1) return res.sendStatus(404);
+    const game = await Game.findOne({ gameId });
+    if (!game) return res.status(404).json({ message: 'Game not found.' });
+    if (game.players.length > 1) return res.status(403).json({ message: 'Game is full.' });
+
+    const { players } = await game.populate<{ players: PlayerType[] }>('players');
+
+    if (players[0].name === playerName) return res.status(403).json({ message: 'Name already in use.' });
 
     const player = await Player.create({
-        name: req.body.playerName,
-        gameId: game.gameId,
+        name: playerName,
+        gameId,
         playerTurn: 1,
     });
-    game.players.push(player._id);
+    players.push(player);
     await game.save();
 
     return res.sendStatus(200);
