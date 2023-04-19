@@ -1,11 +1,11 @@
 import React from 'react';
-import { Coordinates, CellStyle, CellState } from '../../../types/shared';
+import type { Coordinates, CellStyle, CellState } from '../../../../../server/src/trpc/zodTypes';
 import './Square.css';
 
 type Props = {
     coordinates: Coordinates,
     style?: CellStyle,
-    state: keyof typeof CellState,
+    state: CellState,
     mouseEventHandler: ((coordinates: Coordinates, isClick?: boolean, isWheel?: boolean) => void),
 }
 

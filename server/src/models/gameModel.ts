@@ -1,5 +1,6 @@
 import { Schema, ObjectId, model } from 'mongoose';
-import { GameEvent } from '../../../client/src/types/shared';
+import uniqid from 'uniqid';
+import type { GameEvent } from '../trpc/zodTypes';
 
 type GameType = {
     _id: ObjectId,
@@ -14,6 +15,7 @@ type GameType = {
 const gameSchema = new Schema({
     gameId: {
         type: String,
+        default: () => uniqid.time()
     },
     players: [{
         type: Schema.Types.ObjectId,

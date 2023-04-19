@@ -1,10 +1,10 @@
-import { CellState, CellStyle, Coordinates, GameEvent, ShipPlacement } from '../types/shared';
+import type { Coordinates, PlayerBoard, CellStyle, GameEvent, CellState } from '../../../server/src/trpc/zodTypes';
 import uniqid from 'uniqid';
 
 export class Gameboard {
     #grid = this.#createGrid();
     #hits = new Map<string, boolean>();
-    #buildArr: ShipPlacement[] = [];
+    #buildArr: PlayerBoard = [];
     #axis: 'x' | 'y' = 'x';
     #nodeStack: Cell[] = [];
     #shipInventory =
@@ -64,7 +64,7 @@ export class Gameboard {
         this.#grid = this.#createGrid();
     };
 
-    buildPlayerBoard = (eventArr: GameEvent[], shipArr: ShipPlacement[] = []) => {
+    buildPlayerBoard = (eventArr: GameEvent[], shipArr: PlayerBoard = []) => {
         // Build player board from database, mark enemy actions on player board.
         shipArr.forEach(({ axis, coordinates, shipLength, shipId }) => {
             this.#axis = axis;
@@ -76,7 +76,7 @@ export class Gameboard {
     buildEnemyBoard = (eventArr: GameEvent[]) => {
         // Mark player actions on enemy board; misses, hits; set ships sunk.
         const copyArr = [...eventArr];
-        const sunkShips = copyArr.filter(({ result }) => result === CellState.SHIP_SUNK);
+        const sunkShips = copyArr.filter(({ result }) => result === 'SHIP_SUNK');
         for (const ship of sunkShips) {
             copyArr.forEach((evt) => {
                 if (ship.shipId === evt.shipId) {
@@ -209,7 +209,7 @@ export class Gameboard {
 }
 
 class Cell {
-    state: keyof typeof CellState = CellState.EMPTY;
+    state: CellState = 'EMPTY';
     style: CellStyle = '';
     coordinates;
     #ship: Ship | null = null;
@@ -220,7 +220,7 @@ class Cell {
 
     addShip(ship: Ship) {
         this.#ship = ship;
-        this.state = CellState.SHIP;
+        this.state = 'SHIP';
     }
 
     getShipId() {
@@ -228,14 +228,14 @@ class Cell {
         return this.#ship.id;
     }
 
-    receiveAttack() {
+    receiveAttack(): 'SHIP_HIT' | 'SHOT_MISS' | 'SHIP_SUNK' | null {
         if (this.#ship) {
-            this.state = CellState.SHIP_HIT;
+            this.state = 'SHIP_HIT';
             return this.#ship.damage();
         }
-        if (this.state === CellState.EMPTY) {
-            this.state = CellState.SHOT_MISS;
-            return CellState.SHOT_MISS;
+        if (this.state === 'EMPTY') {
+            this.state = 'SHOT_MISS';
+            return this.state;
         }
         return null;
     }
@@ -249,7 +249,7 @@ class Ship {
     constructor(length: number, id?: string | null) {
         this.health = length;
         if (!id) {
-            this.id = uniqid();
+            this.id = uniqid.time();
         } else {
             this.id = id;
         }
@@ -260,16 +260,16 @@ class Ship {
     }
 
     setSunk() {
-        this.shipNodes.forEach(node => node.state = CellState.SHIP_SUNK);
+        this.shipNodes.forEach(node => node.state = 'SHIP_SUNK');
     }
 
     damage() {
         this.health--;
         if (this.health < 1) {
             this.setSunk();
-            return CellState.SHIP_SUNK;
+            return 'SHIP_SUNK';
         }
-        return CellState.SHIP_HIT;
+        return 'SHIP_HIT';
     }
 }
 

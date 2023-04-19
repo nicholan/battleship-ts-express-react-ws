@@ -5,12 +5,8 @@ import { ErrorPage } from './components/Error/Error';
 import { Index } from './routes/Index';
 import { Lobby } from './routes/Lobby';
 import { loader as lobbyLoader } from './routes/Lobby';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './styles.css';
-
-import {
-    createBrowserRouter,
-    RouterProvider,
-} from 'react-router-dom';
 
 const router = createBrowserRouter([
     {

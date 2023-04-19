@@ -7,10 +7,12 @@ export async function createDbConnection() {
     try {
         await mongoose.connect(mongoDb);
     } catch (err) {
+        console.log(err);
         console.error.bind(console, 'MongoDB connection error');
     }
 
     mongoose.connection.on('error', err => {
+        console.log(err);
         console.error.bind(console, 'MongoDB connection error');
     });
 }

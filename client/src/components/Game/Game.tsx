@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { GameEvent, Coordinates, ShipPlacement } from '../../../../client/src/types/shared';
 import { CoordinatesBar } from './CoordinatesBar/CoordinatesBar';
+import type { PlayerBoard, GameEvent, Coordinates } from '../../../../server/src/trpc/zodTypes';
 import { Nametag } from './Nametag/Nametag';
 import { Board } from './Board/Board';
 import { Button } from '../Buttons/Button';
@@ -11,7 +11,7 @@ type Props = {
     playerId: string,
     playerName: string,
     enemyName: string | null | undefined,
-    board: ShipPlacement[],
+    board: PlayerBoard,
     gameEvents: GameEvent[],
     gameStarted: boolean,
     ready: boolean,

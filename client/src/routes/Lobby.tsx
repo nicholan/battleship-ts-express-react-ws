@@ -1,38 +1,37 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Message, GameEvent, MsgType, Coordinates, ShipPlacement } from '../types/shared';
+import type { Coordinates, Message } from '../../../server/src/trpc/zodTypes';
+import { zParse, loaderDataSchema } from '../../../server/src/trpc/zodTypes';
 import { useLoaderData } from 'react-router-dom';
 import type { LoaderFunctionArgs } from 'react-router-dom';
-import { uploadGameEvent, uploadPlayerBoard, uploadStartGame } from '../api/api';
 import { Game } from '../components/Game/Game';
 import { playerGameboard } from '../lib/Gameboard';
-
-type LoaderData = {
-    gameId: string,
-    playerId: string,
-    playerName: string,
-    enemyName: string | null,
-    board: ShipPlacement[],
-    events: GameEvent[],
-    turn: number,
-    playerTurn: number,
-    started: boolean,
-    ready: boolean,
-}
+import { trpc } from '../trpc';
 
 export async function loader({ params }: LoaderFunctionArgs) {
-    const fetchedData = await fetch(`http://localhost:3000/${params.gameId}/${params.playerName}`, {
-        method: 'GET',
-        mode: 'cors',
-    });
-    const data = await fetchedData.json();
-    return data;
+    const { gameId, playerName } = params;
+    if (!gameId || !playerName){
+        throw new Response('Not Found', { status: 404 });
+    }
+
+    const response = await trpc.getGame.query({ gameId, name: playerName });
+    if ('message' in response) {
+        throw new Response(response.message, { status: response.code, statusText: response.message });
+    }
+    return response;
 }
 
 export function Lobby() {
+    const loaderData = useLoaderData();
+    let parsedData;
+    try {
+        parsedData = zParse(loaderDataSchema, loaderData);
+    } catch (error) {
+        return;
+    }
+
+    const { gameId, playerId, playerName, board, events, started, turn, playerTurn, ready, ...data } = parsedData;
     const url = 'ws://localhost:3001';
     const ws = new WebSocket(url);
-
-    const { gameId, playerId, playerName, board, events, started, turn, playerTurn, ready, ...data } = useLoaderData() as LoaderData;
 
     const playerReady = useRef(ready);
     const [isPlayerTurn, setIsPlayerTurn] = useState(turn === playerTurn ? true : false);
@@ -46,25 +45,29 @@ export function Lobby() {
     }
 
     function listenMsg(e: MessageEvent) {
-        const data: Message = JSON.parse(e.data);
-        if (data.gameId !== gameId) return;
-        if (data.playerId === playerId) return;
+        const wsData: Message = JSON.parse(e.data);
+        if (wsData.gameId !== gameId) return;
+        if (wsData.playerId === playerId) return;
 
-        switch (data.type) {
-            case MsgType.PLAYER_READY:
+        switch (wsData.type) {
+            case 'PLAYER_READY':
                 startGame();
                 break;
-            case MsgType.GAME_START:
+            case 'GAME_START':
                 setGameStarted(true);
                 break;
-            case MsgType.PLAYER_JOIN:
-                setEnemyName(data.name);
+            case 'PLAYER_JOIN':
+                setEnemyName(wsData.name);
                 break;
-            case MsgType.ATTACK:
-                processAttack(data);
+            case 'ATTACK':
+                processAttack(wsData);
                 break;
-            case MsgType.RESULT:
-                processResult(data);
+            case 'RESULT':
+                processResult(wsData);
+                break;
+            case 'GAME_OVER':
+                break;
+            case 'WINNER':
                 break;
             default:
                 break;
@@ -72,23 +75,26 @@ export function Lobby() {
     }
 
     async function readyPlayer() {
-        if (!(await uploadPlayerBoard(playerGameboard.getBuildArray(), gameId, playerName))) return false;
+        const response = await trpc.readyPlayer.mutate({ gameId, name: playerName, playerBoard: playerGameboard.getBuildArray() });
+        if ('message' in response) return false;
+
         playerReady.current = true;
         sendMessage({
+            type: 'PLAYER_READY',
             playerId,
             gameId,
-            type: MsgType.PLAYER_READY,
         });
         return true;
     }
 
     async function startGame() {
         if (!playerReady.current) return;
-        if (!(await uploadStartGame(gameId))) return;
+        const response = await trpc.startGame.mutate({ gameId });
+        if ('message' in response) return;
 
         setGameStarted(true);
         sendMessage({
-            type: MsgType.GAME_START,
+            type: 'GAME_START',
             playerId,
             gameId,
         });
@@ -98,7 +104,7 @@ export function Lobby() {
         // Attack enemy board, set player turn to false.
         if (!isPlayerTurn || !gameStarted) return;
         sendMessage({
-            type: MsgType.ATTACK,
+            type: 'ATTACK',
             playerId,
             gameId,
             coordinates,
@@ -113,7 +119,7 @@ export function Lobby() {
         const result = playerGameboard.receiveAttack(coordinates);
         if (!result) return;
 
-        let shipId = null;
+        let shipId: string | null = null;
         if (['SHIP_HIT', 'SHIP_SUNK'].includes(result)) {
             shipId = playerGameboard.getShipId(coordinates);
         }
@@ -125,18 +131,19 @@ export function Lobby() {
             shipId,
         };
 
-        if (await uploadGameEvent(gameEvent, gameId) === false) return;
+        const response = await trpc.addEvent.mutate({ gameId, gameEvent });
+        if ('message' in response) return;
 
         sendMessage({
+            type: 'RESULT',
             playerId,
             gameId,
             coordinates,
             result,
             shipId,
-            type: MsgType.RESULT,
         });
 
-        setGameEvents(prev => [...prev, gameEvent]);
+        setGameEvents(response.gameEvents);
         setIsPlayerTurn(true);
     }
 
@@ -148,16 +155,16 @@ export function Lobby() {
             playerId: data.playerId,
             coordinates,
             result,
-            shipId,
+            shipId: shipId ? shipId : null,
         };
         setGameEvents(prev => [...prev, gameEvent]);
     }
 
     ws.onopen = () => {
         sendMessage({
+            type: 'PLAYER_JOIN',
             gameId,
             playerId,
-            type: MsgType.PLAYER_JOIN,
             name: playerName,
         });
     };
