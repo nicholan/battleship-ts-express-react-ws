@@ -50,6 +50,7 @@ body {
 
 header {
     background: var(--flame-gradient);
+    color: var(--eerie-black);
     max-width: 1200px;
     width: 100%;
     text-align: center;
@@ -65,6 +66,11 @@ header {
 header:hover {
     letter-spacing: 11px;
     transition-duration: 1s;
+} 
+
+header > a {
+    text-decoration: none;
+    color: inherit;
 }
 
 footer {
@@ -73,4 +79,9 @@ footer {
     width: 100%;
     text-align: center;
     margin: 0 auto;
+}
+
+footer > a {
+    text-decoration: none;
+    color: inherit;
 }

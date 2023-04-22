@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Root from './routes/Root';
+import Layout from './routes/Layout';
 import { ErrorPage } from './components/Error/Error';
 import { Index } from './routes/Index';
 import { Lobby } from './routes/Lobby';
@@ -10,20 +10,29 @@ import './styles.css';
 
 const router = createBrowserRouter([
     {
-        path: '/',
-        element: <Root />,
+        path: '',
+        element: <Layout />,
         errorElement: <ErrorPage />,
         children: [
             {
-                path: '/',
-                index: true,
-                element: <Index />,
-            },
-            {
-                path: '/:gameId/:playerName',
-                loader: lobbyLoader,
-                element: <Lobby />,
-            },
+                errorElement: <ErrorPage />,
+                children: [
+                    {
+                        path: '/',
+                        element: <Index />,
+                    },
+                    {
+                        path: '/:gameId/:name',
+                        loader: lobbyLoader,
+                        element: <Lobby />,
+                    },
+                    {
+                        // 404 to <Outlet />
+                        path: '*',
+                        loader: () => { throw new Response('Page not found.', { status: 404, statusText: 'Page not found' }); },
+                    },
+                ]
+            }
         ],
     },
 ]);

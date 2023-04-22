@@ -1,43 +1,44 @@
 import React, { useEffect, useState, useRef } from 'react';
 import type { Coordinates, Message } from '../../../server/src/trpc/zodTypes';
-import { zParse, loaderDataSchema } from '../../../server/src/trpc/zodTypes';
+import { zParse, loaderDataSchema, zodMessage } from '../../../server/src/trpc/zodTypes';
 import { useLoaderData } from 'react-router-dom';
 import type { LoaderFunctionArgs } from 'react-router-dom';
 import { Game } from '../components/Game/Game';
-import { playerGameboard } from '../lib/Gameboard';
+import { playerGameboard, initLobby } from '../lib/Gameboard';
 import { trpc } from '../trpc';
+import { toast } from 'react-toastify';
 
 export async function loader({ params }: LoaderFunctionArgs) {
-    const { gameId, playerName } = params;
-    if (!gameId || !playerName){
-        throw new Response('Not Found', { status: 404 });
+    const { gameId, name } = params;
+    if (!gameId || !name) {
+        throw new Error('Invalid route parameters.');
     }
 
-    const response = await trpc.getGame.query({ gameId, name: playerName });
+    const response = await trpc.getGame.query({ gameId, name });
     if ('message' in response) {
         throw new Response(response.message, { status: response.code, statusText: response.message });
     }
+
+    initLobby();
     return response;
 }
 
+const url = 'ws://localhost:3001';
+const ws = new WebSocket(url);
+
 export function Lobby() {
     const loaderData = useLoaderData();
-    let parsedData;
-    try {
-        parsedData = zParse(loaderDataSchema, loaderData);
-    } catch (error) {
-        return;
-    }
+    const parsedData = zParse(loaderDataSchema, loaderData);
 
-    const { gameId, playerId, playerName, board, events, started, turn, playerTurn, ready, ...data } = parsedData;
-    const url = 'ws://localhost:3001';
-    const ws = new WebSocket(url);
+    const { gameId, playerId, name, board, events, started, turn, playerTurn, ready, ...data } = parsedData;
 
     const playerReady = useRef(ready);
+    const enemyJoined = useRef(data.enemyName ? true : false);
+
     const [isPlayerTurn, setIsPlayerTurn] = useState(turn === playerTurn ? true : false);
     const [gameStarted, setGameStarted] = useState(started);
     const [gameEvents, setGameEvents] = useState(events);
-    const [enemyName, setEnemyName] = useState<string | null | undefined>(data.enemyName);
+    const [enemyName, setEnemyName] = useState<string | null>(data.enemyName);
 
     function sendMessage(data: Message) {
         const payload = JSON.stringify(data);
@@ -45,7 +46,9 @@ export function Lobby() {
     }
 
     function listenMsg(e: MessageEvent) {
-        const wsData: Message = JSON.parse(e.data);
+        const data = JSON.parse(e.data);
+        const wsData = zParse(zodMessage, data);
+
         if (wsData.gameId !== gameId) return;
         if (wsData.playerId === playerId) return;
 
@@ -57,13 +60,15 @@ export function Lobby() {
                 setGameStarted(true);
                 break;
             case 'PLAYER_JOIN':
-                setEnemyName(wsData.name);
+                if (!wsData.name) return;
+                if (enemyJoined.current) return;
+                processPlayerJoin(wsData.name);
                 break;
             case 'ATTACK':
-                processAttack(wsData);
+                wsData.coordinates && processAttack(wsData.coordinates);
                 break;
             case 'RESULT':
-                processResult(wsData);
+                wsData.events && setGameEvents(wsData.events);
                 break;
             case 'GAME_OVER':
                 break;
@@ -74,9 +79,24 @@ export function Lobby() {
         }
     }
 
+    function processPlayerJoin(enemyName: string){
+        toast.success(`${enemyName} joined!`);
+        setEnemyName(enemyName);
+        enemyJoined.current = true;
+    }
+
     async function readyPlayer() {
-        const response = await trpc.readyPlayer.mutate({ gameId, name: playerName, playerBoard: playerGameboard.getBuildArray() });
-        if ('message' in response) return false;
+        const response = await trpc.readyPlayer
+            .mutate({
+                gameId,
+                name,
+                playerBoard: playerGameboard.getBuildArray()
+            });
+
+        if ('message' in response) {
+            toast.error(response.message);
+            return false;
+        }
 
         playerReady.current = true;
         sendMessage({
@@ -88,9 +108,14 @@ export function Lobby() {
     }
 
     async function startGame() {
+        // If player is in ready state, start the game once other player emits ready-message.
         if (!playerReady.current) return;
+
         const response = await trpc.startGame.mutate({ gameId });
-        if ('message' in response) return;
+        if ('message' in response) {
+            toast.error(response.message);
+            return;
+        }
 
         setGameStarted(true);
         sendMessage({
@@ -112,7 +137,7 @@ export function Lobby() {
         setIsPlayerTurn(false);
     }
 
-    async function processAttack({ coordinates }: Message) {
+    async function processAttack(coordinates: Coordinates) {
         // Process incoming attack message; respond with result message; update game events; set player turn to true.
         if (!coordinates) return;
 
@@ -131,46 +156,32 @@ export function Lobby() {
             shipId,
         };
 
-        const response = await trpc.addEvent.mutate({ gameId, gameEvent });
-        if ('message' in response) return;
+        const response = await trpc.addEvent.mutate({ gameId, gameEvent, playerTurn });
+        if ('message' in response) {
+            toast.error(response.message);
+            return;
+        }
 
         sendMessage({
             type: 'RESULT',
             playerId,
             gameId,
-            coordinates,
-            result,
-            shipId,
+            events: response.gameEvents,
         });
 
         setGameEvents(response.gameEvents);
         setIsPlayerTurn(true);
     }
 
-    function processResult({ result, coordinates, shipId, ...data }: Message) {
-        // Process incoming result message, update game events.
-        if (!result || !coordinates) return;
+    useEffect(() => {
+        ws.addEventListener('message', listenMsg);
 
-        const gameEvent = {
-            playerId: data.playerId,
-            coordinates,
-            result,
-            shipId: shipId ? shipId : null,
-        };
-        setGameEvents(prev => [...prev, gameEvent]);
-    }
-
-    ws.onopen = () => {
         sendMessage({
             type: 'PLAYER_JOIN',
             gameId,
             playerId,
-            name: playerName,
+            name,
         });
-    };
-
-    useEffect(() => {
-        ws.addEventListener('message', listenMsg);
 
         return (() => {
             ws.removeEventListener('message', listenMsg, true);
@@ -180,7 +191,7 @@ export function Lobby() {
     return (
         <Game
             playerId={playerId}
-            playerName={playerName}
+            playerName={name}
             enemyName={enemyName}
             board={board}
             gameEvents={gameEvents}

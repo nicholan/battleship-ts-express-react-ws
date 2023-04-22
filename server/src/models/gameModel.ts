@@ -30,10 +30,9 @@ const gameSchema = new Schema({
         type: Boolean,
         default: false
     },
-    createdAt: {
-        type: Date,
-        default: () => Date.now()
-    },
-});
+}, { timestamps: true });
+
+// Expire game after 24 hours.
+gameSchema.index({ createdAt: 1 }, { expireAfterSeconds: (60 * 60 * 24) });
 
 export const Game = model<GameType>('Game', gameSchema);

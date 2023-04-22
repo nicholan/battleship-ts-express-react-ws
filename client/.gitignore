@@ -1,6 +1,4 @@
-mockGameEvent.ts
-classedGameboard.ts
-
+src/store.ts
 
 # Logs
 logs

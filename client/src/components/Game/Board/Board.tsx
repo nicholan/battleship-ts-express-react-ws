@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useLockedBody } from '../../../hooks/useLockedBody';
-import { Coordinates } from '../../../../../server/src/trpc/zodTypes';
+import type { Coordinates } from '../../../../../server/src/trpc/zodTypes';
 import { Square } from '../Square/Square';
 import { playerGameboard, enemyGameboard } from '../../../lib/Gameboard';
 import './Board.css';

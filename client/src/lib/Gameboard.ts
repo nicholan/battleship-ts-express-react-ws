@@ -1,4 +1,4 @@
-import type { Coordinates, PlayerBoard, CellStyle, GameEvent, CellState } from '../../../server/src/trpc/zodTypes';
+import type { Coordinates, PlayerBoard, CellStyle, GameEvent, CellState, Result } from '../../../server/src/trpc/zodTypes';
 import uniqid from 'uniqid';
 
 export class Gameboard {
@@ -88,6 +88,7 @@ export class Gameboard {
     };
 
     #createGrid() {
+        console.log('create grid');
         const grid: Cell[][] = [];
         for (let x = 0; x < 10; x++) {
             grid.push([]);
@@ -101,9 +102,9 @@ export class Gameboard {
     updateCellStyle(isValid: boolean) {
         // Placement validation visual display on board; CSS classes valid / invalid rendered by the "Square" component.
         if (isValid) {
-            this.#nodeStack.forEach(cell => cell.style = 'valid');
+            this.#nodeStack.forEach(cell => cell.style = 'VALID');
         } else {
-            this.#nodeStack.forEach(cell => cell.style = 'invalid');
+            this.#nodeStack.forEach(cell => cell.style = 'INVALID');
         }
     }
 
@@ -228,7 +229,7 @@ class Cell {
         return this.#ship.id;
     }
 
-    receiveAttack(): 'SHIP_HIT' | 'SHOT_MISS' | 'SHIP_SUNK' | null {
+    receiveAttack(): Result | null {
         if (this.#ship) {
             this.state = 'SHIP_HIT';
             return this.#ship.damage();
@@ -279,3 +280,8 @@ function randomNum(max: number) {
 
 export const playerGameboard = new Gameboard();
 export const enemyGameboard = new Gameboard();
+
+export function initLobby() {
+    playerGameboard.reset();
+    enemyGameboard.reset();
+}

@@ -37,7 +37,7 @@ export function Square({ mouseEventHandler, coordinates, style, state }: Props) 
 
     return (
         <div
-            className={`square ${style && style} ${stateStyle}`}
+            className={`square ${style && style.toLowerCase()} ${stateStyle}`}
             onWheel={() => { mouseEventHandler(coordinates, false, true); }}
             onClick={() => { mouseEventHandler(coordinates, true, false); }}
             onMouseEnter={() => { mouseEventHandler(coordinates, false, false); }}

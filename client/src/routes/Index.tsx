@@ -5,10 +5,11 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { zodGameId, zodPlayerName } from '../../../server/src/trpc/zodTypes';
 import { trpc } from '../trpc';
+import { toast } from 'react-toastify';
 
 const formSchema = z
     .object({
-        playerName: zodPlayerName,
+        name: zodPlayerName,
         gameId: zodGameId
             .optional()
             .or(z.literal('')),
@@ -22,7 +23,6 @@ export function Index() {
         register,
         handleSubmit,
         watch,
-        setError,
         formState: { errors, isSubmitting },
     } = useForm<FormSchemaType>({
         resolver: zodResolver(formSchema),
@@ -30,31 +30,32 @@ export function Index() {
     const watchGameId = watch('gameId');
 
     const onSubmit: SubmitHandler<FormSchemaType> = async (data) => {
-        const { playerName, gameId } = data;
-
+        const { name, gameId } = data;
         if (gameId) {
-            await JoinGame(playerName, gameId);
+            await JoinGame(name, gameId);
             return;
         }
-        await CreateGame(playerName);
+        await CreateGame(name);
     };
 
     async function JoinGame(name: string, gameId: string) {
         const response = await trpc.joinGame.mutate({ gameId, name });
         if ('message' in response) {
-            setError('root.api', { type: 'custom', message: response.message });
+            toast.error(response.message);
             return;
         }
 
         if ('name' in response && 'gameId' in response) {
             navigate(`/${response.gameId}/${response.name}`);
+            return;
         }
     }
 
-    async function CreateGame(playerName: string) {
-        const response = await trpc.createGame.mutate({ name: playerName });
+    async function CreateGame(name: string) {
+        const response = await trpc.createGame.mutate({ name });
         if ('name' in response && 'gameId' in response) {
             navigate(`/${response.gameId}/${response.name}`);
+            return;
         }
     }
 
@@ -62,10 +63,10 @@ export function Index() {
         <div>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div>
-                    <label htmlFor="playerName">Name:
-                        <input type='text' {...register('playerName')}></input>
-                        {errors.playerName && (
-                            <div>{errors.playerName.message}</div>
+                    <label htmlFor="name">Name:
+                        <input type='text' {...register('name')}></input>
+                        {errors.name && (
+                            <div>{errors.name.message}</div>
                         )}
                     </label>
                 </div>
@@ -79,9 +80,6 @@ export function Index() {
                 </div>
                 <button type='submit' disabled={isSubmitting}>{watchGameId ? 'Join' : 'Create'}</button>
             </form>
-            {errors.root && (
-                <div>{errors.root.api.message}</div>
-            )}
         </div>
     );
 }

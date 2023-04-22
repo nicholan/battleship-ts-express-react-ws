@@ -32,7 +32,7 @@ const expressServer = app.listen(config.API_PORT, () => {
     createDbConnection();
 });
 
-const wss = createWsServer(Number(config.SOCKET_PORT));
+const wss = createWsServer(config.SOCKET_PORT);
 
 expressServer.on('upgrade', function upgrade(request, socket, head) {
     wss.handleUpgrade(request, socket, head, function done(ws) {

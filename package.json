@@ -1,0 +1,28 @@
+{
+    "name": "battleship-ts-express-react-ws",
+    "version": "1.0.0",
+    "description": "",
+    "main": "app.js",
+    "engines": {
+      "node": "19.0.0"
+    },
+    "scripts": {
+      "dep": "cd client/ && npm i & cd server/ && npm i",
+      "server": "cd server/ && npm run dev",
+      "client": "cd client/ && npm run dev"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/nicholan/battleship-ts-express-react-ws.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/nicholan/battleship-ts-express-react-ws/issues"
+    },
+    "homepage": "https://github.com/nicholan/battleship-ts-express-react-ws#readme",
+    "dependencies": {},
+    "devDependencies": {}
+  }
+  

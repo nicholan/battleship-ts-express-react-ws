@@ -1,4 +1,4 @@
-import { AnyZodObject, ZodError, z } from 'zod';
+import { AnyZodObject, z, ZodError } from 'zod';
 
 export function zParse<T extends AnyZodObject>(schema: T, data: unknown): z.infer<T> {
     try {
@@ -21,6 +21,8 @@ export type CellState = z.infer<typeof zodCellState>
 
 const zodMessageType = z.enum(['PLAYER_READY', 'GAME_START', 'PLAYER_JOIN', 'ATTACK', 'RESULT', 'GAME_OVER', 'WINNER']);
 const zodCellState = z.enum(['EMPTY', 'SHIP', 'SHOT_MISS', 'SHIP_HIT', 'SHIP_SUNK']);
+const zodResult = z.enum(['SHOT_MISS', 'SHIP_HIT', 'SHIP_SUNK']);
+const zodCellStyle = z.enum(['', 'INVALID', 'VALID']);
 
 export const zodGameId = z
     .string()
@@ -35,10 +37,11 @@ export const zodPlayerId = z
 export const zodPlayerName = z
     .string()
     .trim()
+    .toLowerCase()
     .min(1, 'Name is required.')
     .max(20, 'Name must be less than 20 characters.');
 
-export const zodCoordinates = z.object({
+const zodCoordinates = z.object({
     x: z
         .number()
         .min(0)
@@ -49,22 +52,18 @@ export const zodCoordinates = z.object({
         .max(9),
 });
 
-export const zodAxis = z.literal('y')
+const zodAxis = z.literal('y')
     .or(z.literal('x'));
 
-export const zodShipLength = z
+const zodShipLength = z
     .number()
     .min(1)
     .max(5);
 
-export const zodShipId = z
+const zodShipId = z
     .string()
     .trim()
     .length(8, 'Invalid ship ID');
-
-export const zodResult = z.union([z.literal('SHOT_MISS'), z.literal('SHIP_HIT'), z.literal('SHIP_SUNK')]);
-
-export const zodCellStyle = z.union([z.literal('invalid'), (z.literal('valid')), (z.literal(''))]);
 
 const zodShipPlacement = z.object({
     coordinates: zodCoordinates,
@@ -73,7 +72,8 @@ const zodShipPlacement = z.object({
     shipId: zodShipId,
 });
 
-export const zodPlayerBoard = z.array(zodShipPlacement);
+// Maximum number of ships is 7.
+export const zodPlayerBoard = z.array(zodShipPlacement).min(0).max(7);
 
 export const zodGameEvent = z.object({
     coordinates: zodCoordinates,
@@ -87,15 +87,15 @@ export const zodMessage = z.object({
     playerId: zodPlayerId,
     gameId: zodGameId,
     coordinates: zodCoordinates.optional(),
-    result: zodResult.optional(),
+    events: z.array(zodGameEvent).optional(),
     name: zodPlayerName.optional(),
-    shipId: z.nullable(zodShipId).optional()
+    turn: z.number().min(0).max(1).optional()
 });
 
 export const loaderDataSchema = z.object({
     gameId: zodGameId,
     playerId: zodPlayerId,
-    playerName: zodPlayerName,
+    name: zodPlayerName,
     enemyName: z.nullable(zodPlayerName),
     board: zodPlayerBoard,
     events: z.array(zodGameEvent),

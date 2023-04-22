@@ -1,5 +1,5 @@
 import { Schema, ObjectId, model } from 'mongoose';
-import { PlayerBoard } from '../trpc/zodTypes';
+import type { PlayerBoard } from '../trpc/zodTypes';
 
 export type PlayerType = {
     _id: ObjectId,
@@ -27,6 +27,9 @@ const playerSchema = new Schema({
         type: Boolean,
         default: false,
     }
-});
+}, { timestamps: true });
+
+// Expire player after 24 hours.
+playerSchema.index({ createdAt: 1 }, { expireAfterSeconds: (60 * 60 * 24) });
 
 export const Player = model<PlayerType>('Player', playerSchema);

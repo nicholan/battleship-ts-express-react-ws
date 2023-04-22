@@ -1,7 +1,7 @@
 import { publicProcedure, router } from './trpc';
 import { Player } from '../models/userModel';
 import { Game } from '../models/gameModel';
-import { PlayerType } from '../models/userModel';
+import type { PlayerType } from '../models/userModel';
 import { zodGameEvent, zodGameId, zodPlayerName, zodPlayerBoard } from './zodTypes';
 import { z } from 'zod';
 
@@ -9,6 +9,7 @@ const zPlayerName = z.object({ name: zodPlayerName });
 const zGameId = z.object({ gameId: zodGameId });
 const zGameEvent = z.object({ gameEvent: zodGameEvent });
 const zPlayerBoard = z.object({ playerBoard: zodPlayerBoard });
+const zPlayerTurn = z.object({ playerTurn: z.number().min(0).max(1) });
 
 export const appRouter = router({
     createGame: publicProcedure
@@ -99,7 +100,7 @@ export const appRouter = router({
 
             return {
                 playerId: _id,
-                playerName: name,
+                name,
                 gameId,
                 board,
                 events,
@@ -114,8 +115,9 @@ export const appRouter = router({
     addEvent: publicProcedure
         .input(zGameId)
         .input(zGameEvent)
+        .input(zPlayerTurn)
         .mutation(async ({ input }) => {
-            const { gameId, gameEvent } = input;
+            const { gameId, gameEvent, playerTurn } = input;
             const game = await Game.findOne({ gameId });
             if (!game) {
                 return {
@@ -123,11 +125,26 @@ export const appRouter = router({
                     message: 'Game not found.',
                 };
             }
-
+            if (!game.started) {
+                return {
+                    code: 403,
+                    message: 'Game has not started yet.',
+                };
+            }
+            // addEvent gets called by the player processing an incoming attack.
+            if (game.turn === playerTurn) {
+                return {
+                    code: 403,
+                    message: 'It is not your turn.',
+                };
+            }
             game.events.push(gameEvent);
             game.turn === 0 ? game.turn = 1 : game.turn = 0;
             await game.save();
-            return { gameEvents: game.events };
+            return {
+                gameEvents: game.events,
+                turn: game.turn,
+            };
         }),
 
     startGame: publicProcedure
@@ -160,6 +177,9 @@ export const appRouter = router({
                     message: 'Player not found.',
                 };
             }
+            // If player is already 'ready', prevent uploading new gameboard.
+            if (player.ready) return { ready: player.ready };
+
             player.board = playerBoard;
             player.ready = true;
             await player.save();
