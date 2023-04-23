@@ -24,7 +24,7 @@ app.use(
     trpcExpress.createExpressMiddleware({
         router: appRouter,
         createContext,
-    }),
+    })
 );
 
 const expressServer = app.listen(config.API_PORT, () => {

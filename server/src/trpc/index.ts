@@ -2,7 +2,7 @@ import { publicProcedure, router } from './trpc';
 import { Player } from '../models/userModel';
 import { Game } from '../models/gameModel';
 import type { PlayerType } from '../models/userModel';
-import { zodGameEvent, zodGameId, zodPlayerName, zodPlayerBoard } from './zodTypes';
+import { zodGameEvent, zodGameId, zodPlayerName, zodPlayerBoard } from '@packages/zod-data-types';
 import { z } from 'zod';
 
 const zPlayerName = z.object({ name: zodPlayerName });
@@ -12,22 +12,20 @@ const zPlayerBoard = z.object({ playerBoard: zodPlayerBoard });
 const zPlayerTurn = z.object({ playerTurn: z.number().min(0).max(1) });
 
 export const appRouter = router({
-    createGame: publicProcedure
-        .input(zPlayerName)
-        .mutation(async ({ input }) => {
-            const { name } = input;
-            const game = await Game.create({});
-            const player = await Player.create({
-                name,
-                gameId: game.gameId
-            });
-            game.players.push(player._id);
-            await game.save();
-            return {
-                name: player.name,
-                gameId: game.gameId
-            };
-        }),
+    createGame: publicProcedure.input(zPlayerName).mutation(async ({ input }) => {
+        const { name } = input;
+        const game = await Game.create({});
+        const player = await Player.create({
+            name,
+            gameId: game.gameId,
+        });
+        game.players.push(player._id);
+        await game.save();
+        return {
+            name: player.name,
+            gameId: game.gameId,
+        };
+    }),
 
     joinGame: publicProcedure
         .input(zGameId)
@@ -67,7 +65,7 @@ export const appRouter = router({
 
             return {
                 name,
-                gameId
+                gameId,
             };
         }),
 
@@ -95,7 +93,7 @@ export const appRouter = router({
             const { events, turn, started } = game;
             const { _id, board, playerTurn, ready } = playerData;
 
-            const enemy = players.find((p) => p.name !== name);
+            const enemy = players.find(p => p.name !== name);
             const enemyName = enemy ? enemy.name : null;
 
             return {
@@ -139,7 +137,7 @@ export const appRouter = router({
                 };
             }
             game.events.push(gameEvent);
-            game.turn === 0 ? game.turn = 1 : game.turn = 0;
+            game.turn === 0 ? (game.turn = 1) : (game.turn = 0);
             await game.save();
             return {
                 gameEvents: game.events,
@@ -147,22 +145,20 @@ export const appRouter = router({
             };
         }),
 
-    startGame: publicProcedure
-        .input(zGameId)
-        .mutation(async ({ input }) => {
-            const { gameId } = input;
-            const game = await Game.findOne({ gameId });
-            if (!game) {
-                return {
-                    code: 404,
-                    message: 'Game not found.',
-                };
-            }
+    startGame: publicProcedure.input(zGameId).mutation(async ({ input }) => {
+        const { gameId } = input;
+        const game = await Game.findOne({ gameId });
+        if (!game) {
+            return {
+                code: 404,
+                message: 'Game not found.',
+            };
+        }
 
-            game.started = true;
-            await game.save();
-            return { gameId };
-        }),
+        game.started = true;
+        await game.save();
+        return { gameId };
+    }),
 
     readyPlayer: publicProcedure
         .input(zGameId)

@@ -1,4 +1,4 @@
-import type { Coordinates, PlayerBoard, CellStyle, GameEvent, CellState, Result } from '../../../server/src/trpc/zodTypes';
+import type { Coordinates, PlayerBoard, CellStyle, GameEvent, CellState, Result } from '@packages/zod-data-types';
 import uniqid from 'uniqid';
 
 export class Gameboard {
@@ -7,14 +7,13 @@ export class Gameboard {
     #buildArr: PlayerBoard = [];
     #axis: 'x' | 'y' = 'x';
     #nodeStack: Cell[] = [];
-    #shipInventory =
-        [
-            { allowed: 1, length: 5, placed: 0 },
-            { allowed: 1, length: 4, placed: 0 },
-            { allowed: 1, length: 3, placed: 0 },
-            { allowed: 2, length: 2, placed: 0 },
-            { allowed: 2, length: 1, placed: 0 },
-        ];
+    #shipInventory = [
+        { allowed: 1, length: 5, placed: 0 },
+        { allowed: 1, length: 4, placed: 0 },
+        { allowed: 1, length: 3, placed: 0 },
+        { allowed: 2, length: 2, placed: 0 },
+        { allowed: 2, length: 1, placed: 0 }
+    ];
 
     getBuildArray = () => this.#buildArr;
 
@@ -45,12 +44,12 @@ export class Gameboard {
 
     clearCellStyles = () => {
         // Placement validation visual display
-        this.#nodeStack.forEach(cell => cell.style = '');
+        this.#nodeStack.forEach(cell => (cell.style = ''));
         this.#nodeStack.length = 0;
     };
 
     toggleAxis = () => {
-        this.#axis === 'x' ? this.#axis = 'y' : this.#axis = 'x';
+        this.#axis === 'x' ? (this.#axis = 'y') : (this.#axis = 'x');
         this.clearCellStyles();
     };
 
@@ -78,13 +77,13 @@ export class Gameboard {
         const copyArr = [...eventArr];
         const sunkShips = copyArr.filter(({ result }) => result === 'SHIP_SUNK');
         for (const ship of sunkShips) {
-            copyArr.forEach((evt) => {
+            copyArr.forEach(evt => {
                 if (ship.shipId === evt.shipId) {
                     evt.result = ship.result;
                 }
             });
         }
-        copyArr.forEach(({ coordinates: { x, y }, result }) => this.#grid[x][y].state = result);
+        copyArr.forEach(({ coordinates: { x, y }, result }) => (this.#grid[x][y].state = result));
     };
 
     #createGrid() {
@@ -102,9 +101,9 @@ export class Gameboard {
     updateCellStyle(isValid: boolean) {
         // Placement validation visual display on board; CSS classes valid / invalid rendered by the "Square" component.
         if (isValid) {
-            this.#nodeStack.forEach(cell => cell.style = 'VALID');
+            this.#nodeStack.forEach(cell => (cell.style = 'VALID'));
         } else {
-            this.#nodeStack.forEach(cell => cell.style = 'INVALID');
+            this.#nodeStack.forEach(cell => (cell.style = 'INVALID'));
         }
     }
 
@@ -175,7 +174,7 @@ export class Gameboard {
         // Checks that ships do not collide on the Y-axis.
         let isValid = true;
         for (let i = 0; i < shipLength; i++) {
-            if ((y + i) > 9) {
+            if (y + i > 9) {
                 isValid = false;
                 break;
             }
@@ -194,7 +193,8 @@ export class Gameboard {
         let isValid = true;
 
         for (let i = 0; i < shipLength; i++) {
-            if ((x + i) > 9) { // Index out of bounds
+            if (x + i > 9) {
+                // Index out of bounds
                 isValid = false;
                 break;
             }
@@ -261,7 +261,7 @@ class Ship {
     }
 
     setSunk() {
-        this.shipNodes.forEach(node => node.state = 'SHIP_SUNK');
+        this.shipNodes.forEach(node => (node.state = 'SHIP_SUNK'));
     }
 
     damage() {

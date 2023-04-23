@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useLockedBody } from '../../../hooks/useLockedBody';
-import type { Coordinates } from '../../../../../server/src/trpc/zodTypes';
+import type { Coordinates } from '@packages/zod-data-types';
 import { Square } from '../Square/Square';
 import { playerGameboard, enemyGameboard } from '../../../lib/Gameboard';
 import './Board.css';
@@ -44,7 +44,7 @@ export function Board(
 
     function handleWheel() {
         // Handles gameboard axis toggling with a wheel debounce.
-        if(wheelTimeout.current) return;
+        if (wheelTimeout.current) return;
         wheelTimeout.current = true;
         toggleAxis();
         setTimeout(() => {

@@ -1,28 +1,38 @@
 {
-    "name": "battleship-ts-express-react-ws",
-    "version": "1.0.0",
-    "description": "",
-    "main": "app.js",
-    "engines": {
-      "node": "19.0.0"
-    },
-    "scripts": {
-      "dep": "cd client/ && npm i & cd server/ && npm i",
-      "server": "cd server/ && npm run dev",
-      "client": "cd client/ && npm run dev"
-    },
-    "repository": {
-      "type": "git",
-      "url": "git+https://github.com/nicholan/battleship-ts-express-react-ws.git"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "bugs": {
-      "url": "https://github.com/nicholan/battleship-ts-express-react-ws/issues"
-    },
-    "homepage": "https://github.com/nicholan/battleship-ts-express-react-ws#readme",
-    "dependencies": {},
-    "devDependencies": {}
+  "name": "battleship",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicholan/battleship-ts-express-react-ws.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nicholan/battleship-ts-express-react-ws/issues"
+  },
+  "homepage": "https://github.com/nicholan/battleship-ts-express-react-ws#readme",
+  "dependencies": {
+    "@nicholan/eslint-config-custom": "file:./packages/eslint-config-custom",
+    "@nicholan/ts-config-custom": "file:./packages/ts-config-custom",
+    "@packages/zod-data-types": "file:./packages/zod-data-types",
+    "uniqid": "^5.4.0",
+    "zod": "^3.21.4",
+    "websocket": "^1.0.34"
+  },
+  "devDependencies": {
+    "@types/uniqid": "^5.3.2",
+    "@types/websocket": "^1.0.5",
+    "prettier": "^2.8.7",
+    "typescript": "latest"
   }
-  
+}

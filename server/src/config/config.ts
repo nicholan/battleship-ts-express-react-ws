@@ -28,5 +28,3 @@ function createConfig() {
 }
 
 export const config = createConfig();
-
-

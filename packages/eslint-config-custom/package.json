@@ -1,0 +1,16 @@
+{
+  "name": "@nicholan/eslint-config-custom",
+  "main": "index.js",
+  "private": true,
+  "version": "1.0.0",
+  "files": [
+		"index.js"
+	],
+  "dependencies": {
+    "eslint": "latest",
+    "eslint-config-prettier": "latest",
+    "eslint-plugin-react": "latest",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest"
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import type { Coordinates, Message } from '../../../server/src/trpc/zodTypes';
-import { zParse, loaderDataSchema, zodMessage } from '../../../server/src/trpc/zodTypes';
+import { zParse, loaderDataSchema, zodMessage } from '@packages/zod-data-types';
+import type { Coordinates, Message } from '@packages/zod-data-types';
 import { useLoaderData } from 'react-router-dom';
 import type { LoaderFunctionArgs } from 'react-router-dom';
 import { Game } from '../components/Game/Game';
@@ -79,7 +79,7 @@ export function Lobby() {
         }
     }
 
-    function processPlayerJoin(enemyName: string){
+    function processPlayerJoin(enemyName: string) {
         toast.success(`${enemyName} joined!`);
         setEnemyName(enemyName);
         enemyJoined.current = true;

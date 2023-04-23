@@ -12,27 +12,21 @@ export function zParse<T extends AnyZodObject>(schema: T, data: unknown): z.infe
 }
 
 export type GameEvent = z.infer<typeof zodGameEvent>;
-export type PlayerBoard = z.infer<typeof zodPlayerBoard>
-export type Result = z.infer<typeof zodResult>
-export type Coordinates = z.infer<typeof zodCoordinates>
-export type Message = z.infer<typeof zodMessage>
-export type CellStyle = z.infer<typeof zodCellStyle>
-export type CellState = z.infer<typeof zodCellState>
+export type PlayerBoard = z.infer<typeof zodPlayerBoard>;
+export type Result = z.infer<typeof zodResult>;
+export type Coordinates = z.infer<typeof zodCoordinates>;
+export type Message = z.infer<typeof zodMessage>;
+export type CellStyle = z.infer<typeof zodCellStyle>;
+export type CellState = z.infer<typeof zodCellState>;
 
 const zodMessageType = z.enum(['PLAYER_READY', 'GAME_START', 'PLAYER_JOIN', 'ATTACK', 'RESULT', 'GAME_OVER', 'WINNER']);
 const zodCellState = z.enum(['EMPTY', 'SHIP', 'SHOT_MISS', 'SHIP_HIT', 'SHIP_SUNK']);
 const zodResult = z.enum(['SHOT_MISS', 'SHIP_HIT', 'SHIP_SUNK']);
 const zodCellStyle = z.enum(['', 'INVALID', 'VALID']);
 
-export const zodGameId = z
-    .string()
-    .trim()
-    .min(8, 'Invalid game code.');
+export const zodGameId = z.string().trim().min(8, 'Invalid game code.');
 
-export const zodPlayerId = z
-    .string()
-    .trim()
-    .min(12, 'Invalid player ID.');
+export const zodPlayerId = z.string().trim().min(12, 'Invalid player ID.');
 
 export const zodPlayerName = z
     .string()
@@ -42,28 +36,15 @@ export const zodPlayerName = z
     .max(20, 'Name must be less than 20 characters.');
 
 const zodCoordinates = z.object({
-    x: z
-        .number()
-        .min(0)
-        .max(9),
-    y: z
-        .number()
-        .min(0)
-        .max(9),
+    x: z.number().min(0).max(9),
+    y: z.number().min(0).max(9),
 });
 
-const zodAxis = z.literal('y')
-    .or(z.literal('x'));
+const zodAxis = z.literal('y').or(z.literal('x'));
 
-const zodShipLength = z
-    .number()
-    .min(1)
-    .max(5);
+const zodShipLength = z.number().min(1).max(5);
 
-const zodShipId = z
-    .string()
-    .trim()
-    .length(8, 'Invalid ship ID');
+const zodShipId = z.string().trim().length(8, 'Invalid ship ID');
 
 const zodShipPlacement = z.object({
     coordinates: zodCoordinates,
@@ -79,7 +60,7 @@ export const zodGameEvent = z.object({
     coordinates: zodCoordinates,
     playerId: zodPlayerId,
     result: zodResult,
-    shipId: z.nullable(zodShipId)
+    shipId: z.nullable(zodShipId),
 });
 
 export const zodMessage = z.object({
@@ -89,7 +70,7 @@ export const zodMessage = z.object({
     coordinates: zodCoordinates.optional(),
     events: z.array(zodGameEvent).optional(),
     name: zodPlayerName.optional(),
-    turn: z.number().min(0).max(1).optional()
+    turn: z.number().min(0).max(1).optional(),
 });
 
 export const loaderDataSchema = z.object({

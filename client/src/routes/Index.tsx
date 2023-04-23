@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { zodGameId, zodPlayerName } from '../../../server/src/trpc/zodTypes';
+import { zodGameId, zodPlayerName } from '@packages/zod-data-types';
 import { trpc } from '../trpc';
 import { toast } from 'react-toastify';
 

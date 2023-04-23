@@ -1,0 +1,5 @@
+{
+    "name": "@packages/zod-data-types",
+    "private": true,
+    "main": "index.ts"
+}

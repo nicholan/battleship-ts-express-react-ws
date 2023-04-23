@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CoordinatesBar } from './CoordinatesBar/CoordinatesBar';
-import type { PlayerBoard, GameEvent, Coordinates } from '../../../../server/src/trpc/zodTypes';
+import type { PlayerBoard, GameEvent, Coordinates } from '@packages/zod-data-types';
 import { Nametag } from './Nametag/Nametag';
 import { Board } from './Board/Board';
 import { Button } from '../Buttons/Button';
@@ -72,7 +72,7 @@ export function Game(
                 setShipsRemaining={setShipsRemaining}
                 isTurn={gameStarted && isPlayerTurn}
             />
-            <Nametag name={playerName} gridArea='player_name' isTurn={gameStarted && isPlayerTurn}/>
+            <Nametag name={playerName} gridArea='player_name' isTurn={gameStarted && isPlayerTurn} />
 
             <CoordinatesBar type='num' axis='row' gridArea='coordinates_row_p2' />
             <CoordinatesBar type='letter' axis='column' gridArea='coordinates_col_p2' />
@@ -81,7 +81,7 @@ export function Game(
                 attack={attack}
                 isTurn={gameStarted && isPlayerTurn}
             />
-            <Nametag name={enemyName} gridArea='enemy_name' isTurn={gameStarted && !isPlayerTurn}/>
+            <Nametag name={enemyName} gridArea='enemy_name' isTurn={gameStarted && !isPlayerTurn} />
 
             <div className='box_bottom_left'>
                 {!gameStarted && !shipsRemaining && <Button text={playerReady ? 'Waiting...' : 'Ready?'} onClick={handlePlayerReady} disabled={playerReady} />}
