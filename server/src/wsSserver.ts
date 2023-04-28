@@ -1,24 +1,31 @@
-import WebSocket, { WebSocketServer } from 'ws';
+import WebSocket, { WebSocketServer } from "ws";
 
 export function createWsServer(port: number) {
-    const wsServer = new WebSocketServer({ port: port, perMessageDeflate: false });
+  const wsServer = new WebSocketServer({
+    port: port,
+    perMessageDeflate: false,
+  });
 
-    wsServer.on('connection', (socket, request) => {
-        console.log('connection from ' + request.socket.remoteAddress);
+  wsServer.on("connection", (socket, request) => {
+    console.log(
+      `connection from ${request.socket.remoteAddress ?? "<unknown>"}`
+    );
 
-        socket.on('message', async (msg) => {
-            wsServer.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {     // check if client is ready
-                    client.send(msg.toString());
-                }
-            });
-        });
-
-        socket.on('close', async () => {
-            console.log(`disconnection from ${ request.socket.remoteAddress }`);
-        });
-
+    socket.on("message", (msg) => {
+      wsServer.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          // check if client is ready
+          client.send(msg.toString());
+        }
+      });
     });
 
-    return wsServer;
+    socket.on("close", () => {
+      console.log(
+        `disconnection from ${request.socket.remoteAddress ?? "<unknown>"}`
+      );
+    });
+  });
+
+  return wsServer;
 }

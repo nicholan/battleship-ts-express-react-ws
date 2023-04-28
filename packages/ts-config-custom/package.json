@@ -1,9 +1,0 @@
-{
-  "name": "@nicholan/ts-config-custom",
-  "private": true,
-  "version": "1.0.0",
-  "main": "tsconfig.json",
-  "files": [
-		"tsconfig.json"
-	]
-}

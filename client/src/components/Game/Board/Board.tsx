@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useLockedBody } from '../../../hooks/useLockedBody';
 import type { Coordinates } from '@packages/zod-data-types';
 import { Square } from '../Square/Square';

@@ -1,38 +1,39 @@
 {
-  "name": "battleship",
-  "version": "1.0.0",
-  "private": true,
-  "workspaces": [
-    "client",
-    "server",
-    "packages/*"
-  ],
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nicholan/battleship-ts-express-react-ws.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/nicholan/battleship-ts-express-react-ws/issues"
-  },
-  "homepage": "https://github.com/nicholan/battleship-ts-express-react-ws#readme",
-  "dependencies": {
-    "@nicholan/eslint-config-custom": "file:./packages/eslint-config-custom",
-    "@nicholan/ts-config-custom": "file:./packages/ts-config-custom",
-    "@packages/zod-data-types": "file:./packages/zod-data-types",
-    "uniqid": "^5.4.0",
-    "zod": "^3.21.4",
-    "websocket": "^1.0.34"
-  },
-  "devDependencies": {
-    "@types/uniqid": "^5.3.2",
-    "@types/websocket": "^1.0.5",
-    "prettier": "^2.8.7",
-    "typescript": "latest"
-  }
+	"name": "battleship",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build:clean": "rm -rf node_modules && pnpm install",
+		"start": "concurrently \"pnpm start:server\" \"pnpm start:client\"",
+		"start:server": "pnpm --filter server run dev",
+		"start:client": "pnpm --filter client run dev"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nicholan/battleship-ts-express-react-ws.git"
+	},
+	"keywords": [],
+	"author": "Nicholas Anttila",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/nicholan/battleship-ts-express-react-ws/issues"
+	},
+	"homepage": "https://github.com/nicholan/battleship-ts-express-react-ws#readme",
+	"dependencies": {
+		"@packages/zod-data-types": "file:./packages/zod-data-types",
+		"websocket": "^1.0.34",
+		"zod": "latest"
+	},
+	"devDependencies": {
+		"@nicholan/eslint-config": "*",
+		"@nicholan/tsconfig": "*",
+		"@types/websocket": "^1.0.5",
+		"typescript": "5.0.2",
+		"concurrently": "*"
+	},
+	"packageManager": "pnpm@8.3.1",
+	"engines": {
+		"pnpm": "^8.0.0"
+	}
 }

@@ -1,12 +1,11 @@
 import type { Config } from '@jest/types';
 
 const config: Config.InitialOptions = {
-    verbose: true,
-    testEnvironment: 'node',
-    globalTeardown: './src/tests/teardown.ts',
-    transform: {
-        '^.+\\.tsx?$': 'ts-jest',
-    },
+	verbose: true,
+	testEnvironment: 'node',
+	transform: {
+		'^.+\\.(t|j)sx?$': '@swc/jest',
+	},
 };
 
 export default config;

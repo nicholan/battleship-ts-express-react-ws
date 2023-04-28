@@ -1,7 +1,13 @@
 {
-    "extends": "@nicholan/ts-config-custom/tsconfig.json",
-    "include": ["vite.config.ts", "src"],
-    "compilerOptions": {
-        "composite": false
-    }
+	"extends": "@nicholan/tsconfig",
+	"include": ["vite.config.ts", "src"],
+	"exclude": [".eslintrc.cjs"],
+	"compilerOptions": {
+		"target": "ES6",
+		"composite": false,
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"jsx": "react-jsx",
+		"noEmit": true,
+		"outDir": "dist"
+	}
 }

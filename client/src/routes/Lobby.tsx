@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { zParse, loaderDataSchema, zodMessage } from '@packages/zod-data-types';
 import type { Coordinates, Message } from '@packages/zod-data-types';
 import { useLoaderData } from 'react-router-dom';
@@ -45,8 +45,10 @@ export function Lobby() {
         ws.send(payload);
     }
 
-    function listenMsg(e: MessageEvent) {
-        const data = JSON.parse(e.data);
+    async function listenMsg(e: MessageEvent) {
+        if (typeof e.data !== 'string') return;
+
+        const data: unknown = JSON.parse(e.data);
         const wsData = zParse(zodMessage, data);
 
         if (wsData.gameId !== gameId) return;
@@ -54,7 +56,7 @@ export function Lobby() {
 
         switch (wsData.type) {
             case 'PLAYER_READY':
-                startGame();
+                await startGame();
                 break;
             case 'GAME_START':
                 setGameStarted(true);
@@ -65,7 +67,7 @@ export function Lobby() {
                 processPlayerJoin(wsData.name);
                 break;
             case 'ATTACK':
-                wsData.coordinates && processAttack(wsData.coordinates);
+                wsData.coordinates && await processAttack(wsData.coordinates);
                 break;
             case 'RESULT':
                 wsData.events && setGameEvents(wsData.events);

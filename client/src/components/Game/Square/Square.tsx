@@ -1,5 +1,4 @@
-import React from 'react';
-import type { Coordinates, CellStyle, CellState } from '../../../../../server/src/trpc/zodTypes';
+import type { Coordinates, CellStyle, CellState } from '@packages/zod-data-types';
 import './Square.css';
 
 type Props = {
@@ -12,6 +11,8 @@ type Props = {
 export function Square({ mouseEventHandler, coordinates, style, state }: Props) {
     let content: '×' | '';
     let stateStyle: 'ship' | 'ship sunk' | '';
+    const squareStyle = style ?? '';
+
     switch (state) {
         case 'EMPTY':
             content = '';
@@ -37,7 +38,7 @@ export function Square({ mouseEventHandler, coordinates, style, state }: Props) 
 
     return (
         <div
-            className={`square ${style && style.toLowerCase()} ${stateStyle}`}
+            className={`square ${squareStyle.toLowerCase()} ${stateStyle}`}
             onWheel={() => { mouseEventHandler(coordinates, false, true); }}
             onClick={() => { mouseEventHandler(coordinates, true, false); }}
             onMouseEnter={() => { mouseEventHandler(coordinates, false, false); }}

@@ -1,15 +1,10 @@
 import mongoose from 'mongoose';
-import { config } from './config';
+import { config } from './config.js';
 
 export async function createDbConnection() {
-    try {
-        await mongoose.connect(config.DATABASE_URI);
-    } catch (error) {
-        console.error(error);
-    }
-
-    mongoose.connection.on('error', err => {
-        console.error(err);
-    });
+	await mongoose.connect(config.DATABASE_URI);
+	
+	mongoose.connection.on('error', err => {
+		throw err;
+	});
 }
-

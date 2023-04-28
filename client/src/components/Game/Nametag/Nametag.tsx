@@ -1,4 +1,3 @@
-import React  from 'react';
 import './Nametag.css';
 
 type Props = {

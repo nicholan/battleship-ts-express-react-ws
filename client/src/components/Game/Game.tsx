@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CoordinatesBar } from './CoordinatesBar/CoordinatesBar';
 import type { PlayerBoard, GameEvent, Coordinates } from '@packages/zod-data-types';
 import { Nametag } from './Nametag/Nametag';
@@ -56,9 +56,9 @@ export function Game(
         setDateKey(new Date().getTime().toString());
     }
 
-    async function handlePlayerReady() {
+    function handlePlayerReady() {
         setPlayerReady(true);
-        readyPlayer();
+        readyPlayer().catch(err => console.log(err));
     }
 
     return (

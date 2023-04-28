@@ -6,15 +6,10 @@ import * as trpcExpress from '@trpc/server/adapters/express';
  * Should be done only once per backend!
  */
 
-export const createContext = ({
-    req,
-    res,
-}: trpcExpress.CreateExpressContextOptions) => ({}); // no context
-
+export const createContext = (_req_res: trpcExpress.CreateExpressContextOptions) => ({});
 type Context = inferAsyncReturnType<typeof createContext>;
 
 const t = initTRPC.context<Context>().create();
-
 
 /**
  * Export reusable router and procedure helpers

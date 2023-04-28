@@ -2,52 +2,51 @@
 
 import { useEffect, useLayoutEffect, useState } from 'react';
 
-type UseLockedBodyOutput = [boolean, (locked: boolean) => void]
+type UseLockedBodyOutput = [boolean, (locked: boolean) => void];
 
 export function useLockedBody(
-    initialLocked = false,
-    rootId = 'root', // Default to `___gatsby` to not introduce breaking change
+	initialLocked = false,
+	rootId = 'root' // Default to `___gatsby` to not introduce breaking change
 ): UseLockedBodyOutput {
-    const [locked, setLocked] = useState(initialLocked);
+	const [locked, setLocked] = useState(initialLocked);
 
-    // Do the side effect before render
-    useLayoutEffect(() => {
-        if (!locked) {
-            return;
-        }
+	// Do the side effect before render
+	useLayoutEffect(() => {
+		if (!locked) {
+			return;
+		}
 
-        // Save initial body style
-        const originalOverflow = document.body.style.overflow;
-        const originalPaddingRight = document.body.style.paddingRight;
+		// Save initial body style
+		const originalOverflow = document.body.style.overflow;
+		const originalPaddingRight = document.body.style.paddingRight;
 
-        // Lock body scroll
-        document.body.style.overflow = 'hidden';
+		// Lock body scroll
+		document.body.style.overflow = 'hidden';
 
-        // Get the scrollBar width
-        const root = document.getElementById(rootId); // or root
-        const scrollBarWidth = root ? root.offsetWidth - root.scrollWidth : 0;
+		// Get the scrollBar width
+		const root = document.getElementById(rootId); // or root
+		const scrollBarWidth = root ? root.offsetWidth - root.scrollWidth : 0;
 
-        // Avoid width reflow
-        if (scrollBarWidth) {
-            document.body.style.paddingRight = `${scrollBarWidth}px`;
-        }
+		// Avoid width reflow
+		if (scrollBarWidth) {
+			document.body.style.paddingRight = `${scrollBarWidth}px`;
+		}
 
-        return () => {
-            document.body.style.overflow = originalOverflow;
+		return () => {
+			document.body.style.overflow = originalOverflow;
 
-            if (scrollBarWidth) {
-                document.body.style.paddingRight = originalPaddingRight;
-            }
-        };
-    }, [locked]);
+			if (scrollBarWidth) {
+				document.body.style.paddingRight = originalPaddingRight;
+			}
+		};
+	}, [locked]);
 
-    // Update state if initialValue changes
-    useEffect(() => {
-        if (locked !== initialLocked) {
-            setLocked(initialLocked);
-        }
+	// Update state if initialValue changes
+	useEffect(() => {
+		if (locked !== initialLocked) {
+			setLocked(initialLocked);
+		}
+	}, [initialLocked]);
 
-    }, [initialLocked]);
-
-    return [locked, setLocked];
+	return [locked, setLocked];
 }

@@ -1,0 +1,6 @@
+{
+	"name": "packages",
+	"scripts": {
+		"build": "npx tsc"
+	}
+}
