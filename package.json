@@ -21,9 +21,11 @@
 	},
 	"homepage": "https://github.com/nicholan/battleship-ts-express-react-ws#readme",
 	"dependencies": {
-		"@packages/zod-data-types": "file:./packages/zod-data-types",
+		"@packages/zod-data-types": "1.0.0",
 		"websocket": "^1.0.34",
-		"zod": "latest"
+		"zod": "latest",
+		"@trpc/client": "^10.20.0",
+		"@trpc/server": "^10.20.0"
 	},
 	"devDependencies": {
 		"@nicholan/eslint-config": "*",

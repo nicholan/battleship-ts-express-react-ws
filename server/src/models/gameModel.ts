@@ -1,21 +1,22 @@
-import { Schema, ObjectId, model } from 'mongoose';
-import type { GameEvent } from '@packages/zod-data-types';
+import { Schema, ObjectId, model, Document } from 'mongoose';
+import type { GameEvent, GameState } from '@packages/zod-data-types';
 
-type GameType = {
-	_id: ObjectId;
+interface GameTypes extends Document {
 	gameId: string;
 	players: ObjectId[];
 	turn: number;
-	started: boolean;
 	createdAt: Date;
 	events: GameEvent[];
-};
+	winner: string;
+	gameState: GameState;
+	round: number;
+}
 
-const gameSchema = new Schema(
+const gameSchema: Schema = new Schema(
 	{
 		gameId: {
 			type: String,
-			default: () => (Date.now() + Math.random()).toString(36),
+			default: () => generateUniqueId(),
 		},
 		players: [
 			{
@@ -24,13 +25,20 @@ const gameSchema = new Schema(
 			},
 		],
 		events: [],
+		round: {
+			type: Number,
+			default: 1,
+		},
 		turn: {
 			type: Number,
-			default: () => Math.round(Math.random()),
+			default: 2,
 		},
-		started: {
-			type: Boolean,
-			default: false,
+		winner: {
+			type: String,
+		},
+		gameState: {
+			type: String,
+			default: 'NOT_STARTED',
 		},
 	},
 	{ timestamps: true }
@@ -39,4 +47,8 @@ const gameSchema = new Schema(
 // Expire game after 24 hours.
 gameSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 });
 
-export const Game = model<GameType>('Game', gameSchema);
+export const Game = model<GameTypes>('Game', gameSchema);
+
+function generateUniqueId() {
+	return (Date.now() + Math.trunc(Math.random() * 10_000)).toString(36);
+}

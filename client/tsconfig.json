@@ -7,7 +7,7 @@
 		"composite": false,
 		"lib": ["ESNext", "DOM", "DOM.Iterable"],
 		"jsx": "react-jsx",
-		"noEmit": true,
+		"noEmit": false,
 		"outDir": "dist"
 	}
 }

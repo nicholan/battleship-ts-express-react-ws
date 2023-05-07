@@ -6,7 +6,8 @@ import * as trpcExpress from '@trpc/server/adapters/express';
  * Should be done only once per backend!
  */
 
-export const createContext = (_req_res: trpcExpress.CreateExpressContextOptions) => ({});
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const createContext = (_data: trpcExpress.CreateExpressContextOptions) => ({});
 type Context = inferAsyncReturnType<typeof createContext>;
 
 const t = initTRPC.context<Context>().create();

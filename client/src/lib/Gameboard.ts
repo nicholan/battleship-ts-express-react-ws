@@ -13,6 +13,7 @@ export class Gameboard {
 		{ allowed: 2, length: 2, placed: 0 },
 		{ allowed: 2, length: 1, placed: 0 },
 	];
+	#numSunkShips = 6;
 
 	getBuildArray = () => this.#buildArr;
 
@@ -30,16 +31,32 @@ export class Gameboard {
 	};
 
 	receiveAttack = ({ x, y }: Coordinates) => {
+		if (this.#numSunkShips === 7) return null;
+
 		const key = [x, y].toString();
 		if (this.#hits.get(key)) return null;
 		this.#hits.set(key, true);
 
-		return this.#grid[x][y].receiveAttack();
-	};
+		const result = this.#grid[x][y].receiveAttack();
 
-	getShipId({ x, y }: Coordinates) {
-		return this.#grid[x][y].getShipId();
-	}
+		let shipId: string | null = null;
+		let allShipsSunk = false;
+
+		if (result === 'SHOT_MISS') {
+			return { result, shipId, allShipsSunk };
+		}
+
+		shipId = this.#grid[x][y].getShipId();
+
+		if (result === 'SHIP_SUNK') {
+			this.#numSunkShips++;
+			if (this.#numSunkShips === 7) {
+				allShipsSunk = true;
+			}
+		}
+
+		return { result, shipId, allShipsSunk };
+	};
 
 	clearCellStyles = () => {
 		// Placement validation visual display
@@ -61,6 +78,7 @@ export class Gameboard {
 		this.clearCellStyles();
 		this.#grid = this.#createGrid();
 		this.#hits.clear();
+		this.#numSunkShips = 6;
 	};
 
 	buildPlayerBoard = (eventArr: GameEvent[], shipArr: PlayerBoard = []) => {
@@ -228,16 +246,13 @@ class Cell {
 		return this.#ship.id;
 	}
 
-	receiveAttack(): Result | null {
+	receiveAttack(): Result {
 		if (this.#ship) {
 			this.state = 'SHIP_HIT';
 			return this.#ship.damage();
 		}
-		if (this.state === 'EMPTY') {
-			this.state = 'SHOT_MISS';
-			return this.state;
-		}
-		return null;
+		this.state = 'SHOT_MISS';
+		return this.state;
 	}
 }
 
@@ -249,7 +264,7 @@ class Ship {
 	constructor(length: number, id?: string | null) {
 		this.health = length;
 		if (!id) {
-			this.id = Date.now().toString(36);
+			this.id = generateUniqueId();
 		} else {
 			this.id = id;
 		}
@@ -275,6 +290,10 @@ class Ship {
 
 function randomNum(max: number) {
 	return Math.floor(Math.random() * max);
+}
+
+function generateUniqueId() {
+	return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
 export const playerGameboard = new Gameboard();

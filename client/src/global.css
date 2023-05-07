@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Staatliches&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.game_wrapper {
+	place-self: center;
+	display: grid;
+	grid-template-columns: repeat(21, 50px);
+	grid-template-rows: repeat(22, 50px);
+	grid-column-gap: 0px;
+	grid-row-gap: 0px;
+	grid-area: 1 / 1 / 2 / 2;
+}
+
+.coordinates_row_p1 {
+	grid-area: 1 / 2 / 2 / 12;
+}
+.coordinates_col_p1 {
+	grid-area: 2 / 1 / 12 / 2;
+}
+.player_board {
+	grid-area: 2 / 2 / 12 / 12;
+}
+.coordinates_row_p2 {
+	grid-area: 11 / 12 / 12 / 22;
+}
+.coordinates_col_p2 {
+	grid-area: 12 / 11 / 22 / 12;
+}
+.enemy_board {
+	grid-area: 12 / 12 / 22 / 22;
+}
+.enemy_name {
+	grid-area: 22 / 13 / 23 / 21;
+}
+.player_name {
+	grid-area: 12 / 3 / 13 / 11;
+}
+
+.box_top_right {
+	display: grid;
+	grid-area: 2 / 12 / 11 / 22;
+}
+
+.box_bottom_left {
+	display: grid;
+	grid-area: 13 / 3 / 22 / 11;
+}

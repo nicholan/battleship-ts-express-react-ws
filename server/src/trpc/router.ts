@@ -12,22 +12,26 @@ const zPlayerBoard = z.object({ playerBoard: zodPlayerBoard });
 const zPlayerTurn = z.object({ playerTurn: z.number().min(0).max(1) });
 
 export const appRouter = router({
-	createGame: publicProcedure.input(zPlayerName).mutation(async ({ input }) => {
-		const { name } = input;
-		const game = await Game.create({});
-		const player = await Player.create({
-			name,
-			gameId: game.gameId,
-		});
-		game.players.push(player._id);
-		await game.save();
-		return {
-			name: player.name,
-			gameId: game.gameId,
-		};
-	}),
+	createGame: publicProcedure
+		// Called when creating a new game.
+		.input(zPlayerName)
+		.mutation(async ({ input }) => {
+			const { name } = input;
+			const game = await Game.create({});
+			const player = await Player.create({
+				name,
+				gameId: game.gameId,
+			});
+			game.players.push(player._id);
+			await game.save();
+			return {
+				name: player.name,
+				gameId: game.gameId,
+			};
+		}),
 
 	joinGame: publicProcedure
+		// Called in Index page when joining a game via code.
 		.input(zGameId)
 		.input(zPlayerName)
 		.mutation(async ({ input }) => {
@@ -70,6 +74,7 @@ export const appRouter = router({
 		}),
 
 	getGame: publicProcedure
+		// Called in Lobby page loader function.
 		.input(zGameId)
 		.input(zPlayerName)
 		.query(async ({ input }) => {
@@ -90,7 +95,8 @@ export const appRouter = router({
 				};
 			}
 
-			const { events, turn, started } = game;
+			const { events, turn, gameState, round } = game;
+			const winner = game.winner ?? null;
 			const { _id, board, playerTurn, ready } = playerData;
 
 			const enemy = players.find((p) => p.name !== name);
@@ -105,17 +111,20 @@ export const appRouter = router({
 				turn,
 				playerTurn,
 				ready,
-				started,
 				enemyName,
+				gameState,
+				winner,
+				round,
 			};
 		}),
 
 	addEvent: publicProcedure
+		// Player receiving an attack calls this.
+		// Save game event to events array.
 		.input(zGameId)
 		.input(zGameEvent)
-		.input(zPlayerTurn)
 		.mutation(async ({ input }) => {
-			const { gameId, gameEvent, playerTurn } = input;
+			const { gameId, gameEvent } = input;
 			const game = await Game.findOne({ gameId });
 			if (!game) {
 				return {
@@ -123,21 +132,14 @@ export const appRouter = router({
 					message: 'Game not found.',
 				};
 			}
-			if (!game.started) {
+			if (game.gameState !== 'STARTED') {
 				return {
 					code: 403,
 					message: 'Game has not started yet.',
 				};
 			}
-			// addEvent gets called by the player processing an incoming attack.
-			if (game.turn === playerTurn) {
-				return {
-					code: 403,
-					message: 'It is not your turn.',
-				};
-			}
 			game.events.push(gameEvent);
-			game.turn === 0 ? (game.turn = 1) : (game.turn = 0);
+			game.turn !== 2 && (game.turn === 0 ? (game.turn = 1) : (game.turn = 0));
 			await game.save();
 			return {
 				gameEvents: game.events,
@@ -145,22 +147,28 @@ export const appRouter = router({
 			};
 		}),
 
-	startGame: publicProcedure.input(zGameId).mutation(async ({ input }) => {
-		const { gameId } = input;
-		const game = await Game.findOne({ gameId });
-		if (!game) {
-			return {
-				code: 404,
-				message: 'Game not found.',
-			};
-		}
-
-		game.started = true;
-		await game.save();
-		return { gameId };
-	}),
+	startGame: publicProcedure
+		// The second player to ready up calls this;
+		// sets game started and randomizes starting player turn.
+		.input(zGameId)
+		.mutation(async ({ input }) => {
+			const { gameId } = input;
+			const game = await Game.findOne({ gameId });
+			if (!game) {
+				return {
+					code: 404,
+					message: 'Game not found.',
+				};
+			}
+			game.turn = Math.round(Math.random()); // 0 or 1;
+			game.gameState = 'STARTED';
+			await game.save();
+			return { turn: game.turn };
+		}),
 
 	readyPlayer: publicProcedure
+		// Called when ships are placed on board and player clicks ready;
+		// Save board build instructions; set player ready.
 		.input(zGameId)
 		.input(zPlayerName)
 		.input(zPlayerBoard)
@@ -180,6 +188,79 @@ export const appRouter = router({
 			player.ready = true;
 			await player.save();
 			return { ready: player.ready };
+		}),
+
+	getGameTurn: publicProcedure
+		// Attacking player calls this.
+		.input(zGameId)
+		.input(zPlayerTurn)
+		.query(async ({ input }) => {
+			const { gameId, playerTurn } = input;
+			const game = await Game.findOne({ gameId });
+			if (!game) {
+				return {
+					code: 404,
+					message: 'Game not found.',
+				};
+			}
+
+			const gameOver = game.gameState === 'GAME_OVER';
+
+			const isPlayerTurn = game.turn === playerTurn;
+			return { isPlayerTurn, gameOver };
+		}),
+
+	gameOver: publicProcedure
+		// Losing player calls this.
+		.input(zGameId)
+		.input(zPlayerTurn)
+		.mutation(async ({ input }) => {
+			const { gameId, playerTurn } = input;
+			const game = await Game.findOne({ gameId });
+			if (!game) {
+				return {
+					code: 404,
+					message: 'Game not found.',
+				};
+			}
+			game.gameState = 'GAME_OVER';
+
+			// Querying player turn will always be false for both players:
+			game.turn = 2;
+			const { players } = await game.populate<{ players: PlayerType[] }>('players');
+
+			const winner = playerTurn === 0 ? 1 : 0;
+			game.winner = players[winner].name;
+			await game.save();
+			return { winner: game.winner, gameState: game.gameState };
+		}),
+
+	resetGame: publicProcedure
+		// Called when both players want to play again.
+		.input(zGameId)
+		.mutation(async ({ input }) => {
+			const { gameId } = input;
+			const game = await Game.findOne({ gameId });
+			if (!game) {
+				return {
+					code: 404,
+					message: 'Game not found.',
+				};
+			}
+
+			game.gameState = 'NOT_STARTED';
+			game.events = [];
+			game.round++;
+
+			const { players } = await game.populate<{ players: PlayerType[] }>('players');
+			players.forEach(async (p) => {
+				p.board = [];
+				p.ready = false;
+				await p.save();
+			});
+
+			await game.save();
+			return { gameId };
 		}),
 });
 

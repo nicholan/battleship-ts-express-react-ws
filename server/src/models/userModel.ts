@@ -1,14 +1,14 @@
-import { Schema, ObjectId, model } from 'mongoose';
+import { Schema, ObjectId, model, Document } from 'mongoose';
 import type { PlayerBoard } from '@packages/zod-data-types';
 
-export type PlayerType = {
+export interface PlayerType extends Document {
 	_id: ObjectId;
 	name: string;
 	board: PlayerBoard;
 	gameId: string;
 	playerTurn: number;
 	ready: boolean;
-};
+}
 
 const playerSchema = new Schema(
 	{

@@ -1,9 +1,0 @@
-#error-page {
-    margin: 0 auto;
-    flex: 1;
-}
-
-#error-page > p {
-    font-size: 20px;
-    font-family: 'Roboto';
-}

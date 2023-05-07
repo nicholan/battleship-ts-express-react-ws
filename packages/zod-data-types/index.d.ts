@@ -34,7 +34,7 @@ export declare const zodPlayerBoard: z.ZodArray<z.ZodObject<{
         x: number;
         y: number;
     }>;
-    axis: z.ZodUnion<[z.ZodLiteral<"y">, z.ZodLiteral<"x">]>;
+    axis: z.ZodEnum<["x", "y"]>;
     shipLength: z.ZodNumber;
     shipId: z.ZodString;
 }, "strip", z.ZodTypeAny, {
@@ -187,7 +187,7 @@ export declare const loaderDataSchema: z.ZodObject<{
             x: number;
             y: number;
         }>;
-        axis: z.ZodUnion<[z.ZodLiteral<"y">, z.ZodLiteral<"x">]>;
+        axis: z.ZodEnum<["x", "y"]>;
         shipLength: z.ZodNumber;
         shipId: z.ZodString;
     }, "strip", z.ZodTypeAny, {

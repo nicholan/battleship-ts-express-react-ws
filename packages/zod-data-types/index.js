@@ -14,6 +14,7 @@ const zodMessageType = z.enum(['PLAYER_READY', 'GAME_START', 'PLAYER_JOIN', 'ATT
 const zodCellState = z.enum(['EMPTY', 'SHIP', 'SHOT_MISS', 'SHIP_HIT', 'SHIP_SUNK']);
 const zodResult = z.enum(['SHOT_MISS', 'SHIP_HIT', 'SHIP_SUNK']);
 const zodCellStyle = z.enum(['', 'INVALID', 'VALID']);
+const zodAxis = z.enum(['x', 'y']);
 export const zodGameId = z.string().trim().min(8, 'Invalid game code.');
 export const zodPlayerId = z.string().trim().min(12, 'Invalid player ID.');
 export const zodPlayerName = z
@@ -26,9 +27,8 @@ const zodCoordinates = z.object({
     x: z.number().min(0).max(9),
     y: z.number().min(0).max(9),
 });
-const zodAxis = z.literal('y').or(z.literal('x'));
 const zodShipLength = z.number().min(1).max(5);
-const zodShipId = z.string().trim().length(8, 'Invalid ship ID');
+const zodShipId = z.string().trim();
 const zodShipPlacement = z.object({
     coordinates: zodCoordinates,
     axis: zodAxis,

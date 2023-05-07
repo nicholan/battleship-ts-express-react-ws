@@ -1,19 +1,23 @@
-import './Nametag.css';
+import type { GameState } from '@packages/zod-data-types';
+import { ReactNode } from 'react';
 
-type Props = {
-    name: string | null | undefined,
-    gridArea: string,
-    isTurn?: boolean,
-}
+type Nametag = {
+	gridArea: string;
+	isPlayerTurn: boolean;
+	gameState: GameState;
+	children: ReactNode;
+};
 
-export function Nametag({ name, gridArea, isTurn }: Props) {
+export function Nametag({ gridArea, isPlayerTurn, gameState, children }: Nametag) {
+	const gameStarted = gameState === 'STARTED';
 
-    const turnValid = '🟢';
-    const turnInvalid = '🔴';
-
-    return (
-        <div className={`nametag ${gridArea}`}>
-            { name ? name : 'Player 2' } {isTurn !== undefined && isTurn ? turnValid : turnInvalid}
-        </div>
-    );
+	return (
+		<div
+			className={`tracking-wider font-bebas-neue text-2xl text-white select-none text-center items-center grid shadow text-shadow shadow-black/20 ${gridArea} ${
+				gameStarted && isPlayerTurn ? 'bg-gradient-to-r from-orange-400 to-orange-500' : 'bg-black/70'
+			}`}
+		>
+			{children ?? 'Player'}
+		</div>
+	);
 }
