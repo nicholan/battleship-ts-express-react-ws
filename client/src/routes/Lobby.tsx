@@ -10,6 +10,7 @@ import { Button } from '../components/Buttons/Button.js';
 import { playerGameboard, initLobby } from '../lib/Gameboard.js';
 import { trpc } from '../trpc.js';
 import { toast } from 'react-toastify';
+import { RematchToast } from '../components/Toasts/RematchToast.js';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -45,6 +46,7 @@ export function Lobby() {
 	const [gameEvents, setGameEvents] = useState(events);
 	const [enemyName, setEnemyName] = useState<string | null>(data.enemyName);
 	const [winner, setWinner] = useState<string | null>(data.winner);
+	const [rematchModalVisible, setRematchModalVisible] = useState(gameState === 'GAME_OVER' ? true : false);
 
 	const { sendMessage, lastMessage, readyState } = useWebSocket(url, {
 		onOpen: () => {
@@ -94,7 +96,7 @@ export function Lobby() {
 				data.winner !== undefined && processGameOver(data.winner);
 				break;
 			case 'REQUEST_REMATCH':
-				await processRematch();
+				data.name !== undefined && (await processRematch(data.name));
 				break;
 			case 'REMATCH_ACCEPT':
 				navigate(0);
@@ -182,6 +184,7 @@ export function Lobby() {
 
 		if (!isPlayerTurn) {
 			toast(<p>It is not your turn.</p>);
+			return;
 		}
 
 		const response = await trpc.getGameTurn.query({ gameId, playerTurn });
@@ -272,26 +275,43 @@ export function Lobby() {
 	function processGameOver(winner: string) {
 		setWinner(winner);
 		setIsPlayerTurn(false);
+		setRematchModalVisible(true);
 		setTimeout(() => setGameState('GAME_OVER'), 1000);
 	}
 
 	function requestRematch() {
 		// Called when player asks to play again.
+
 		if (rematchRequested.current) return;
 		rematchRequested.current = true;
 		setReady(false);
 
 		const data = {
 			type: 'REQUEST_REMATCH',
+			name,
 			playerId,
 			gameId,
 		};
 		sendMessage(JSON.stringify(data));
 	}
 
-	async function processRematch() {
+	async function processRematch(name: string) {
 		// Called when player has requested rematch, and the other player emits 'REQUEST_REMATCH'.
-		if (!rematchRequested.current) return;
+		if (!rematchRequested.current) {
+			setRematchModalVisible(false);
+			toast(
+				<RematchToast
+					name={name}
+					requestRematch={requestRematch}
+					setRematchModalVisible={setRematchModalVisible}
+				/>,
+				{
+					autoClose: 30000,
+					hideProgressBar: false,
+				}
+			);
+			return;
+		}
 
 		const response = await trpc.resetGame.mutate({ gameId });
 		if ('message' in response) {
@@ -349,8 +369,8 @@ export function Lobby() {
 					invitePlayer={invitePlayer}
 				/>
 			</div>
-			{gameState === 'GAME_OVER' && (
-				<Modal>
+			{gameState === 'GAME_OVER' && rematchModalVisible && (
+				<Modal onClose={() => setRematchModalVisible(false)}>
 					<div className="flex flex-col gap-4 items-center px-8">
 						<div className="tracking-wide text-center select-none font-bebas-neue">
 							{ready && (
@@ -360,7 +380,12 @@ export function Lobby() {
 							)}
 							{!ready && <p className="text-5xl">Waiting for {enemyName}</p>}
 						</div>
-						{ready && <Button onClick={() => requestRematch()}>Play again?</Button>}
+						{ready && (
+							<div className="flex flex-row gap-4">
+								<Button onClick={() => requestRematch()}>Request rematch</Button>
+								<Button onClick={() => navigate('/')}>Home</Button>
+							</div>
+						)}
 					</div>
 				</Modal>
 			)}

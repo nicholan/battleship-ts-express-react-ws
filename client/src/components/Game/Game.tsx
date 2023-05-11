@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef } from 'react';
 import { CoordinatesBar } from './CoordinatesBar/CoordinatesBar.js';
 import type { PlayerBoard, GameEvent, Coordinates, GameState } from '@packages/zod-data-types';
 import { Nametag } from './Nametag/Nametag.js';
-import { Board } from './Board/Board.js';
+import { CanvasBoard } from './Board/CanvasBoard.js';
 import { Button } from '../Buttons/Button.js';
 import { playerGameboard, enemyGameboard } from '../../lib/Gameboard.js';
 import { InvitePlayerForm } from '../Forms/InvitePlayerForm.js';
@@ -66,7 +66,7 @@ export function Game({
 	const isSetupPhase = gameState === 'NOT_STARTED';
 
 	return (
-		// Game wrapper is a 21 x 22 grid of squares; elements are placed using gridAreas defined in Game.css.
+		// Game wrapper is a 21 x 22 grid of squares; elements are placed using gridAreas defined in global.css
 		// TODO: Media queries.
 		<>
 			{inviteModalVisible && (
@@ -93,17 +93,44 @@ export function Game({
 				</Nametag>
 
 				{/* Player board. */}
-				<Board
-					gridArea={'player_board'}
-					gameState={gameState}
-					key={`${dateKey.toString(36)}`}
+				<CanvasBoard
+					key={dateKey.toString(36) + gameEvents.length.toString(36)}
 					isPlayerBoard={true}
-					shipsRemaining={shipsRemaining}
+					isPlayerTurn={isPlayerTurn}
+					gridArea="player_board"
+					size={500}
 					setShipsRemaining={setShipsRemaining}
+					gameState={gameState}
 				/>
 
 				{/* Enemy board. */}
-				<Board gridArea={'enemy_board'} gameState={gameState} isPlayerBoard={false} attack={attack} />
+				<CanvasBoard
+					key={gameEvents.length.toString(36)}
+					isPlayerBoard={false}
+					isPlayerTurn={isPlayerTurn}
+					gridArea="enemy_board"
+					size={500}
+					attack={attack}
+					gameState={gameState}
+				/>
+
+				{/* Reset and randomize buttons. */}
+				<div className="box_top_right">
+					<div className="flex place-self-center gap-4 flex-row">
+						{!ready && isSetupPhase && (
+							<Button type="button" onClick={randomizeBoard}>
+								Random
+							</Button>
+						)}
+						{!ready && isSetupPhase && (
+							<Button disabled={shipsRemaining} type="reset" onClick={resetBoard}>
+								Reset
+							</Button>
+						)}
+						{gameState === 'STARTED' &&
+							(isPlayerTurn ? <Text color="text-orange-400">Your turn</Text> : <Text>Enemy turn</Text>)}
+					</div>
+				</div>
 
 				{/* Ready button */}
 				<div className="box_bottom_left">
@@ -127,24 +154,6 @@ export function Game({
 						{isSetupPhase && !shipsRemaining && ready && <Text>Waiting for {enemyName ?? 'Player 2'}</Text>}
 					</div>
 				</div>
-
-				{/* Reset and randomize buttons. */}
-				<div className="box_top_right">
-					<div className="flex place-self-center gap-4 flex-row">
-						{!ready && isSetupPhase && (
-							<Button type="button" onClick={randomizeBoard}>
-								Random
-							</Button>
-						)}
-						{!ready && isSetupPhase && (
-							<Button disabled={shipsRemaining} type="reset" onClick={resetBoard}>
-								Reset
-							</Button>
-						)}
-						{gameState === 'STARTED' &&
-							(isPlayerTurn ? <Text color="text-orange-400">Your turn</Text> : <Text>Enemy turn</Text>)}
-					</div>
-				</div>
 			</div>
 		</>
 	);
@@ -155,5 +164,9 @@ interface TextProps extends ComponentPropsWithoutRef<'p'> {
 }
 
 function Text({ children, color, ...props }: TextProps) {
-	return <p className={`tracking-wide ${color ? color : 'text-black/90'} font-staatliches text-2xl`}>{children}</p>;
+	return (
+		<p className={`tracking-wide ${color ? color : 'text-black/90'} font-staatliches text-2xl`} {...props}>
+			{children}
+		</p>
+	);
 }

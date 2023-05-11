@@ -1,8 +1,10 @@
-import type { Coordinates, PlayerBoard, CellStyle, GameEvent, CellState, Result } from '@packages/zod-data-types';
+import type { Coordinates, PlayerBoard, GameEvent } from '@packages/zod-data-types';
+import { Cell } from './Cell.js';
+import { Ship } from './Ship.js';
 
-export class Gameboard {
+class Gameboard {
 	#grid = this.#createGrid();
-	#hits = new Map<string, boolean>();
+	#hits = new Map<string, Coordinates>();
 	#buildArr: PlayerBoard = [];
 	#axis: 'x' | 'y' = 'x';
 	#nodeStack: Cell[] = [];
@@ -21,6 +23,8 @@ export class Gameboard {
 
 	getGrid = () => this.#grid;
 
+	getLastHitCoordinate = () => Array.from(this.#hits.values()).pop() ?? null;
+
 	getShipLength = () => {
 		for (const ship of this.#shipInventory) {
 			if (ship.allowed > ship.placed) {
@@ -33,9 +37,9 @@ export class Gameboard {
 	receiveAttack = ({ x, y }: Coordinates) => {
 		if (this.#numSunkShips === 7) return null;
 
-		const key = [x, y].toString();
-		if (this.#hits.get(key)) return null;
-		this.#hits.set(key, true);
+		const key = JSON.stringify({ x, y });
+		if (this.#hits.has(key)) return null;
+		this.#hits.set(key, { x, y });
 
 		const result = this.#grid[x][y].receiveAttack();
 
@@ -60,7 +64,7 @@ export class Gameboard {
 
 	clearCellStyles = () => {
 		// Placement validation visual display
-		this.#nodeStack.forEach((cell) => (cell.style = ''));
+		this.#nodeStack.forEach((cell) => (cell.style = 'NONE'));
 		this.#nodeStack.length = 0;
 	};
 
@@ -93,6 +97,7 @@ export class Gameboard {
 	buildEnemyBoard = (eventArr: GameEvent[]) => {
 		// Mark player actions on enemy board; misses, hits; set ships sunk.
 		const copyArr = [...eventArr];
+		eventArr.forEach(({ coordinates }) => this.receiveAttack(coordinates));
 		const sunkShips = copyArr.filter(({ result }) => result === 'SHIP_SUNK');
 		for (const ship of sunkShips) {
 			copyArr.forEach((evt) => {
@@ -176,14 +181,27 @@ export class Gameboard {
 		}
 	}
 
-	isValidPlacement = (coordinates: Coordinates, useNodeStack = true) => {
+	isValidSelection = ({ x, y }: Coordinates) => {
+		this.clearCellStyles();
+		const isValid = this.isValidPlacement({ x, y }, true, 1);
+		if (isValid) {
+			this.#grid[x][y].style = 'SELECTED_VALID';
+		} else if (!isValid && this.#grid[x][y].state === 'SHOT_MISS') {
+			this.#grid[x][y].style = 'SELECTED_INVALID_MISS';
+		} else if (!isValid && this.#grid[x][y].state === 'SHIP_HIT') {
+			this.#grid[x][y].style = 'SELECTED_INVALID_SHIP';
+		}
+	};
+
+	isValidPlacement = (coordinates: Coordinates, useNodeStack = true, shipLen = this.getShipLength()) => {
 		// Check that placement is not out of bounds or overlapping.
+		this.clearCellStyles();
 		if (this.getShipLength() === 0) return false;
 
 		if (this.#axis === 'x') {
-			return this.#noCollisionX(coordinates, this.getShipLength(), useNodeStack);
+			return this.#noCollisionX(coordinates, shipLen, useNodeStack);
 		} else {
-			return this.#noCollisionY(coordinates, this.getShipLength(), useNodeStack);
+			return this.#noCollisionY(coordinates, shipLen, useNodeStack);
 		}
 	};
 
@@ -195,9 +213,8 @@ export class Gameboard {
 				isValid = false;
 				break;
 			}
-			if (this.#grid[x][y + i].getShipId()) {
+			if (this.#grid[x][y + i].state !== 'EMPTY') {
 				isValid = false;
-				break;
 			}
 			useNodeStack && this.#nodeStack.push(this.#grid[x][y + i]);
 		}
@@ -215,9 +232,8 @@ export class Gameboard {
 				isValid = false;
 				break;
 			}
-			if (this.#grid[x + i][y].getShipId()) {
+			if (this.#grid[x + i][y].state !== 'EMPTY') {
 				isValid = false;
-				break;
 			}
 			useNodeStack && this.#nodeStack.push(this.#grid[x + i][y]);
 		}
@@ -226,74 +242,8 @@ export class Gameboard {
 	}
 }
 
-class Cell {
-	state: CellState = 'EMPTY';
-	style: CellStyle = '';
-	coordinates;
-	#ship: Ship | null = null;
-
-	constructor(coordinates: Coordinates) {
-		this.coordinates = coordinates;
-	}
-
-	addShip(ship: Ship) {
-		this.#ship = ship;
-		this.state = 'SHIP';
-	}
-
-	getShipId() {
-		if (!this.#ship) return null;
-		return this.#ship.id;
-	}
-
-	receiveAttack(): Result {
-		if (this.#ship) {
-			this.state = 'SHIP_HIT';
-			return this.#ship.damage();
-		}
-		this.state = 'SHOT_MISS';
-		return this.state;
-	}
-}
-
-class Ship {
-	health;
-	shipNodes: Cell[] = [];
-	id: string;
-
-	constructor(length: number, id?: string | null) {
-		this.health = length;
-		if (!id) {
-			this.id = generateUniqueId();
-		} else {
-			this.id = id;
-		}
-	}
-
-	addCell(cell: Cell) {
-		this.shipNodes.push(cell);
-	}
-
-	setSunk() {
-		this.shipNodes.forEach((node) => (node.state = 'SHIP_SUNK'));
-	}
-
-	damage() {
-		this.health--;
-		if (this.health < 1) {
-			this.setSunk();
-			return 'SHIP_SUNK';
-		}
-		return 'SHIP_HIT';
-	}
-}
-
 function randomNum(max: number) {
 	return Math.floor(Math.random() * max);
-}
-
-function generateUniqueId() {
-	return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
 export const playerGameboard = new Gameboard();

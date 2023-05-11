@@ -21,6 +21,7 @@ export function Layout() {
 				rtl={false}
 				draggable
 				pauseOnHover={false}
+				pauseOnFocusLoss={false}
 				theme="light"
 				progressClassName="bg-gradient-to-r from-orange-400 to-orange-500"
 				toastClassName={'bg-black'}

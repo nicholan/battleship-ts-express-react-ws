@@ -5,25 +5,24 @@ type Props = {
 };
 
 export function CoordinatesBar({ type, axis, gridArea }: Props) {
-	const content = type === 'num' ? getNumbers() : getLetters();
+	const content = type === 'num' ? getNumbers(1, 10) : getLetters('A', 'J');
 
 	return (
 		<div
 			className={`${gridArea} font-bebas-neue text-xl !leading-[0px] select-none text-black/90 text-center flex`}
 			style={axis === 'row' ? { flexDirection: 'row' } : { flexDirection: 'column' }}
+			tabIndex={-1}
 		>
 			{content}
 		</div>
 	);
 }
 
-const squareCSS = 'grid place-items-center h-full w-full';
-
-function getNumbers() {
+function getNumbers(start: number, end: number) {
 	const numbers = [];
-	for (let i = 1; i < 11; i++) {
+	for (let i = start; i < end + 1; i++) {
 		numbers.push(
-			<div className={squareCSS} key={i}>
+			<div className="grid place-items-center h-full w-full" key={i}>
 				{i}
 			</div>
 		);
@@ -31,11 +30,13 @@ function getNumbers() {
 	return numbers;
 }
 
-function getLetters() {
+function getLetters(start: string, end: string) {
 	const letters = [];
-	for (let i = 97; i < 107; i++) {
+	const s = start.charCodeAt(0);
+	const e = end.charCodeAt(0);
+	for (let i = s; i < e + 1; i++) {
 		letters.push(
-			<div className={squareCSS} key={i}>
+			<div className="grid place-items-center h-full w-full" key={i}>
 				{String.fromCharCode(i)}
 			</div>
 		);

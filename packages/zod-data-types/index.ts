@@ -37,7 +37,14 @@ const zodMessageType = z.enum([
 ]);
 const zodCellState = z.enum(['EMPTY', 'SHIP', 'SHOT_MISS', 'SHIP_HIT', 'SHIP_SUNK']);
 const zodResult = z.enum(['SHOT_MISS', 'SHIP_HIT', 'SHIP_SUNK']);
-const zodCellStyle = z.enum(['', 'INVALID', 'VALID']);
+const zodCellStyle = z.enum([
+	'NONE',
+	'INVALID',
+	'VALID',
+	'SELECTED_VALID',
+	'SELECTED_INVALID_SHIP',
+	'SELECTED_INVALID_MISS',
+]);
 const zodGameState = z.literal('STARTED').or(z.literal('NOT_STARTED')).or(z.literal('GAME_OVER'));
 
 const zodAxis = z.enum(['x', 'y']);

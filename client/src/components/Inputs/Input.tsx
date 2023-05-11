@@ -28,6 +28,7 @@ export const Input: FC<InputProps> = forwardRef<HTMLInputElement, InputProps>(
 		return (
 			<input
 				id={id}
+				tabIndex={0}
 				ref={ref}
 				name={name}
 				type={type}
