@@ -35,7 +35,7 @@ export function Lobby() {
 	const { gameId, playerId, name, playerTurn, events, ...data } = zParse(loaderDataSchema, useLoaderData());
 
 	// These initialize on page load.
-	// Refs are used to sync behaviour on certain actions; websocket, button clicks.
+	// Refs are used to avoid useState undefined variables on component re-renders.
 	const playerReady = useRef(data.ready);
 	const enemyJoined = useRef(data.enemyName ? true : false);
 	const rematchRequested = useRef(false);
@@ -70,41 +70,25 @@ export function Lobby() {
 		// Make sure message contains current gameId,
 		// and that incoming message was sent by the other player.
 		if (zData.gameId !== gameId || zData.playerId === playerId) return;
-		processMessageData(zData).catch((err) => {
-			throw err;
-		});
+		processMessageData(zData);
 	}
 
-	async function processMessageData(data: Message) {
-		switch (data.type) {
-			case 'PLAYER_READY':
-				await processGameStart();
-				break;
-			case 'GAME_START':
-				data.turn !== undefined && startGame(data.turn);
-				break;
-			case 'PLAYER_JOIN':
-				data.name !== undefined && processPlayerJoin(data.name);
-				break;
-			case 'ATTACK':
-				data.coordinates !== undefined && (await processAttack(data.coordinates));
-				break;
-			case 'RESULT':
-				data.events !== undefined && setGameEvents(data.events);
-				break;
-			case 'GAME_OVER':
-				data.winner !== undefined && processGameOver(data.winner);
-				break;
-			case 'REQUEST_REMATCH':
-				data.name !== undefined && (await processRematch(data.name));
-				break;
-			case 'REMATCH_ACCEPT':
-				navigate(0);
-				break;
-			default:
-				break;
-		}
+	function processMessageData(data: Message) {
+		if (!Object.hasOwn(dispatchTable, data.type)) return;
+
+		dispatchTable[data.type as keyof typeof dispatchTable](data);
 	}
+
+	const dispatchTable: Record<string, (data: Message) => void> = {
+		PLAYER_READY: () => processGameStart(),
+		GAME_START: ({ turn }) => turn !== undefined && startGame(turn),
+		PLAYER_JOIN: ({ name }) => name !== undefined && processPlayerJoin(name),
+		ATTACK: ({ coordinates }) => coordinates !== undefined && processAttack(coordinates),
+		RESULT: ({ events }) => events !== undefined && setGameEvents(events),
+		GAME_OVER: ({ winner }) => winner !== undefined && processGameOver(winner),
+		REQUEST_REMATCH: ({ name }) => name !== undefined && processRematch(name),
+		REMATCH_ACCEPT: () => navigate(0),
+	};
 
 	function processPlayerJoin(name: string) {
 		if (enemyJoined.current) return;

@@ -114,26 +114,37 @@ export function Game({
 					gameState={gameState}
 				/>
 
-				{/* Reset and randomize buttons. */}
-				<div className="box_top_right">
-					<div className="flex place-self-center gap-4 flex-row">
-						{!ready && isSetupPhase && (
-							<Button type="button" onClick={randomizeBoard}>
-								Random
-							</Button>
+				{/* Reset and randomize buttons, controls info. */}
+				<div className="box_top_right grid auto-rows-fr">
+					{!ready && isSetupPhase && (
+						<div className="flex gap-4 flex-row justify-center self-end">
+							<>
+								<Button type="button" onClick={randomizeBoard}>
+									Random
+								</Button>
+								<Button disabled={shipsRemaining} type="reset" onClick={resetBoard}>
+									Reset
+								</Button>
+							</>
+						</div>
+					)}
+					<div className="flex flex-col gap-2 place-self-center">
+						<div className="text-sm font-semibold font-mono">
+							<Kbd>Arrow keys</Kbd> Navigate board
+						</div>
+						{isSetupPhase && (
+							<div className="text-sm font-semibold font-mono">
+								<Kbd>Shift</Kbd> Change ship axis
+							</div>
 						)}
-						{!ready && isSetupPhase && (
-							<Button disabled={shipsRemaining} type="reset" onClick={resetBoard}>
-								Reset
-							</Button>
-						)}
-						{gameState === 'STARTED' &&
-							(isPlayerTurn ? <Text color="text-orange-400">Your turn</Text> : <Text>Enemy turn</Text>)}
+						<div className="text-sm font-semibold font-mono">
+							<Kbd>Enter</Kbd> {isSetupPhase ? 'Place ship' : 'Attack'}
+						</div>
 					</div>
 				</div>
 
-				{/* Ready button */}
-				<div className="box_bottom_left">
+				{/* Ready button and turn indicator */}
+				<div className="box_bottom_left grid">
 					<div className={classNames({ 'flex-col': ready }, ['flex items-center gap-4 place-self-center'])}>
 						{!enemyName && (
 							<Button disabled={inviteModalVisible} onClick={() => setInviteModalVisible(true)}>
@@ -152,6 +163,8 @@ export function Game({
 							</Button>
 						)}
 						{isSetupPhase && !shipsRemaining && ready && <Text>Waiting for {enemyName ?? 'Player 2'}</Text>}
+						{gameState === 'STARTED' &&
+							(isPlayerTurn ? <Text color="text-orange-400">Your turn</Text> : <Text>Enemy turn</Text>)}
 					</div>
 				</div>
 			</div>
@@ -165,8 +178,16 @@ interface TextProps extends ComponentPropsWithoutRef<'p'> {
 
 function Text({ children, color, ...props }: TextProps) {
 	return (
-		<p className={`tracking-wide ${color ? color : 'text-black/90'} font-staatliches text-2xl`} {...props}>
+		<p className={`tracking-wide ${color ? color : 'text-black'} font-staatliches text-3xl`} {...props}>
 			{children}
 		</p>
+	);
+}
+
+function Kbd({ children, ...props }: ComponentPropsWithoutRef<'kbd'>) {
+	return (
+		<kbd className="inline-block px-2 py-1.5 text-xs font-semibold rounded-lg bg-neutral-700 text-gray-100 border border-neutral-600 shadow">
+			{children}
+		</kbd>
 	);
 }

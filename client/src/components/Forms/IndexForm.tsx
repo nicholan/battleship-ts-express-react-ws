@@ -41,7 +41,7 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 	return (
 		<form
 			onSubmit={handleSubmit(onSubmit)}
-			className="font-roboto flex-col gap-4 flex text-center w-full max-w-md my-0 mx-auto py-12 px-8 shadow bg-gray-700/10 items-center"
+			className="font-roboto flex-col gap-4 flex text-center w-full max-w-md my-0 mx-auto py-12 px-8 shadow bg-neutral-200 items-center"
 		>
 			<div>
 				<Label htmlFor="name">Name</Label>

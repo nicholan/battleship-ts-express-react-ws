@@ -9,7 +9,7 @@ export function CoordinatesBar({ type, axis, gridArea }: Props) {
 
 	return (
 		<div
-			className={`${gridArea} font-bebas-neue text-xl !leading-[0px] select-none text-black/90 text-center flex`}
+			className={`${gridArea} font-bebas-neue text-xl !leading-[0px] select-none text-black text-center flex`}
 			style={axis === 'row' ? { flexDirection: 'row' } : { flexDirection: 'column' }}
 			tabIndex={-1}
 		>

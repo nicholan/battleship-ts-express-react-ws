@@ -42,11 +42,9 @@
 }
 
 .box_top_right {
-	display: grid;
 	grid-area: 2 / 12 / 11 / 22;
 }
 
 .box_bottom_left {
-	display: grid;
 	grid-area: 13 / 3 / 22 / 11;
 }

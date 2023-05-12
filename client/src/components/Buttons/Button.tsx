@@ -24,7 +24,7 @@ export function Button({
 			className={classNames(
 				className,
 				{
-					'bg-black/70': props.disabled,
+					'bg-neutral-700': props.disabled,
 				},
 				{
 					'bg-gradient-to-r from-orange-400 to-orange-500 hover:scale-105 active:scale-100 duration-75':

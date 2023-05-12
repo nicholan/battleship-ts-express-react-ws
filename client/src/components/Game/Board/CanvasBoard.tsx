@@ -142,7 +142,6 @@ export function CanvasBoard({
 			setCoordinates((prev) => (prev ? prev : { x: 0, y: 0 }));
 			return;
 		}
-
 		keyboardDispatch[key as keyof typeof keyboardDispatch]();
 	};
 
