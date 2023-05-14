@@ -2,7 +2,7 @@ import { publicProcedure, router } from './trpc.js';
 import { Player } from '../models/userModel.js';
 import { Game } from '../models/gameModel.js';
 import type { PlayerType } from '../models/userModel.js';
-import { zodGameEvent, zodGameId, zodPlayerName, zodPlayerBoard } from '@packages/zod-data-types/index.js';
+import { zodGameEvent, zodGameId, zodPlayerName, zodPlayerBoard, zodPlayerId } from '@packages/zod-data-types/index.js';
 import { z } from 'zod';
 
 const zPlayerName = z.object({ name: zodPlayerName });
@@ -10,6 +10,7 @@ const zGameId = z.object({ gameId: zodGameId });
 const zGameEvent = z.object({ gameEvent: zodGameEvent });
 const zPlayerBoard = z.object({ playerBoard: zodPlayerBoard });
 const zPlayerTurn = z.object({ playerTurn: z.number().min(0).max(1) });
+const zPlayerId = z.object({ playerId: zodPlayerId });
 
 export const appRouter = router({
 	createGame: publicProcedure
@@ -212,6 +213,29 @@ export const appRouter = router({
 		.mutation(async ({ input }) => {
 			const { gameId, name, playerBoard } = input;
 			const player = await Player.findOne({ name, gameId });
+			if (!player) {
+				return {
+					code: 404,
+					message: 'Player not found.',
+				};
+			}
+			// If player is already 'ready', prevent uploading new gameboard.
+			if (player.ready) return { ready: player.ready };
+
+			player.board = playerBoard;
+			player.ready = true;
+			await player.save();
+			return { ready: player.ready };
+		}),
+
+	readyPlayerNew: publicProcedure
+		// Called when ships are placed on board and player clicks ready;
+		// Save board build instructions; set player ready.
+		.input(zPlayerId)
+		.input(zPlayerBoard)
+		.mutation(async ({ input }) => {
+			const { playerId, playerBoard } = input;
+			const player = await Player.findById(playerId);
 			if (!player) {
 				return {
 					code: 404,

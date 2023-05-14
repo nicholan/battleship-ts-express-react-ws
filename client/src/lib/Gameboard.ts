@@ -17,7 +17,7 @@ class Gameboard {
 		{ allowed: 2, length: 2, placed: 0 },
 		{ allowed: 2, length: 1, placed: 0 },
 	];
-	#numSunkShips = 0;
+	#numSunkShips = 6;
 
 	getBuildArray = () => this.#buildArr;
 
@@ -85,7 +85,7 @@ class Gameboard {
 		this.clearCellStyles();
 		this.#grid = this.#createGrid();
 		this.#hits.clear();
-		this.#numSunkShips = 0;
+		this.#numSunkShips = 6;
 	};
 
 	buildPlayerBoard = (eventArr: GameEvent[], shipArr: PlayerBoard = []) => {

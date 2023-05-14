@@ -116,14 +116,15 @@ export function Lobby() {
 			return false;
 		}
 
+		playerReady.current = true;
+		setReady(response.ready);
+
 		const data = {
 			type: 'PLAYER_READY',
 			playerId: isAiGame ? 'ai0000000000' : playerId,
 			gameId,
 		};
 
-		playerReady.current = true;
-		setReady(response.ready);
 		sendMessage(JSON.stringify(data));
 		return true;
 	}
@@ -183,6 +184,7 @@ export function Lobby() {
 			await processGameEnding(1);
 			return;
 		}
+
 		await delay(1000);
 		aiAttack();
 	}
@@ -418,7 +420,6 @@ export function Lobby() {
 		}
 
 		if (isAiGame && gameState === 'STARTED' && !isPlayerTurn && gameEvents.length === 0) {
-			console.log('ran');
 			aiStart().catch((err) => console.log(err));
 		}
 	}, [gameState]);

@@ -4,6 +4,7 @@ import { Layout } from './components/Layout/Layout.js';
 import { ErrorPage } from './components/Error/Error.js';
 import { Index } from './routes/Index.js';
 import { Lobby } from './routes/Lobby.js';
+import { LobbyTwo } from './routes/Lobby_new.js';
 import { loader as lobbyLoader } from './routes/Lobby.js';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './global.css';
@@ -24,7 +25,7 @@ const router = createBrowserRouter([
 					{
 						path: '/:gameId/:name',
 						loader: lobbyLoader,
-						element: <Lobby />,
+						element: <LobbyTwo />,
 					},
 					{
 						// All other paths; 404 to <Outlet />
