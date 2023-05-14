@@ -8,6 +8,7 @@ export interface PlayerType extends Document {
 	gameId: string;
 	playerTurn: number;
 	ready: boolean;
+	isAi: boolean;
 }
 
 const playerSchema = new Schema(
@@ -25,6 +26,10 @@ const playerSchema = new Schema(
 			default: 0,
 		},
 		ready: {
+			type: Boolean,
+			default: false,
+		},
+		isAi: {
 			type: Boolean,
 			default: false,
 		},

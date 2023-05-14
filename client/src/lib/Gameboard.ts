@@ -1,6 +1,8 @@
 import type { Coordinates, PlayerBoard, GameEvent } from '@packages/zod-data-types';
 import { Cell } from './Cell.js';
 import { Ship } from './Ship.js';
+import { ai } from './AiController.js';
+import { randomNum } from './utilities.js';
 
 class Gameboard {
 	#grid = this.#createGrid();
@@ -15,7 +17,7 @@ class Gameboard {
 		{ allowed: 2, length: 2, placed: 0 },
 		{ allowed: 2, length: 1, placed: 0 },
 	];
-	#numSunkShips = 6;
+	#numSunkShips = 0;
 
 	getBuildArray = () => this.#buildArr;
 
@@ -35,7 +37,7 @@ class Gameboard {
 	};
 
 	receiveAttack = ({ x, y }: Coordinates) => {
-		if (this.#numSunkShips === 7) return null;
+		if (this.#numSunkShips > 6) return null;
 
 		const key = JSON.stringify({ x, y });
 		if (this.#hits.has(key)) return null;
@@ -54,16 +56,17 @@ class Gameboard {
 
 		if (result === 'SHIP_SUNK') {
 			this.#numSunkShips++;
-			if (this.#numSunkShips === 7) {
-				allShipsSunk = true;
-			}
+		}
+
+		if (this.#numSunkShips > 6) {
+			allShipsSunk = true;
 		}
 
 		return { result, shipId, allShipsSunk };
 	};
 
 	clearCellStyles = () => {
-		// Placement validation visual display
+		// Clear placement validation visual display
 		this.#nodeStack.forEach((cell) => (cell.style = 'NONE'));
 		this.#nodeStack.length = 0;
 	};
@@ -82,15 +85,18 @@ class Gameboard {
 		this.clearCellStyles();
 		this.#grid = this.#createGrid();
 		this.#hits.clear();
-		this.#numSunkShips = 6;
+		this.#numSunkShips = 0;
 	};
 
 	buildPlayerBoard = (eventArr: GameEvent[], shipArr: PlayerBoard = []) => {
 		// Build player board from database, mark enemy actions on player board.
-		shipArr.forEach(({ axis, coordinates, shipLength, shipId }) => {
-			this.#axis = axis;
-			this.placeShip(coordinates, shipLength, shipId);
-		});
+		if (this.#buildArr.length === 0) {
+			this.#buildArr = shipArr;
+			this.#buildArr.forEach(({ axis, coordinates, shipLength, shipId }) => {
+				this.#axis = axis;
+				this.placeShip(coordinates, shipLength, shipId);
+			});
+		}
 		eventArr.forEach(({ coordinates }) => this.receiveAttack(coordinates));
 	};
 
@@ -242,14 +248,13 @@ class Gameboard {
 	}
 }
 
-function randomNum(max: number) {
-	return Math.floor(Math.random() * max);
-}
-
 export const playerGameboard = new Gameboard();
 export const enemyGameboard = new Gameboard();
+export const aiGameboard = new Gameboard();
 
 export function initLobby() {
 	playerGameboard.reset();
 	enemyGameboard.reset();
+	aiGameboard.reset();
+	ai.reset();
 }

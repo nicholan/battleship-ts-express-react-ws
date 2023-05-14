@@ -11,6 +11,7 @@ type CanvasProps = {
 	isPlayerTurn: boolean;
 	attack?: (coordinates: Coordinates) => void;
 	setShipsRemaining?: (val: boolean) => void;
+	gameEventsLen: number;
 };
 
 export function CanvasBoard({
@@ -21,6 +22,7 @@ export function CanvasBoard({
 	isPlayerBoard,
 	gridArea,
 	size = 500,
+	gameEventsLen,
 }: CanvasProps) {
 	const {
 		getGrid,
@@ -189,7 +191,7 @@ export function CanvasBoard({
 			canvasCtxRef.current = canvasRef.current.getContext('2d');
 			drawBoard(canvasCtxRef.current);
 		}
-	}, []);
+	}, [gameEventsLen]);
 
 	useEffect(() => {
 		if (!canvasCtxRef.current) return;
@@ -198,7 +200,7 @@ export function CanvasBoard({
 		coordinatesRef.current = coordinates;
 
 		update();
-	}, [coordinates]);
+	}, [coordinates, gameEventsLen]);
 
 	useEffect(() => {
 		window.addEventListener('keydown', handleKeyboardEvent);

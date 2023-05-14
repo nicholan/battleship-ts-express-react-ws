@@ -5,7 +5,8 @@ import type { PlayerBoard, GameEvent, Coordinates, GameState } from '@packages/z
 import { Nametag } from './Nametag/Nametag.js';
 import { CanvasBoard } from './Board/CanvasBoard.js';
 import { Button } from '../Buttons/Button.js';
-import { playerGameboard, enemyGameboard } from '../../lib/Gameboard.js';
+import { playerGameboard, enemyGameboard, aiGameboard } from '../../lib/Gameboard.js';
+import { ai } from '../../lib/AiController.js';
 import { InvitePlayerForm } from '../Forms/InvitePlayerForm.js';
 import { Modal } from '../Modal/Modal.js';
 import classNames from 'classnames';
@@ -22,6 +23,7 @@ type Props = {
 	attack: (coordinates: Coordinates) => void;
 	gameState: GameState;
 	invitePlayer: (name: string) => void;
+	aiBoard: PlayerBoard;
 };
 
 export function Game({
@@ -36,6 +38,7 @@ export function Game({
 	attack,
 	readyPlayer,
 	invitePlayer,
+	aiBoard,
 }: Props) {
 	const playerEvents = gameEvents.filter((evt) => {
 		return evt.playerId === playerId;
@@ -45,6 +48,8 @@ export function Game({
 	});
 
 	playerGameboard.buildPlayerBoard(playerEvents, board);
+	aiGameboard.buildPlayerBoard(enemyEvents, aiBoard);
+	ai.calculateMoveSet(playerEvents);
 	enemyGameboard.buildEnemyBoard(enemyEvents);
 
 	const [shipsRemaining, setShipsRemaining] = useState(playerGameboard.getShipLength() === 0 ? false : true);
@@ -94,7 +99,8 @@ export function Game({
 
 				{/* Player board. */}
 				<CanvasBoard
-					key={dateKey.toString(36) + gameEvents.length.toString(36)}
+					key={dateKey.toString(36)}
+					gameEventsLen={gameEvents.length}
 					isPlayerBoard={true}
 					isPlayerTurn={isPlayerTurn}
 					gridArea="player_board"
@@ -105,7 +111,8 @@ export function Game({
 
 				{/* Enemy board. */}
 				<CanvasBoard
-					key={gameEvents.length.toString(36)}
+					key={gameState}
+					gameEventsLen={gameEvents.length}
 					isPlayerBoard={false}
 					isPlayerTurn={isPlayerTurn}
 					gridArea="enemy_board"

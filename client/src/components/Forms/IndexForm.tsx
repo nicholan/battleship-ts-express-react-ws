@@ -12,6 +12,7 @@ export type IndexFormSchema = z.infer<typeof formSchema>;
 const formSchema = z.object({
 	name: zodPlayerName,
 	gameId: zodGameId.optional().or(z.literal('')),
+	isComputer: z.boolean(),
 });
 
 type IndexFormProps = {
@@ -62,6 +63,18 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 					type="text"
 					name="gameId"
 					label="Join code"
+					register={register}
+					errors={errors}
+				/>
+			</div>
+
+			<div className="flex flex-row gap-2">
+				<Label htmlFor="isComputer">Play against AI</Label>
+				<FormInput<IndexFormSchema>
+					id="isComputer"
+					type="checkbox"
+					name="isComputer"
+					label="Play against AI"
 					register={register}
 					errors={errors}
 				/>

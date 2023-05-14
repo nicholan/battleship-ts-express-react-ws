@@ -118,4 +118,6 @@ export const loaderDataSchema = z.object({
 	gameState: zodGameState,
 	winner: z.nullable(zodPlayerName),
 	round: z.number(),
+	isAiGame: z.boolean(),
+	aiBoard: zodPlayerBoard,
 });

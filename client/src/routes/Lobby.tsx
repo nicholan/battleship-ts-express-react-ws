@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { Game } from '../components/Game/Game.js';
 import { Modal } from '../components/Modal/Modal.js';
 import { Button } from '../components/Buttons/Button.js';
-import { playerGameboard, initLobby } from '../lib/Gameboard.js';
+import { playerGameboard, aiGameboard, initLobby } from '../lib/Gameboard.js';
+import { ai } from '../lib/AiController.js';
 import { trpc } from '../trpc.js';
 import { toast } from 'react-toastify';
 import { RematchToast } from '../components/Toasts/RematchToast.js';
@@ -32,7 +33,7 @@ const url = 'ws://localhost:3001';
 
 export function Lobby() {
 	const navigate = useNavigate();
-	const { gameId, playerId, name, playerTurn, events, ...data } = zParse(loaderDataSchema, useLoaderData());
+	const { gameId, playerId, name, playerTurn, events, isAiGame, ...data } = zParse(loaderDataSchema, useLoaderData());
 
 	// These initialize on page load.
 	// Refs are used to avoid useState undefined variables on component re-renders.
@@ -50,6 +51,7 @@ export function Lobby() {
 
 	const { sendMessage, lastMessage, readyState } = useWebSocket(url, {
 		onOpen: () => {
+			if (gameState === 'STARTED') return;
 			const data = {
 				type: 'PLAYER_JOIN',
 				gameId,
@@ -116,7 +118,7 @@ export function Lobby() {
 
 		const data = {
 			type: 'PLAYER_READY',
-			playerId,
+			playerId: isAiGame ? 'ai0000000000' : playerId,
 			gameId,
 		};
 
@@ -155,6 +157,46 @@ export function Lobby() {
 		startGame(response.turn);
 	}
 
+	async function processAiReceiveAttack(coordinates: Coordinates) {
+		const attack = aiGameboard.receiveAttack(coordinates);
+		if (attack === null) {
+			setIsPlayerTurn(true);
+			return;
+		}
+
+		const { result, shipId, allShipsSunk } = attack;
+
+		const gameEvent = {
+			playerId: 'ai0000000000',
+			coordinates,
+			result,
+			shipId,
+		};
+
+		const response = await trpc.addEvent.mutate({ gameId, gameEvent });
+
+		if ('gameEvents' in response) {
+			setGameEvents(response.gameEvents);
+		}
+
+		if (allShipsSunk) {
+			await processGameEnding(1);
+			return;
+		}
+		await delay(1000);
+		aiAttack();
+	}
+
+	function aiAttack() {
+		const attackCoordinate: Coordinates = ai.getAiMove();
+		dispatchTable['ATTACK']({
+			type: 'ATTACK',
+			gameId,
+			playerId: 'ai0000000000',
+			coordinates: attackCoordinate,
+		});
+	}
+
 	async function attack(coordinates: Coordinates) {
 		// Called when player clicks enemy board.
 		if (gameState === 'NOT_STARTED') {
@@ -190,12 +232,19 @@ export function Lobby() {
 			return;
 		}
 
+		if (isAiGame) {
+			setIsPlayerTurn(false);
+			await processAiReceiveAttack(coordinates);
+			return;
+		}
+
 		const data = {
 			type: 'ATTACK',
 			playerId,
 			gameId,
 			coordinates,
 		};
+
 		sendMessage(JSON.stringify(data));
 		setIsPlayerTurn(false);
 	}
@@ -232,14 +281,14 @@ export function Lobby() {
 		setGameEvents(response.gameEvents);
 
 		if (allShipsSunk) {
-			await processGameEnding();
+			await processGameEnding(playerTurn);
 			return;
 		}
 
 		setIsPlayerTurn(response.turn === playerTurn);
 	}
 
-	async function processGameEnding() {
+	async function processGameEnding(playerTurn: number) {
 		const response = await trpc.gameOver.mutate({ gameId, playerTurn });
 		if ('message' in response) {
 			toast(<p>{response.message}</p>);
@@ -253,14 +302,16 @@ export function Lobby() {
 			winner: response.winner,
 		};
 		sendMessage(JSON.stringify(data));
-		processGameOver(response.winner);
+		await processGameOver(response.winner);
 	}
 
-	function processGameOver(winner: string) {
+	async function processGameOver(winner: string) {
 		setWinner(winner);
 		setIsPlayerTurn(false);
 		setRematchModalVisible(true);
-		setTimeout(() => setGameState('GAME_OVER'), 1000);
+
+		await delay(1000);
+		setGameState('GAME_OVER');
 	}
 
 	function requestRematch() {
@@ -270,13 +321,34 @@ export function Lobby() {
 		rematchRequested.current = true;
 		setReady(false);
 
+		if (isAiGame) {
+			dispatchTable['REQUEST_REMATCH']({
+				type: 'REQUEST_REMATCH',
+				gameId,
+				playerId: 'ai0000000000',
+				name: enemyName ?? name === 'computer' ? 'computer2' : 'computer',
+			});
+			return;
+		}
+
 		const data = {
 			type: 'REQUEST_REMATCH',
 			name,
 			playerId,
 			gameId,
 		};
+
 		sendMessage(JSON.stringify(data));
+	}
+
+	async function processAiRematch() {
+		aiGameboard.reset();
+		aiGameboard.populateBoard();
+		await trpc.readyPlayer.mutate({
+			gameId,
+			name: 'computer',
+			playerBoard: aiGameboard.getBuildArray(),
+		});
 	}
 
 	async function processRematch(name: string) {
@@ -309,6 +381,10 @@ export function Lobby() {
 			gameId,
 		};
 
+		if (isAiGame) {
+			await processAiRematch();
+		}
+
 		sendMessage(JSON.stringify(data));
 		navigate(0);
 	}
@@ -335,6 +411,18 @@ export function Lobby() {
 		}
 	}, [lastMessage]);
 
+	useEffect(() => {
+		async function aiStart() {
+			await delay(1000);
+			aiAttack();
+		}
+
+		if (isAiGame && gameState === 'STARTED' && !isPlayerTurn && gameEvents.length === 0) {
+			console.log('ran');
+			aiStart().catch((err) => console.log(err));
+		}
+	}, [gameState]);
+
 	return (
 		<>
 			<div className="mx-auto my-0 grid">
@@ -351,6 +439,7 @@ export function Lobby() {
 					isPlayerTurn={isPlayerTurn}
 					gameState={gameState}
 					invitePlayer={invitePlayer}
+					aiBoard={data.aiBoard}
 				/>
 			</div>
 			{gameState === 'GAME_OVER' && rematchModalVisible && (
@@ -376,3 +465,7 @@ export function Lobby() {
 		</>
 	);
 }
+
+const delay = (ms: number) => {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+};

@@ -2,7 +2,7 @@ import { DetailedHTMLProps, InputHTMLAttributes, FC, forwardRef, ComponentPropsW
 import classNames from 'classnames';
 
 export type InputSize = 'sm' | 'md' | 'lg';
-export type InputType = 'text' | 'email';
+export type InputType = 'text' | 'email' | 'checkbox';
 
 export type InputProps = {
 	id: string;

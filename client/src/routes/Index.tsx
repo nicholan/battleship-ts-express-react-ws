@@ -8,6 +8,7 @@ import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket.js';
 import { zParse, zodGameInvitationMessage, type GameInvitationMessage } from '@packages/zod-data-types';
 import { useEffect, useState, useRef } from 'react';
 import { GameInviteToast } from '../components/Toasts/GameInviteToast.js';
+import { aiGameboard } from '../lib/Gameboard.js';
 
 const url = 'ws://localhost:3001';
 
@@ -21,9 +22,14 @@ export function Index() {
 	});
 
 	const onSubmit: SubmitHandler<IndexFormSchema> = async (data) => {
-		const { name, gameId } = data;
+		const { name, gameId, isComputer } = data;
 		if (gameId) {
 			await joinGame(name, gameId);
+			return;
+		}
+
+		if (isComputer) {
+			await createAiGame(name);
 			return;
 		}
 		await createGame(name);
@@ -44,6 +50,18 @@ export function Index() {
 
 	async function createGame(name: string) {
 		const response = await trpc.createGame.mutate({ name });
+		if ('name' in response && 'gameId' in response) {
+			navigate(`/${response.gameId}/${response.name}`);
+			return;
+		}
+	}
+
+	async function createAiGame(name: string) {
+		aiGameboard.reset();
+		aiGameboard.populateBoard();
+		const board = aiGameboard.getBuildArray();
+
+		const response = await trpc.createAiGame.mutate({ name, playerBoard: board });
 		if ('name' in response && 'gameId' in response) {
 			navigate(`/${response.gameId}/${response.name}`);
 			return;
