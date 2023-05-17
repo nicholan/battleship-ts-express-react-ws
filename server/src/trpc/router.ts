@@ -31,36 +31,6 @@ export const appRouter = router({
 			};
 		}),
 
-	createAiGame: publicProcedure
-		.input(zPlayerName)
-		.input(zPlayerBoard)
-		.mutation(async ({ input }) => {
-			const { name, playerBoard } = input;
-			const game = await Game.create({});
-			const player = await Player.create({
-				name,
-				gameId: game.gameId,
-			});
-
-			const computer = await Player.create({
-				name: name === 'computer' ? 'computer2' : 'computer',
-				gameId: game.gameId,
-				board: playerBoard,
-				ready: true,
-				playerTurn: 1,
-				isAi: true,
-			});
-
-			game.players.push(player._id);
-			game.players.push(computer._id);
-
-			await game.save();
-			return {
-				name: player.name,
-				gameId: game.gameId,
-			};
-		}),
-
 	joinGame: publicProcedure
 		// Called in Index page when joining a game via code.
 		.input(zGameId)
@@ -126,14 +96,7 @@ export const appRouter = router({
 				};
 			}
 
-			if (playerData.isAi) {
-				return {
-					code: 404,
-					message: 'Player not found.',
-				};
-			}
-
-			const { events, turn, gameState, round } = game;
+			const { events, turn, gameState } = game;
 			const { _id, board, playerTurn, ready } = playerData;
 
 			const enemy = players.find((p) => p.name !== name);
@@ -148,10 +111,9 @@ export const appRouter = router({
 				playerTurn,
 				ready,
 				gameState,
-				round,
 				winner: game.winner ?? null,
-				aiBoard: enemy ? (enemy.isAi ? enemy.board : []) : [],
-				isAiGame: enemy ? enemy.isAi : false,
+				aiBoard: [],
+				isAiGame: false,
 				enemyName: enemy ? enemy.name : null,
 			};
 		}),
@@ -311,7 +273,6 @@ export const appRouter = router({
 
 			game.gameState = 'NOT_STARTED';
 			game.events = [];
-			game.round++;
 
 			const { players } = await game.populate<{ players: PlayerType[] }>('players');
 			players.forEach(async (p) => {

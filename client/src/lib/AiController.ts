@@ -1,5 +1,5 @@
 import { Cell } from './Cell.js';
-import { randomNum } from './utilities.js';
+import { randomNum } from '@packages/utilities';
 import type { Coordinates, GameEvent } from '@packages/zod-data-types';
 
 export class AiController {
@@ -7,7 +7,7 @@ export class AiController {
 	#nodeStack: Cell[] = [];
 	#hits = new Map<string, Coordinates>();
 	#results: Coordinates[] = [];
-	#preference: 'x' | 'y' = 'x';
+	#preference: 'x' | 'y' | null = null;
 
 	reset = () => {
 		this.#grid = this.#createGrid();
@@ -38,7 +38,9 @@ export class AiController {
 			y - 1 < 0 ? undefined : this.#grid[x][y - 1],
 		];
 
-		return this.#preference === 'x' ? [...adjacentX, ...adjacentY] : [...adjacentY, ...adjacentX];
+		if (this.#preference === 'x') return [...adjacentX];
+		if (this.#preference === 'y') return [...adjacentY];
+		if (!this.#preference) return [...adjacentY, ...adjacentX];
 	};
 
 	#saveAdjacentCells = () => {
@@ -59,7 +61,7 @@ export class AiController {
 		// Check what is the axis of the two most recent hits;
 		// prefer attacking on that axis until ship has sunk
 		if (this.#results.length < 2) {
-			this.#preference = this.#preference === 'x' ? 'y' : 'y';
+			this.#preference = null;
 			return;
 		}
 

@@ -1,11 +1,11 @@
 import type { ToastContentProps } from 'react-toastify';
+import type { Dispatch, SetStateAction } from 'react';
 import { Button } from '../Buttons/Button.js';
-import React from 'react';
 
-type RematchToastProps = {
+export type RematchToastProps = {
 	name: string;
 	requestRematch: () => void;
-	setRematchModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+	setRematchModalVisible: Dispatch<SetStateAction<boolean>>;
 };
 
 export const RematchToast = ({

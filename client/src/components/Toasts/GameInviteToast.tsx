@@ -1,7 +1,7 @@
 import type { ToastContentProps } from 'react-toastify';
 import { Button } from '../Buttons/Button.js';
 
-type GameInviteToastProps = {
+export type GameInviteToastProps = {
 	gameId: string;
 	name: string;
 	hostName: string;

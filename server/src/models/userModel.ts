@@ -29,10 +29,6 @@ const playerSchema = new Schema(
 			type: Boolean,
 			default: false,
 		},
-		isAi: {
-			type: Boolean,
-			default: false,
-		},
 	},
 	{ timestamps: true }
 );

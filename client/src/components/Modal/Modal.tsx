@@ -23,7 +23,7 @@ export function Modal({ children, onClose, ...props }: ComponentPropsWithoutRef<
 	if (!visible) return null;
 
 	return (
-		<dialog className="absolute left-0 top-0 w-full h-full grid bg-black/30 p-0">
+		<dialog className="fixed left-0 top-0 w-full h-full grid bg-black/30 p-0">
 			<div className="relative place-self-center p-12 rounded shadow-md bg-black/90 text-white">
 				{closeButton}
 				<div {...props}>{children}</div>

@@ -5,7 +5,8 @@ import type { NavigateFunction } from 'react-router-dom';
 import { zParse, zodMessage } from '@packages/zod-data-types';
 import { playerGameboard } from './Gameboard.js';
 import { trpc } from '../trpc.js';
-import { delay } from './utilities.js';
+import { delay } from '@packages/utilities';
+import { dispatchToast } from '../components/Toasts/Toaster.js';
 
 type StateActions = {
 	sendMessage: SendMessage;
@@ -19,13 +20,14 @@ type StateActions = {
 	navigate: NavigateFunction;
 };
 
-type ControllerProps = {
+export type ControllerProps = {
 	gameId: string;
 	playerId: string;
 	playerTurn: number;
 	ready: boolean;
 	name: string;
 	actions: StateActions;
+	enemyName: string | null;
 };
 
 export function multiplayerController({
@@ -34,6 +36,7 @@ export function multiplayerController({
 	playerTurn,
 	ready,
 	name,
+	enemyName,
 	actions: {
 		sendMessage,
 		setGameEvents,
@@ -48,6 +51,7 @@ export function multiplayerController({
 }: ControllerProps) {
 	let playerReady = ready;
 	let rematchRequested = false;
+	let enemyJoined = enemyName ? true : false;
 
 	const send = (data: Partial<Message> | GameInvitationMessage) => {
 		sendMessage(
@@ -61,7 +65,7 @@ export function multiplayerController({
 
 	const dispatchTable: Record<string, (data: Message) => void> = {
 		PLAYER_READY: () => processGameStart(),
-		PLAYER_JOIN: ({ name }) => name !== undefined && setEnemyName(name),
+		PLAYER_JOIN: ({ name }) => name !== undefined && processPlayerJoin(name),
 		GAME_START: ({ turn }) => turn !== undefined && startGame(turn),
 		ATTACK: ({ coordinates }) => coordinates !== undefined && processAttack(coordinates),
 		RESULT: ({ events }) => events !== undefined && setGameEvents(events),
@@ -90,7 +94,10 @@ export function multiplayerController({
 			playerId,
 			playerBoard: playerGameboard.getBuildArray(),
 		});
-		if ('message' in response) return false;
+		if ('message' in response) {
+			dispatchToast('API_RESPONSE', { message: response.message });
+			return false;
+		}
 
 		setReady(response.ready);
 		playerReady = response.ready;
@@ -99,11 +106,22 @@ export function multiplayerController({
 		return true;
 	};
 
+	const processPlayerJoin = (name: string) => {
+		if (enemyJoined) return;
+		enemyJoined = true;
+		setEnemyName(name);
+		dispatchToast('PLAYER_JOIN', { name });
+	};
+
 	const processGameStart = async () => {
 		if (!playerReady) return;
 
 		const response = await trpc.startGame.mutate({ gameId });
-		if ('message' in response) return;
+		if ('message' in response) {
+			dispatchToast('API_RESPONSE', { message: response.message });
+			return;
+		}
+
 		send({ type: 'GAME_START', turn: response.turn });
 		startGame(response.turn);
 		return;
@@ -113,12 +131,17 @@ export function multiplayerController({
 		// Runs when PLAYER_READY or GAME_START messages are emitted.
 		setGameState('STARTED');
 		setIsPlayerTurn(gameTurn === playerTurn);
+		dispatchToast('GAME_START');
 		return;
 	};
 
 	const attack = async (coordinates: Coordinates) => {
 		const response = await trpc.getGameTurn.query({ gameId, playerTurn });
-		if ('message' in response) return;
+		if ('message' in response) {
+			dispatchToast('API_RESPONSE', { message: response.message });
+			return;
+		}
+
 		if (!response.isPlayerTurn) return;
 
 		send({ type: 'ATTACK', coordinates });
@@ -139,7 +162,10 @@ export function multiplayerController({
 		};
 
 		const response = await trpc.addEvent.mutate({ gameId, gameEvent });
-		if ('message' in response) return;
+		if ('message' in response) {
+			dispatchToast('API_RESPONSE', { message: response.message });
+			return;
+		}
 
 		send({ type: 'RESULT', events: response.gameEvents });
 		setGameEvents(response.gameEvents);
@@ -154,7 +180,10 @@ export function multiplayerController({
 
 	const processGameEnding = async (playerTurn: number) => {
 		const response = await trpc.gameOver.mutate({ gameId, playerTurn });
-		if ('message' in response) return;
+		if ('message' in response) {
+			dispatchToast('API_RESPONSE', { message: response.message });
+			return;
+		}
 
 		send({ type: 'GAME_OVER', winner: response.winner });
 		await processGameOver(response.winner);
@@ -177,9 +206,17 @@ export function multiplayerController({
 	};
 
 	const processRematch = async (name: string) => {
-		if (!rematchRequested) return;
+		if (!rematchRequested) {
+			setRematchModalVisible(false);
+			dispatchToast('REMATCH_REQUEST', { name, requestRematch, setRematchModalVisible });
+			return;
+		}
+
 		const response = await trpc.resetGame.mutate({ gameId });
-		if ('message' in response) return;
+		if ('message' in response) {
+			dispatchToast('API_RESPONSE', { message: response.message });
+			return;
+		}
 
 		send({ type: 'REMATCH_ACCEPT' });
 		navigate(0);
@@ -187,6 +224,7 @@ export function multiplayerController({
 
 	const invite = (playerName: string) => {
 		send({ type: 'PLAYER_INVITE', hostName: name, name: playerName });
+		dispatchToast('INVITE', { name: playerName });
 	};
 
 	return { parseSocketMessage, attack, readyPlayer, requestRematch, invite };

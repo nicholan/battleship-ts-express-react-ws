@@ -1,11 +1,11 @@
 import { aiGameboard, playerGameboard } from './Gameboard.js';
-import { trpc } from '../trpc.js';
-import { delay } from './utilities.js';
-import type { Coordinates, GameEvent, GameState } from '@packages/zod-data-types';
+import { delay } from '@packages/utilities';
+import type { Coordinates, GameEvent, GameState, LoaderData } from '@packages/zod-data-types';
 import type { Dispatch, SetStateAction } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
 import type { SendMessage } from 'react-use-websocket';
 import { ai } from './AiController.js';
+import { dispatchToast } from '../components/Toasts/Toaster.js';
 
 type StateActions = {
 	sendMessage: SendMessage;
@@ -28,37 +28,56 @@ export type ControllerProps = {
 	actions: StateActions;
 };
 
+function localData(gameId: string) {
+	const getLocalData = () => {
+		const data = window.localStorage.getItem(gameId);
+		if (!data) throw new Error('Local data not found.');
+
+		return JSON.parse(data) as LoaderData;
+	};
+
+	const getDataByKey = (key: keyof LoaderData) => {
+		const data = getLocalData();
+		return data[key];
+	};
+
+	const setLocalData = (newData: Partial<LoaderData>) => {
+		const data = getLocalData();
+		window.localStorage.setItem(gameId, JSON.stringify({ ...data, ...newData }));
+	};
+
+	return { setLocalData, getDataByKey, getLocalData };
+}
+
 export function singleplayerController({
 	gameId,
 	playerId,
 	playerTurn,
 	actions: { setGameEvents, setGameState, setIsPlayerTurn, setReady, setWinner, navigate, setRematchModalVisible },
 }: ControllerProps) {
-	const readyPlayer = async () => {
-		const response = await trpc.readyPlayerNew.mutate({
-			playerId,
-			playerBoard: playerGameboard.getBuildArray(),
-		});
+	const { getDataByKey, setLocalData, getLocalData } = localData(gameId);
 
-		if ('message' in response) return false;
-
-		setReady(response.ready);
-		await startGame();
-		return true;
+	const readyPlayer = () => {
+		setLocalData({ board: playerGameboard.getBuildArray(), ready: true });
+		setReady(true);
+		startGame();
+		return Promise.resolve(true);
 	};
 
-	const startGame = async () => {
-		const response = await trpc.startGame.mutate({ gameId });
-		if ('message' in response) return;
+	const startGame = () => {
+		const turn = Math.round(Math.random());
+		setLocalData({ gameState: 'STARTED', turn });
 		setGameState('STARTED');
-		setIsPlayerTurn(response.turn === playerTurn);
+		dispatchToast('GAME_START');
+		setIsPlayerTurn(turn === playerTurn);
 	};
 
 	const attack = async (coordinates: Coordinates) => {
-		const response = await trpc.getGameTurn.query({ gameId, playerTurn });
-		if ('message' in response) return;
-		if (!response.isPlayerTurn) return;
-		setIsPlayerTurn(false);
+		const isTurn = getDataByKey('turn') === playerTurn;
+		if (!isTurn) {
+			setIsPlayerTurn(false);
+			return;
+		}
 
 		await processAttack(coordinates, true);
 	};
@@ -78,56 +97,66 @@ export function singleplayerController({
 			shipId,
 		};
 
-		const response = await trpc.addEvent.mutate({ gameId, gameEvent });
-		if ('message' in response) return;
-
-		setGameEvents(response.gameEvents);
+		const data = getLocalData();
+		data.events.push(gameEvent);
+		data.turn = data.turn === 1 ? 0 : 1;
+		setLocalData(data);
+		setGameEvents(data.events);
 
 		if (allShipsSunk) {
 			await processGameEnding(playerIsAttacker ? 1 : 0);
 			return;
 		}
 
-		setIsPlayerTurn(response.turn === playerTurn);
+		setIsPlayerTurn(data.turn === playerTurn);
 
 		if (playerIsAttacker) {
-			await delay(1000);
-			await processAttack(ai.getAiMove(), false);
+			await aiAttack();
 		}
 	};
 
-	const processGameEnding = async (playerTurn: number) => {
-		const response = await trpc.gameOver.mutate({ gameId, playerTurn });
-		if ('message' in response) return;
-		await processGameOver(response.winner);
+	const aiAttack = async () => {
+		await delay(1000);
+		await processAttack(ai.getAiMove(), false);
+	};
+
+	const processGameEnding = async (loserTurnNumber: number) => {
+		const data = getLocalData();
+		data.gameState = 'GAME_OVER';
+		data.turn = 2;
+		data.winner = loserTurnNumber === 0 ? data.enemyName ?? 'computer' : data.name;
+		setLocalData(data);
+
+		await processGameOver(data.winner);
 	};
 
 	const processGameOver = async (winner: string) => {
 		setWinner(winner);
 		setIsPlayerTurn(false);
-		setRematchModalVisible(true);
 
 		await delay(1000);
+		setRematchModalVisible(true);
 		setGameState('GAME_OVER');
 	};
 
-	const initializeAi = async () => {
+	const initializeAi = () => {
 		aiGameboard.reset();
 		aiGameboard.populateBoard();
-		await trpc.readyPlayer.mutate({
-			gameId,
-			name: 'computer',
-			playerBoard: aiGameboard.getBuildArray(),
-		});
+		const data = getLocalData();
+		data.aiBoard = aiGameboard.getBuildArray();
+		setLocalData(data);
 	};
 
-	const requestRematch = async () => {
-		const response = await trpc.resetGame.mutate({ gameId });
-		if ('message' in response) return;
-
-		await initializeAi();
+	const requestRematch = () => {
+		const data = getLocalData();
+		data.gameState = 'NOT_STARTED';
+		data.events.length = 0;
+		data.board.length = 0;
+		data.ready = false;
+		setLocalData(data);
+		initializeAi();
 		navigate(0);
 	};
 
-	return { attack, readyPlayer, requestRematch };
+	return { attack, readyPlayer, requestRematch, aiAttack };
 }

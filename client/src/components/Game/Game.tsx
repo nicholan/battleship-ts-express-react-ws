@@ -22,7 +22,7 @@ type Props = {
 	readyPlayer: () => Promise<boolean>;
 	attack: (coordinates: Coordinates) => void;
 	gameState: GameState;
-	invitePlayer: (name: string) => void;
+	invitePlayer?: (name: string) => void;
 	aiBoard: PlayerBoard;
 };
 
@@ -78,7 +78,10 @@ export function Game({
 				<Modal onClose={() => setInviteModalVisible(false)}>
 					<div className="text-center font-bebas-neue">
 						<p className="text-2xl tracking-wider">Invite a player</p>
-						<InvitePlayerForm closeModal={() => setInviteModalVisible(false)} invitePlayer={invitePlayer} />
+						<InvitePlayerForm
+							closeModal={() => setInviteModalVisible(false)}
+							invitePlayer={invitePlayer && invitePlayer}
+						/>
 					</div>
 				</Modal>
 			)}
@@ -193,7 +196,10 @@ function Text({ children, color, ...props }: TextProps) {
 
 function Kbd({ children, ...props }: ComponentPropsWithoutRef<'kbd'>) {
 	return (
-		<kbd className="inline-block px-2 py-1.5 text-xs font-semibold rounded-lg bg-neutral-700 text-gray-100 border border-neutral-600 shadow">
+		<kbd
+			className="inline-block px-2 py-1.5 text-xs font-semibold rounded-lg bg-neutral-700 text-gray-100 border border-neutral-600 shadow"
+			{...props}
+		>
 			{children}
 		</kbd>
 	);

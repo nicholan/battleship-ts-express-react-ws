@@ -9,8 +9,8 @@
 .game_wrapper {
 	place-self: center;
 	display: grid;
-	grid-template-columns: repeat(21, 50px);
-	grid-template-rows: repeat(22, 50px);
+	grid-template-columns: repeat(21, 1fr);
+	grid-template-rows: repeat(22, 1fr);
 	grid-column-gap: 0px;
 	grid-row-gap: 0px;
 	grid-area: 1 / 1 / 2 / 2;
@@ -31,6 +31,7 @@
 .coordinates_col_p2 {
 	grid-area: 12 / 11 / 22 / 12;
 }
+
 .enemy_board {
 	grid-area: 12 / 12 / 22 / 22;
 }
@@ -47,4 +48,31 @@
 
 .box_bottom_left {
 	grid-area: 13 / 3 / 22 / 11;
+}
+
+@media (max-width: 1050px) {
+	.coordinates_col_p1,
+	.coordinates_col_p2,
+	.coordinates_row_p1,
+	.coordinates_row_p2,
+	.player_name,
+	.enemy_name,
+	.box_bottom_left,
+	.box_top_right {
+		display: none;
+	}
+
+	.game_wrapper {
+		grid-template-columns: repeat(2, 1fr);
+		grid-template-rows: repeat(2, 1fr);
+		gap: 1rem;
+	}
+
+	.player_board {
+		grid-area: 1 / 1 / 2 / 2;
+	}
+
+	.enemy_board {
+		grid-area: 1 / 2 / 3 / 2;
+	}
 }

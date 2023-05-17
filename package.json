@@ -22,17 +22,18 @@
 	"homepage": "https://github.com/nicholan/battleship-ts-express-react-ws#readme",
 	"dependencies": {
 		"@packages/zod-data-types": "1.0.0",
+		"@packages/utilities": "1.0.0",
 		"websocket": "^1.0.34",
 		"zod": "latest",
 		"@trpc/client": "^10.20.0",
 		"@trpc/server": "^10.20.0"
 	},
 	"devDependencies": {
-		"@nicholan/eslint-config": "*",
-		"@nicholan/tsconfig": "*",
+		"@nicholan/eslint-config": "latest",
+		"@nicholan/tsconfig": "latest",
 		"@types/websocket": "^1.0.5",
 		"typescript": "5.0.2",
-		"concurrently": "*"
+		"concurrently": "latest"
 	},
 	"packageManager": "pnpm@8.3.1",
 	"engines": {

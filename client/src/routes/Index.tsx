@@ -1,14 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { trpc } from '../trpc.js';
-import { toast } from 'react-toastify';
 import { SubmitHandler } from 'react-hook-form';
 import type { IndexFormSchema } from '../components/Forms/IndexForm.js';
 import { IndexForm } from '../components/Forms/IndexForm.js';
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket.js';
-import { zParse, zodGameInvitationMessage, type GameInvitationMessage } from '@packages/zod-data-types';
+import { zParse, zodGameInvitationMessage, type GameInvitationMessage, LoaderData } from '@packages/zod-data-types';
 import { useEffect, useState, useRef } from 'react';
-import { GameInviteToast } from '../components/Toasts/GameInviteToast.js';
 import { aiGameboard } from '../lib/Gameboard.js';
+import { generateUniqueId } from '@packages/utilities';
+import { dispatchToast } from '../components/Toasts/Toaster.js';
 
 const url = 'ws://localhost:3001';
 
@@ -29,16 +29,17 @@ export function Index() {
 		}
 
 		if (isComputer) {
-			await createAiGame(name);
+			createAiGame(name);
 			return;
 		}
+
 		await createGame(name);
 	};
 
 	async function joinGame(name: string, gameId: string) {
 		const response = await trpc.joinGame.mutate({ gameId, name });
 		if ('message' in response) {
-			toast(<p>{response.message}</p>);
+			dispatchToast('API_RESPONSE', { message: response.message });
 			return;
 		}
 
@@ -56,16 +57,30 @@ export function Index() {
 		}
 	}
 
-	async function createAiGame(name: string) {
+	function createAiGame(name: string) {
 		aiGameboard.reset();
 		aiGameboard.populateBoard();
-		const board = aiGameboard.getBuildArray();
+		const aiBoard = aiGameboard.getBuildArray();
 
-		const response = await trpc.createAiGame.mutate({ name, playerBoard: board });
-		if ('name' in response && 'gameId' in response) {
-			navigate(`/${response.gameId}/${response.name}`);
-			return;
-		}
+		const data: LoaderData = {
+			playerId: generateUniqueId(),
+			name: name,
+			gameId: generateUniqueId(),
+			board: [],
+			events: [],
+			turn: 2,
+			playerTurn: 0,
+			ready: false,
+			gameState: 'NOT_STARTED',
+			winner: null,
+			aiBoard,
+			isAiGame: true,
+			enemyName: 'computer',
+		};
+		window.localStorage.setItem(data.gameId, JSON.stringify(data));
+
+		navigate(`/${data.gameId}/${data.name}`);
+		return;
 	}
 
 	function processSocketMessage({ hostName, gameId, type, ...data }: GameInvitationMessage) {
@@ -73,10 +88,7 @@ export function Index() {
 		if (data.name === undefined || hostName === undefined || gameId === undefined) return;
 		if (data.name !== name + suffix.current) return;
 
-		toast(<GameInviteToast gameId={gameId} name={name} hostName={hostName} joinGame={joinGame} />, {
-			autoClose: 30000,
-			hideProgressBar: false,
-		});
+		dispatchToast('INVITE_RECEIVED', { gameId, name, hostName, joinGame });
 	}
 
 	function parseSocketMessage({ data }: MessageEvent) {

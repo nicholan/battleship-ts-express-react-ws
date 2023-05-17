@@ -1,4 +1,4 @@
-import { Coordinates, CellStyle, CellState } from '@packages/zod-data-types';
+import type { Coordinates, CellStyle, CellState } from '@packages/zod-data-types';
 import type { Cell } from './Cell.js';
 
 type DrawProps = {

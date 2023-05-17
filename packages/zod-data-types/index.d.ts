@@ -7,9 +7,13 @@ export type Coordinates = z.infer<typeof zodCoordinates>;
 export type Message = z.infer<typeof zodMessage>;
 export type CellStyle = z.infer<typeof zodCellStyle>;
 export type CellState = z.infer<typeof zodCellState>;
+export type GameState = z.infer<typeof zodGameState>;
+export type LoaderData = z.infer<typeof loaderDataSchema>;
+export type GameInvitationMessage = z.infer<typeof zodGameInvitationMessage>;
 declare const zodCellState: z.ZodEnum<["EMPTY", "SHIP", "SHOT_MISS", "SHIP_HIT", "SHIP_SUNK"]>;
 declare const zodResult: z.ZodEnum<["SHOT_MISS", "SHIP_HIT", "SHIP_SUNK"]>;
-declare const zodCellStyle: z.ZodEnum<["", "INVALID", "VALID"]>;
+declare const zodCellStyle: z.ZodEnum<["NONE", "INVALID", "VALID", "SELECTED_VALID", "SELECTED_INVALID_SHIP", "SELECTED_INVALID_MISS"]>;
+declare const zodGameState: z.ZodUnion<[z.ZodUnion<[z.ZodLiteral<"STARTED">, z.ZodLiteral<"NOT_STARTED">]>, z.ZodLiteral<"GAME_OVER">]>;
 export declare const zodGameId: z.ZodString;
 export declare const zodPlayerId: z.ZodString;
 export declare const zodPlayerName: z.ZodString;
@@ -86,7 +90,7 @@ export declare const zodGameEvent: z.ZodObject<{
     shipId: string | null;
 }>;
 export declare const zodMessage: z.ZodObject<{
-    type: z.ZodEnum<["PLAYER_READY", "GAME_START", "PLAYER_JOIN", "ATTACK", "RESULT", "GAME_OVER", "WINNER"]>;
+    type: z.ZodEnum<["PLAYER_READY", "GAME_START", "PLAYER_JOIN", "ATTACK", "RESULT", "GAME_OVER", "REQUEST_REMATCH", "REMATCH_ACCEPT", "PLAYER_INVITE"]>;
     playerId: z.ZodString;
     gameId: z.ZodString;
     coordinates: z.ZodOptional<z.ZodObject<{
@@ -132,8 +136,9 @@ export declare const zodMessage: z.ZodObject<{
     }>, "many">>;
     name: z.ZodOptional<z.ZodString>;
     turn: z.ZodOptional<z.ZodNumber>;
+    winner: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "PLAYER_READY" | "GAME_START" | "PLAYER_JOIN" | "ATTACK" | "RESULT" | "GAME_OVER" | "WINNER";
+    type: "PLAYER_READY" | "GAME_START" | "PLAYER_JOIN" | "ATTACK" | "RESULT" | "GAME_OVER" | "REQUEST_REMATCH" | "REMATCH_ACCEPT" | "PLAYER_INVITE";
     playerId: string;
     gameId: string;
     coordinates?: {
@@ -151,8 +156,9 @@ export declare const zodMessage: z.ZodObject<{
     }[] | undefined;
     name?: string | undefined;
     turn?: number | undefined;
+    winner?: string | undefined;
 }, {
-    type: "PLAYER_READY" | "GAME_START" | "PLAYER_JOIN" | "ATTACK" | "RESULT" | "GAME_OVER" | "WINNER";
+    type: "PLAYER_READY" | "GAME_START" | "PLAYER_JOIN" | "ATTACK" | "RESULT" | "GAME_OVER" | "REQUEST_REMATCH" | "REMATCH_ACCEPT" | "PLAYER_INVITE";
     playerId: string;
     gameId: string;
     coordinates?: {
@@ -170,6 +176,23 @@ export declare const zodMessage: z.ZodObject<{
     }[] | undefined;
     name?: string | undefined;
     turn?: number | undefined;
+    winner?: string | undefined;
+}>;
+export declare const zodGameInvitationMessage: z.ZodObject<{
+    gameId: z.ZodString;
+    name: z.ZodOptional<z.ZodString>;
+    hostName: z.ZodOptional<z.ZodString>;
+    type: z.ZodEnum<["PLAYER_READY", "GAME_START", "PLAYER_JOIN", "ATTACK", "RESULT", "GAME_OVER", "REQUEST_REMATCH", "REMATCH_ACCEPT", "PLAYER_INVITE"]>;
+}, "strip", z.ZodTypeAny, {
+    type: "PLAYER_READY" | "GAME_START" | "PLAYER_JOIN" | "ATTACK" | "RESULT" | "GAME_OVER" | "REQUEST_REMATCH" | "REMATCH_ACCEPT" | "PLAYER_INVITE";
+    gameId: string;
+    name?: string | undefined;
+    hostName?: string | undefined;
+}, {
+    type: "PLAYER_READY" | "GAME_START" | "PLAYER_JOIN" | "ATTACK" | "RESULT" | "GAME_OVER" | "REQUEST_REMATCH" | "REMATCH_ACCEPT" | "PLAYER_INVITE";
+    gameId: string;
+    name?: string | undefined;
+    hostName?: string | undefined;
 }>;
 export declare const loaderDataSchema: z.ZodObject<{
     gameId: z.ZodString;
@@ -240,8 +263,41 @@ export declare const loaderDataSchema: z.ZodObject<{
     }>, "many">;
     turn: z.ZodNumber;
     playerTurn: z.ZodNumber;
-    started: z.ZodBoolean;
     ready: z.ZodBoolean;
+    gameState: z.ZodUnion<[z.ZodUnion<[z.ZodLiteral<"STARTED">, z.ZodLiteral<"NOT_STARTED">]>, z.ZodLiteral<"GAME_OVER">]>;
+    winner: z.ZodNullable<z.ZodString>;
+    isAiGame: z.ZodBoolean;
+    aiBoard: z.ZodArray<z.ZodObject<{
+        coordinates: z.ZodObject<{
+            x: z.ZodNumber;
+            y: z.ZodNumber;
+        }, "strip", z.ZodTypeAny, {
+            x: number;
+            y: number;
+        }, {
+            x: number;
+            y: number;
+        }>;
+        axis: z.ZodEnum<["x", "y"]>;
+        shipLength: z.ZodNumber;
+        shipId: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        coordinates: {
+            x: number;
+            y: number;
+        };
+        shipId: string;
+        axis: "x" | "y";
+        shipLength: number;
+    }, {
+        coordinates: {
+            x: number;
+            y: number;
+        };
+        shipId: string;
+        axis: "x" | "y";
+        shipLength: number;
+    }>, "many">;
 }, "strip", z.ZodTypeAny, {
     playerId: string;
     gameId: string;
@@ -256,6 +312,7 @@ export declare const loaderDataSchema: z.ZodObject<{
     }[];
     name: string;
     turn: number;
+    winner: string | null;
     enemyName: string | null;
     board: {
         coordinates: {
@@ -267,8 +324,18 @@ export declare const loaderDataSchema: z.ZodObject<{
         shipLength: number;
     }[];
     playerTurn: number;
-    started: boolean;
     ready: boolean;
+    gameState: "GAME_OVER" | "STARTED" | "NOT_STARTED";
+    isAiGame: boolean;
+    aiBoard: {
+        coordinates: {
+            x: number;
+            y: number;
+        };
+        shipId: string;
+        axis: "x" | "y";
+        shipLength: number;
+    }[];
 }, {
     playerId: string;
     gameId: string;
@@ -283,6 +350,7 @@ export declare const loaderDataSchema: z.ZodObject<{
     }[];
     name: string;
     turn: number;
+    winner: string | null;
     enemyName: string | null;
     board: {
         coordinates: {
@@ -294,7 +362,17 @@ export declare const loaderDataSchema: z.ZodObject<{
         shipLength: number;
     }[];
     playerTurn: number;
-    started: boolean;
     ready: boolean;
+    gameState: "GAME_OVER" | "STARTED" | "NOT_STARTED";
+    isAiGame: boolean;
+    aiBoard: {
+        coordinates: {
+            x: number;
+            y: number;
+        };
+        shipId: string;
+        axis: "x" | "y";
+        shipLength: number;
+    }[];
 }>;
 export {};

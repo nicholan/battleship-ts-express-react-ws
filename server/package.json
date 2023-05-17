@@ -36,9 +36,9 @@
 		"@types/node": "^18.15.3",
 		"@types/supertest": "^2.0.12",
 		"@types/ws": "^8.5.4",
-		"chokidar": "*",
+		"chokidar": "latest",
 		"jest": "^29.5.0",
 		"morgan": "^1.10.0",
-		"nodemon": "*"
+		"nodemon": "latest"
 	}
 }

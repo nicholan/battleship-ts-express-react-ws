@@ -12,7 +12,7 @@ const formSchema = z.object({
 });
 
 type InvitePlayerFormProps = {
-	invitePlayer: (name: string) => void;
+	invitePlayer?: (name: string) => void;
 	closeModal?: () => void;
 };
 
@@ -27,7 +27,7 @@ export function InvitePlayerForm({ invitePlayer, closeModal }: InvitePlayerFormP
 	});
 
 	const onSubmit: SubmitHandler<InvitePlayerFormSchema> = (data) => {
-		invitePlayer(data.name);
+		invitePlayer && invitePlayer(data.name);
 		reset();
 		closeModal && closeModal();
 	};

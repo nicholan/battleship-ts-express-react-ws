@@ -2,7 +2,7 @@ import type { Coordinates, PlayerBoard, GameEvent } from '@packages/zod-data-typ
 import { Cell } from './Cell.js';
 import { Ship } from './Ship.js';
 import { ai } from './AiController.js';
-import { randomNum } from './utilities.js';
+import { randomNum } from '@packages/utilities';
 
 class Gameboard {
 	#grid = this.#createGrid();
@@ -17,7 +17,7 @@ class Gameboard {
 		{ allowed: 2, length: 2, placed: 0 },
 		{ allowed: 2, length: 1, placed: 0 },
 	];
-	#numSunkShips = 6;
+	#numSunkShips = 0;
 
 	getBuildArray = () => this.#buildArr;
 
@@ -85,7 +85,7 @@ class Gameboard {
 		this.clearCellStyles();
 		this.#grid = this.#createGrid();
 		this.#hits.clear();
-		this.#numSunkShips = 6;
+		this.#numSunkShips = 0;
 	};
 
 	buildPlayerBoard = (eventArr: GameEvent[], shipArr: PlayerBoard = []) => {

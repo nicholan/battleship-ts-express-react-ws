@@ -51,7 +51,7 @@ const zodAxis = z.enum(['x', 'y']);
 
 export const zodGameId = z.string().trim().min(8, 'Invalid game code.');
 
-export const zodPlayerId = z.string().trim().min(12, 'Invalid player ID.');
+export const zodPlayerId = z.string().trim().min(8, 'Invalid player ID.');
 
 export const zodPlayerName = z
 	.string()
@@ -117,7 +117,6 @@ export const loaderDataSchema = z.object({
 	ready: z.boolean(),
 	gameState: zodGameState,
 	winner: z.nullable(zodPlayerName),
-	round: z.number(),
 	isAiGame: z.boolean(),
 	aiBoard: zodPlayerBoard,
 });
