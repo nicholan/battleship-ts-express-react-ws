@@ -61,7 +61,7 @@ export const zodPlayerName = z
 	.max(20, 'Name must be less than 20 characters.')
 	.regex(regex, 'Name may contain only letters and numbers.');
 
-const zodCoordinates = z.object({
+export const zodCoordinates = z.object({
 	x: z.number().min(0).max(9),
 	y: z.number().min(0).max(9),
 });

@@ -7,13 +7,13 @@ type DrawProps = {
 };
 
 const colorMap = {
-	BLACK: 'rgb(0, 0, 0)',
-	WHITE: 'rgb(255, 255, 255)',
+	BLACK: 'rgb(25, 25, 25)',
+	WHITE: 'rgb(250, 250, 250)',
 	ORANGE: 'rgb(251, 146, 60)',
-	SQUARE_BORDER: 'rgb(235,236,238)',
+	SQUARE_BORDER: 'rgb(225, 225, 225)',
 	CANVAS_BORDER: 'rgb(0, 0, 0)',
 	INVALID: 'rgb(253, 211, 177)',
-	VALID: 'rgb(230, 230, 230)',
+	VALID: 'rgb(210, 210, 210)',
 	SELECTED_INVALID_MISS: 'rgb(251, 146, 60)',
 	SELECTED_INVALID_SHIP: 'rgb(251, 146, 60)',
 } as const;

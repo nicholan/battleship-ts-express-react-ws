@@ -1,7 +1,7 @@
 {
 	"name": "@packages/utilities",
-	"main": "./index.ts",
-	"types": "./index.ts",
+	"main": "./index.js",
+	"types": "./index.d.ts",
 	"type": "module",
 	"private": true,
 	"version": "1.0.0"

@@ -1,16 +1,21 @@
+import classNames from 'classnames';
+import type { ComponentPropsWithoutRef } from 'react';
+
 type Props = {
 	type: 'num' | 'letter';
-	axis: 'row' | 'column';
-	gridArea: string;
-};
+} & ComponentPropsWithoutRef<'div'>;
 
-export function CoordinatesBar({ type, axis, gridArea }: Props) {
+export function CoordinatesBar({ type, className }: Props) {
 	const content = type === 'num' ? getNumbers(1, 10) : getLetters('A', 'J');
 
 	return (
 		<div
-			className={`${gridArea} font-bebas-neue text-xl !leading-[0px] select-none text-black text-center flex`}
-			style={axis === 'row' ? { flexDirection: 'row' } : { flexDirection: 'column' }}
+			className={classNames(
+				[className],
+				['text-black dark:text-neutral-100'],
+				['font-bebas-neue text-xl !leading-[0px] select-none'],
+				['hidden lg:flex']
+			)}
 			tabIndex={-1}
 		>
 			{content}
@@ -18,11 +23,13 @@ export function CoordinatesBar({ type, axis, gridArea }: Props) {
 	);
 }
 
+const style = classNames(['grid place-items-center'], ['w-full h-full']);
+
 function getNumbers(start: number, end: number) {
 	const numbers = [];
 	for (let i = start; i < end + 1; i++) {
 		numbers.push(
-			<div className="grid place-items-center h-full w-full" key={i}>
+			<div className={style} key={i}>
 				{i}
 			</div>
 		);
@@ -36,7 +43,7 @@ function getLetters(start: string, end: string) {
 	const e = end.charCodeAt(0);
 	for (let i = s; i < e + 1; i++) {
 		letters.push(
-			<div className="grid place-items-center h-full w-full" key={i}>
+			<div className={style} key={i}>
 				{String.fromCharCode(i)}
 			</div>
 		);

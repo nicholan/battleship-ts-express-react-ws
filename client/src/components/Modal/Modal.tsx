@@ -1,4 +1,5 @@
 import { useState, type ComponentPropsWithoutRef } from 'react';
+import classNames from 'classnames';
 
 type ModalProps = {
 	onClose?: () => void;
@@ -14,7 +15,12 @@ export function Modal({ children, onClose, ...props }: ComponentPropsWithoutRef<
 				setVisible(false);
 				onClose && onClose();
 			}}
-			className="absolute text-3xl top-3 right-3 h-8 w-8 cursor-pointer leading-[0px] grid place-items-center font-roboto text-white hover:text-orange-400"
+			className={classNames(
+				['grid place-items-center'],
+				['cursor-pointer'],
+				['absolute top-3 right-3 h-8 w-8'],
+				['text-3xl leading-[0px] font-roboto text-white hover:text-orange-400']
+			)}
 		>
 			×
 		</button>
@@ -23,8 +29,15 @@ export function Modal({ children, onClose, ...props }: ComponentPropsWithoutRef<
 	if (!visible) return null;
 
 	return (
-		<dialog className="fixed left-0 top-0 w-full h-full grid bg-black/30 p-0">
-			<div className="relative place-self-center p-12 rounded shadow-md bg-black/90 text-white">
+		<dialog className="fixed left-0 top-0 w-full h-full grid p-0 m-0 bg-black/30 ">
+			<div
+				className={classNames(
+					['relative place-self-center rounded shadow-md text-neutral-50'],
+					['bg-gradient-to-b from-neutral-800 to-neutral-900'],
+					['border dark:border-neutral-300/10'],
+					['p-8 lg:p-12']
+				)}
+			>
 				{closeButton}
 				<div {...props}>{children}</div>
 			</div>

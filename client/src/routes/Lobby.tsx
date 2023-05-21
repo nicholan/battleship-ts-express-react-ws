@@ -129,7 +129,7 @@ export function Lobby() {
 					<div className="flex flex-col gap-4 items-center px-8">
 						<div className="tracking-wide text-center select-none font-bebas-neue">
 							{ready && (
-								<p className="text-5xl">
+								<p className="text-3xl md:text-4xl lg:text-5xl">
 									{enemyName && (winner === enemyName ? `${enemyName} wins!` : 'You win!')}
 								</p>
 							)}

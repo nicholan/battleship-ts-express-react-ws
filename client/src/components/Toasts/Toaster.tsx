@@ -30,7 +30,7 @@ const toasts: Record<ToastKeys, (props?: ToastDispatchProps) => void> = {
 		props &&
 			'joinGame' in props &&
 			toast(<GameInviteToast {...props} />, {
-				autoClose: 30000,
+				autoClose: false,
 				hideProgressBar: false,
 			});
 	},

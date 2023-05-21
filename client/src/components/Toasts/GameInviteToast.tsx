@@ -16,11 +16,11 @@ export const GameInviteToast = ({
 	name,
 }: Partial<ToastContentProps> & GameInviteToastProps) => {
 	return (
-		<div className="px-8 py-4 flex flex-col gap-4">
+		<div className="px-0 md:px-8 py-2 md:py-4 flex flex-col gap-4">
 			<p>
 				Invitation from <span className="text-orange-400 tracking-wider">{hostName}</span>
 			</p>
-			<div className="flex gap-2 flex-row justify-center">
+			<div className="flex gap-4 flex-row justify-center">
 				<Button onClick={async () => await joinGame(name, gameId)}>Accept</Button>
 				<Button onClick={() => closeToast && closeToast()}>Decline</Button>
 			</div>

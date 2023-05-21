@@ -6,6 +6,7 @@ import { Button } from '../Buttons/Button.js';
 import { FormInput } from '../Inputs/FormInput.js';
 import { Label } from '../Inputs/Label.js';
 import { useEffect } from 'react';
+import classNames from 'classnames';
 
 export type IndexFormSchema = z.infer<typeof formSchema>;
 
@@ -33,6 +34,7 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 
 	const watchGameId = watch('gameId');
 	const watchName = watch('name');
+	const watchAi = watch('isComputer');
 
 	useEffect(() => {
 		if (!isValid) return;
@@ -42,7 +44,15 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 	return (
 		<form
 			onSubmit={handleSubmit(onSubmit)}
-			className="font-roboto flex-col gap-4 flex text-center w-full max-w-md my-0 mx-auto py-12 px-8 shadow bg-neutral-200 items-center"
+			className={classNames(
+				['font-roboto text-center'],
+				['flex flex-col gap-4 items-center'],
+				['w-full max-w-md mt-4 mx-auto'],
+				['py-8 lg:py-12 px-8'],
+				['rounded border dark:border-neutral-300/10'],
+				['shadow-sm dark:shadow-inner'],
+				['bg-neutral-50 dark:bg-neutral-800/5']
+			)}
 		>
 			<div>
 				<Label htmlFor="name">Name</Label>
@@ -68,7 +78,7 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 				/>
 			</div>
 
-			<div className="flex flex-row gap-2">
+			<div className="flex flex-row gap-2 items-center">
 				<Label htmlFor="isComputer">Play against AI</Label>
 				<FormInput<IndexFormSchema>
 					id="isComputer"
@@ -80,15 +90,19 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 				/>
 			</div>
 			<Button type="submit">{watchGameId ? 'Join' : 'Create'}</Button>
-			{isValid && watchName && (
-				<div className="flex justify-center flex-col gap-2 py-2 px-6 bg-white shadow">
+			{isValid && watchName && !watchAi && !watchGameId && (
+				<div
+					className={classNames(
+						['w-full pt-8'],
+						['rounded-sm border-t dark:border-neutral-300/10'],
+						['dark:text-white']
+					)}
+				>
 					<Label>Public name</Label>
-					<div className="flex justify-center">
-						<p>
-							{watchName.slice(0, 19)}
-							{suffix}
-						</p>
-					</div>
+					<p>
+						{watchName.slice(0, 19)}
+						{suffix}
+					</p>
 				</div>
 			)}
 		</form>

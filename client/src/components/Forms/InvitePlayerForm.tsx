@@ -33,20 +33,22 @@ export function InvitePlayerForm({ invitePlayer, closeModal }: InvitePlayerFormP
 	};
 
 	return (
-		<form
-			onSubmit={handleSubmit(onSubmit)}
-			className="font-roboto flex-row flex gap-4 text-center w-max p-2 my-0 mx-auto shadow items-center justify-center"
-		>
-			<FormInput<InvitePlayerFormSchema>
-				name="name"
-				id="name"
-				label="Player name"
-				size="sm"
-				register={register}
-				errors={errors}
-				showErrorMessage={false}
-			/>
-			<Button type="submit">Send</Button>
-		</form>
+		<div className="text-center font-bebas-neue flex flex-col gap-2">
+			<p className="text-2xl tracking-wider">Invite a player</p>
+			<form
+				onSubmit={handleSubmit(onSubmit)}
+				className="font-roboto flex-row flex gap-4 text-center w-max p-2 my-0 mx-auto shadow items-center justify-center"
+			>
+				<FormInput<InvitePlayerFormSchema>
+					name="name"
+					id="name"
+					label="Player name"
+					register={register}
+					errors={errors}
+					showErrorMessage={false}
+				/>
+				<Button type="submit">Send</Button>
+			</form>
+		</div>
 	);
 }

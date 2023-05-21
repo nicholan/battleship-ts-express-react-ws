@@ -1,18 +1,29 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Coordinates, GameState } from '@packages/zod-data-types';
+import { useRef, useEffect, useState, type ComponentPropsWithoutRef } from 'react';
+import type { Coordinates, GameState } from '@packages/zod-data-types';
+import { zodCoordinates } from '@packages/zod-data-types';
 import { playerGameboard, enemyGameboard } from '../../../lib/Gameboard.js';
 import { CanvasController } from '../../../lib/CanvasController.js';
+import classNames from 'classnames';
 
 type CanvasProps = {
 	isPlayerBoard: boolean;
-	size: number;
-	gridArea: 'player_board' | 'enemy_board';
+	size: BoardSize;
 	gameState: GameState;
 	isPlayerTurn: boolean;
 	attack?: (coordinates: Coordinates) => void;
 	setShipsRemaining?: (val: boolean) => void;
 	gameEventsLen: number;
-};
+} & ComponentPropsWithoutRef<'canvas'>;
+
+export type BoardSize = 'xxs' | 'xs' | 'sm' | 'md' | 'lg';
+
+export const boardSizeMap: { [key in BoardSize]: number } = {
+	xxs: 350,
+	xs: 400,
+	sm: 500,
+	md: 380,
+	lg: 460,
+} as const;
 
 export function CanvasBoard({
 	setShipsRemaining,
@@ -20,8 +31,8 @@ export function CanvasBoard({
 	attack,
 	gameState,
 	isPlayerBoard,
-	gridArea,
-	size = 500,
+	className,
+	size,
 	gameEventsLen,
 }: CanvasProps) {
 	const {
@@ -42,7 +53,7 @@ export function CanvasBoard({
 	const coordinatesRef = useRef<Coordinates | null>(null);
 
 	const grid = getGrid();
-	const { drawBoard } = new CanvasController(size, grid);
+	const { drawBoard } = new CanvasController(boardSizeMap[size], grid);
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -53,8 +64,8 @@ export function CanvasBoard({
 		}
 
 		const { offsetLeft, offsetTop } = canvasRef.current;
-		const x = Math.floor(((pageX - offsetLeft) / size) * 10);
-		const y = Math.floor(((pageY - offsetTop) / size) * 10);
+		const x = Math.floor(((pageX - offsetLeft) / boardSizeMap[size]) * 10);
+		const y = Math.floor(((pageY - offsetTop) / boardSizeMap[size]) * 10);
 
 		return {
 			x: x < 0 ? 0 : x,
@@ -64,6 +75,7 @@ export function CanvasBoard({
 
 	const update = () => {
 		if (!coordinatesRef.current) return;
+		if (!zodCoordinates.safeParse(coordinatesRef.current).success) return;
 
 		if (gameState === 'NOT_STARTED' && isPlayerBoard) {
 			isValidPlacement(coordinatesRef.current);
@@ -104,7 +116,14 @@ export function CanvasBoard({
 	const mouseLeaveHandler = () => {
 		if (getShipLength() < 1) return;
 
-		setCoordinates(null);
+		if (gameState === 'NOT_STARTED') {
+			setCoordinates(null);
+		}
+
+		if (gameState === 'STARTED') {
+			setCoordinates(getLastHitCoordinate());
+		}
+
 		clearCellStyles();
 		drawBoard(canvasCtxRef.current);
 	};
@@ -191,7 +210,7 @@ export function CanvasBoard({
 			canvasCtxRef.current = canvasRef.current.getContext('2d');
 			drawBoard(canvasCtxRef.current);
 		}
-	}, [gameEventsLen]);
+	}, [gameEventsLen, size]);
 
 	useEffect(() => {
 		if (!canvasCtxRef.current) return;
@@ -200,7 +219,7 @@ export function CanvasBoard({
 		coordinatesRef.current = coordinates;
 
 		update();
-	}, [coordinates, gameEventsLen]);
+	}, [coordinates, gameEventsLen, size]);
 
 	useEffect(() => {
 		window.addEventListener('keydown', handleKeyboardEvent);
@@ -212,10 +231,10 @@ export function CanvasBoard({
 
 	return (
 		<canvas
-			width={size}
-			height={size}
+			width={boardSizeMap[size]}
+			height={boardSizeMap[size]}
 			ref={canvasRef}
-			className={`${gridArea} select-none`}
+			className={classNames([className], ['select-none'], ['shadow dark:shadow-none'])}
 			onMouseMove={handleMouseMove}
 			onMouseEnter={handleMouseMove}
 			onClick={handleClick}

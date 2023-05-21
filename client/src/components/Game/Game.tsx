@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ComponentPropsWithoutRef } from 'react';
 import { CoordinatesBar } from './CoordinatesBar/CoordinatesBar.js';
 import type { PlayerBoard, GameEvent, Coordinates, GameState } from '@packages/zod-data-types';
@@ -10,6 +10,8 @@ import { ai } from '../../lib/AiController.js';
 import { InvitePlayerForm } from '../Forms/InvitePlayerForm.js';
 import { Modal } from '../Modal/Modal.js';
 import classNames from 'classnames';
+import { useWindowSize } from '../../hooks/useWindowSize.js';
+import type { BoardSize } from './Board/CanvasBoard.js';
 
 type Props = {
 	playerId: string;
@@ -48,13 +50,17 @@ export function Game({
 	});
 
 	playerGameboard.buildPlayerBoard(playerEvents, board);
-	aiGameboard.buildPlayerBoard(enemyEvents, aiBoard);
-	ai.calculateMoveSet(playerEvents);
 	enemyGameboard.buildEnemyBoard(enemyEvents);
+
+	// Player is playing against ai in offline game.
+	aiBoard.length > 0 && aiGameboard.buildPlayerBoard(enemyEvents, aiBoard);
+	aiBoard.length > 0 && ai.calculateMoveSet(playerEvents);
 
 	const [shipsRemaining, setShipsRemaining] = useState(playerGameboard.getShipLength() === 0 ? false : true);
 	const [dateKey, setDateKey] = useState(new Date().getTime());
 	const [inviteModalVisible, setInviteModalVisible] = useState(false);
+	const { width } = useWindowSize(100);
+	const [size, setSize] = useState<BoardSize>('lg');
 
 	function resetBoard() {
 		playerGameboard.reset();
@@ -70,64 +76,145 @@ export function Game({
 
 	const isSetupPhase = gameState === 'NOT_STARTED';
 
+	useEffect(() => {
+		if (width < 410) {
+			setSize('xxs');
+			return;
+		}
+		if (width < 510) {
+			setSize('xs');
+			return;
+		}
+		if (width < 768) {
+			setSize('sm');
+			return;
+		}
+		if (width < 1024) {
+			setSize('md');
+			return;
+		}
+		setSize('lg');
+		return;
+	}, [width]);
+
 	return (
-		// Game wrapper is a 21 x 22 grid of squares; elements are placed using gridAreas defined in global.css
-		// TODO: Media queries.
 		<>
 			{inviteModalVisible && (
 				<Modal onClose={() => setInviteModalVisible(false)}>
-					<div className="text-center font-bebas-neue">
-						<p className="text-2xl tracking-wider">Invite a player</p>
-						<InvitePlayerForm
-							closeModal={() => setInviteModalVisible(false)}
-							invitePlayer={invitePlayer && invitePlayer}
-						/>
-					</div>
+					<InvitePlayerForm
+						closeModal={() => setInviteModalVisible(false)}
+						invitePlayer={invitePlayer && invitePlayer}
+					/>
 				</Modal>
 			)}
-			<div className="game_wrapper">
-				{/* Create coordinate bars (numbers/letters) for each player. */}
-				<CoordinatesBar type="num" axis="row" gridArea="coordinates_row_p1" />
-				<CoordinatesBar type="letter" axis="column" gridArea="coordinates_col_p1" />
-				<CoordinatesBar type="num" axis="row" gridArea="coordinates_row_p2" />
-				<CoordinatesBar type="letter" axis="column" gridArea="coordinates_col_p2" />
+			<div
+				className={classNames(
+					['grid mx-auto'],
+					['pt-4 md:py-4'],
+					['row-auto grid-cols-1'],
+					['md:grid-rows-21 md:grid-cols-20'],
+					['lg:grid-rows-22 lg:grid-cols-21']
+				)}
+			>
+				{/* ----------- LETTER / NUMBER COORDINATES ----------- */}
+				{size === 'lg' && (
+					<>
+						<CoordinatesBar
+							type="num"
+							className={classNames(['flex-row'], ['row-start-1 col-start-2 row-end-2 col-end-12'])}
+						/>
+						<CoordinatesBar
+							type="letter"
+							className={classNames(['flex-col'], ['row-start-2 col-start-1 row-end-[12] col-end-2'])}
+						/>
+						<CoordinatesBar
+							type="num"
+							className={classNames(
+								['flex-row'],
+								['row-start-[11] col-start-12 row-end-[12] col-end-[22]']
+							)}
+						/>
+						<CoordinatesBar
+							type="letter"
+							className={classNames(
+								['flex-col'],
+								['row-start-[12] col-start-11 row-end-[22] col-end-[12]']
+							)}
+						/>
+					</>
+				)}
 
-				{/* Player nametags. */}
-				<Nametag gridArea="player_name" isPlayerTurn={isPlayerTurn} gameState={gameState}>
+				{/* ----------- NAMETAGS ----------- */}
+				<Nametag
+					active={gameState === 'STARTED' && isPlayerTurn}
+					className={classNames(
+						['mb-3 md:mb-0'],
+						['row-start-3 col-start-1 row-end-4 col-end-2'],
+						['md:row-start-[11] md:col-start-2 md:row-end-[12] md:col-end-[10]'],
+						['lg:row-start-[12] lg:col-start-3 lg:row-end-[13] lg:col-end-[11]']
+					)}
+				>
 					{playerName}
 				</Nametag>
-				<Nametag gridArea="enemy_name" isPlayerTurn={!isPlayerTurn} gameState={gameState}>
+				<Nametag
+					active={gameState === 'STARTED' && !isPlayerTurn}
+					className={classNames(
+						['row-start-5 col-start-1 row-end-6 col-end-2'],
+						['md:row-start-[21] md:col-start-12 md:row-end-[22] md:col-end-[20]'],
+						['lg:row-start-[22] lg:col-start-13 lg:row-end-[23] lg:col-end-[21]']
+					)}
+				>
 					{enemyName}
 				</Nametag>
 
-				{/* Player board. */}
+				{/* ----------- PLAYER BOARD ----------- */}
 				<CanvasBoard
 					key={dateKey.toString(36)}
 					gameEventsLen={gameEvents.length}
+					className={classNames(
+						['row-start-2 col-start-1 row-end-3 col-end-2'],
+						['md:row-start-1 md:col-start-1 md:row-end-11 md:col-end-11'],
+						['lg:row-start-2 lg:col-start-2 lg:row-end-12 lg:col-end-12']
+					)}
 					isPlayerBoard={true}
 					isPlayerTurn={isPlayerTurn}
-					gridArea="player_board"
-					size={500}
+					size={size}
 					setShipsRemaining={setShipsRemaining}
 					gameState={gameState}
 				/>
 
-				{/* Enemy board. */}
+				{/* ----------- ENEMY BOARD ----------- */}
 				<CanvasBoard
-					key={gameState}
+					key={`${gameState}_enemy_board`}
 					gameEventsLen={gameEvents.length}
+					className={classNames(
+						['row-start-4 col-start-1 row-end-5 col-end-2'],
+						['md:row-start-[11] md:col-start-11 md:row-end-[21] md:col-end-[21]'],
+						['lg:row-start-[12] lg:col-start-12 lg:row-end-[22] lg:col-end-[22]']
+					)}
 					isPlayerBoard={false}
 					isPlayerTurn={isPlayerTurn}
-					gridArea="enemy_board"
-					size={500}
+					size={size}
 					attack={attack}
 					gameState={gameState}
 				/>
 
-				{/* Reset and randomize buttons, controls info. */}
-				<div className="box_top_right grid auto-rows-fr">
-					{!ready && isSetupPhase && (
-						<div className="flex gap-4 flex-row justify-center self-end">
+				{/* ----------- RESET, RANDOM, KBD CONTROLS CONTAINER ----------- */}
+
+				<div
+					className={classNames(
+						['grid'],
+						[!ready && 'py-3'],
+						['md:py-0'],
+						['row-start-1 col-start-1 row-end-2 col-end-2'],
+						['md:row-start-1 md:col-start-11 md:row-end-[11] md:col-end-[21]'],
+						['lg:row-start-2 lg:col-start-12 lg:row-end-[11] lg:col-end-[22]']
+					)}
+				>
+					{!ready && (
+						<div
+							className={classNames(['flex gap-4 flex-row justify-center'], ['self-center lg:self-end'])}
+						>
 							<>
 								<Button type="button" onClick={randomizeBoard}>
 									Random
@@ -138,23 +225,40 @@ export function Game({
 							</>
 						</div>
 					)}
-					<div className="flex flex-col gap-2 place-self-center">
-						<div className="text-sm font-semibold font-mono">
-							<Kbd>Arrow keys</Kbd> Navigate board
-						</div>
-						{isSetupPhase && (
-							<div className="text-sm font-semibold font-mono">
-								<Kbd>Shift</Kbd> Change ship axis
+
+					{size === 'lg' && (
+						<div
+							className={classNames(
+								['flex flex-col gap-2 place-self-center'],
+								['p-4 border rounded-sm'],
+								['rounded border dark:border-neutral-300/10']
+							)}
+						>
+							<div className="text-sm font-semibold font-mono dark:text-white">
+								<Kbd>Arrow keys</Kbd> Navigate board
 							</div>
-						)}
-						<div className="text-sm font-semibold font-mono">
-							<Kbd>Enter</Kbd> {isSetupPhase ? 'Place ship' : 'Attack'}
+							{isSetupPhase && (
+								<div className="text-sm font-semibold font-mono dark:text-white">
+									<Kbd>Shift</Kbd> Change ship axis
+								</div>
+							)}
+							<div className="text-sm font-semibold font-mono dark:text-white">
+								<Kbd>Enter</Kbd> {isSetupPhase ? 'Place ship' : 'Attack'}
+							</div>
 						</div>
-					</div>
+					)}
 				</div>
 
-				{/* Ready button and turn indicator */}
-				<div className="box_bottom_left grid">
+				{/* ----------- READY, TURN INDICATOR CONTAINER ----------- */}
+				<div
+					className={classNames(
+						['grid'],
+						['py-3 md:py-0'],
+						['row-start-6 col-start-1 row-end-7 col-end-2'],
+						['md:row-start-[12] md:col-start-2 md:row-end-[22] md:col-end-[10]'],
+						['lg:row-start-[13] lg:col-start-3 lg:row-end-[22] lg:col-end-[11]']
+					)}
+				>
 					<div className={classNames({ 'flex-col': ready }, ['flex items-center gap-4 place-self-center'])}>
 						{!enemyName && (
 							<Button disabled={inviteModalVisible} onClick={() => setInviteModalVisible(true)}>
@@ -169,7 +273,7 @@ export function Game({
 								disabled={ready}
 								type="submit"
 							>
-								Ready?
+								{aiBoard.length > 0 ? 'Start' : 'Ready'}
 							</Button>
 						)}
 						{isSetupPhase && !shipsRemaining && ready && <Text>Waiting for {enemyName ?? 'Player 2'}</Text>}
@@ -183,12 +287,20 @@ export function Game({
 }
 
 interface TextProps extends ComponentPropsWithoutRef<'p'> {
-	color?: string | undefined;
+	color?: string;
 }
 
-function Text({ children, color, ...props }: TextProps) {
+function Text({ children, color, className, ...props }: TextProps) {
 	return (
-		<p className={`tracking-wide ${color ? color : 'text-black'} font-staatliches text-3xl`} {...props}>
+		<p
+			className={classNames(
+				['text-xl md:text-2xl lg:text-3xl'],
+				[`tracking-wide font-staatliches`],
+				[color ? color : 'text-black dark:text-white'],
+				[className]
+			)}
+			{...props}
+		>
 			{children}
 		</p>
 	);

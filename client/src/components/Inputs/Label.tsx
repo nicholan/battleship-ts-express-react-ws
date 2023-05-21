@@ -1,23 +1,20 @@
-import { DetailedHTMLProps, LabelHTMLAttributes, FC } from 'react';
+import { ComponentPropsWithoutRef } from 'react';
 import classNames from 'classnames';
 
-type LabelSize = 'sm' | 'md' | 'lg' | 'none';
-
-type LabelProps = {
-	size?: LabelSize;
-} & Omit<DetailedHTMLProps<LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>, 'size'>;
-
-const sizeMap: { [key in LabelSize]: string } = {
-	none: 'p-0',
-	sm: 'p-2',
-	md: 'p-3',
-	lg: 'p-4',
-};
-
-export const Label: FC<LabelProps> = ({ children, size = 'none', className, ...props }: LabelProps) => {
+export function Label({ children, className, ...props }: ComponentPropsWithoutRef<'label'>) {
 	return (
-		<label className={classNames([sizeMap[size], className])} {...props}>
+		<label
+			className={classNames(
+				[className],
+				['p-1 sm:p-2'],
+				['inline-block'],
+				['text-lg lg:text-xl'],
+				['font-staatliches tracking-wider'],
+				['text-neutral-700 dark:text-neutral-100']
+			)}
+			{...props}
+		>
 			{children}
 		</label>
 	);
-};
+}

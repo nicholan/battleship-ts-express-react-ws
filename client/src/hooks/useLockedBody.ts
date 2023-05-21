@@ -4,10 +4,7 @@ import { useEffect, useLayoutEffect, useState } from 'react';
 
 type UseLockedBodyOutput = [boolean, (locked: boolean) => void];
 
-export function useLockedBody(
-	initialLocked = false,
-	rootId = 'root' // Default to `___gatsby` to not introduce breaking change
-): UseLockedBodyOutput {
+export function useLockedBody(initialLocked = false, rootId = 'root'): UseLockedBodyOutput {
 	const [locked, setLocked] = useState(initialLocked);
 
 	// Do the side effect before render

@@ -1,21 +1,23 @@
-import type { GameState } from '@packages/zod-data-types';
-import { ReactNode } from 'react';
+import classNames from 'classnames';
+import { ComponentPropsWithoutRef } from 'react';
 
 type Nametag = {
-	gridArea: string;
-	isPlayerTurn: boolean;
-	gameState: GameState;
-	children: ReactNode;
-};
+	active: boolean;
+} & ComponentPropsWithoutRef<'div'>;
 
-export function Nametag({ gridArea, isPlayerTurn, gameState, children }: Nametag) {
-	const gameStarted = gameState === 'STARTED';
-
+export function Nametag({ active, children, className, ...props }: Nametag) {
 	return (
 		<div
-			className={`tracking-wider font-bebas-neue text-2xl text-white select-none text-center items-center grid shadow text-shadow shadow-black/20 ${gridArea} ${
-				gameStarted && isPlayerTurn ? 'bg-gradient-to-r from-orange-400 to-orange-500' : 'bg-neutral-700'
-			}`}
+			className={classNames(
+				[className],
+				['grid items-center'],
+				['text-lg md:text-xl lg:text-2xl'],
+				['py-1 lg:py-0'],
+				['tracking-wider font-staatliches text-center'],
+				['select-none'],
+				[active ? 'text-orange-400' : 'text-neutral-800 dark:text-neutral-50']
+			)}
+			{...props}
 		>
 			{children ?? 'Player'}
 		</div>

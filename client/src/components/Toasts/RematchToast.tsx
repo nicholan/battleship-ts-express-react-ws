@@ -15,7 +15,7 @@ export const RematchToast = ({
 	setRematchModalVisible,
 }: Partial<ToastContentProps> & RematchToastProps) => {
 	return (
-		<div className="px-8 py-4 flex flex-col gap-4">
+		<div className="px-0 md:px-8 py-2 md:py-4 flex flex-col gap-4">
 			<p>
 				<span className="text-orange-400 tracking-wider">{name}</span> has requested rematch!
 			</p>
