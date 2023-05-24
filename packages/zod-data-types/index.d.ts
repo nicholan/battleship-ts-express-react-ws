@@ -17,7 +17,7 @@ declare const zodGameState: z.ZodUnion<[z.ZodUnion<[z.ZodLiteral<"STARTED">, z.Z
 export declare const zodGameId: z.ZodString;
 export declare const zodPlayerId: z.ZodString;
 export declare const zodPlayerName: z.ZodString;
-declare const zodCoordinates: z.ZodObject<{
+export declare const zodCoordinates: z.ZodObject<{
     x: z.ZodNumber;
     y: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {

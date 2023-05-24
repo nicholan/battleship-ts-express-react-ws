@@ -17,6 +17,7 @@ type Props = {
 	playerId: string;
 	playerName: string;
 	enemyName: string | null | undefined;
+	gameId: string;
 	board: PlayerBoard;
 	gameEvents: GameEvent[];
 	ready: boolean;
@@ -32,6 +33,7 @@ export function Game({
 	playerId,
 	playerName,
 	enemyName,
+	gameId,
 	board,
 	gameEvents,
 	ready,
@@ -104,6 +106,7 @@ export function Game({
 					<InvitePlayerForm
 						closeModal={() => setInviteModalVisible(false)}
 						invitePlayer={invitePlayer && invitePlayer}
+						gameId={gameId}
 					/>
 				</Modal>
 			)}
@@ -216,11 +219,9 @@ export function Game({
 							className={classNames(['flex gap-4 flex-row justify-center'], ['self-center lg:self-end'])}
 						>
 							<>
-								<Button type="button" onClick={randomizeBoard}>
-									Random
-								</Button>
+								<Button onClick={randomizeBoard}>Random</Button>
 								<Button disabled={shipsRemaining} type="reset" onClick={resetBoard}>
-									Reset
+									Clear
 								</Button>
 							</>
 						</div>
@@ -259,7 +260,7 @@ export function Game({
 						['lg:row-start-[13] lg:col-start-3 lg:row-end-[22] lg:col-end-[11]']
 					)}
 				>
-					<div className={classNames({ 'flex-col': ready }, ['flex items-center gap-4 place-self-center'])}>
+					<div className={classNames(['flex flex-col items-center gap-4 place-self-center'])}>
 						{!enemyName && (
 							<Button disabled={inviteModalVisible} onClick={() => setInviteModalVisible(true)}>
 								Invite

@@ -19,7 +19,7 @@ export function Modal({ children, onClose, ...props }: ComponentPropsWithoutRef<
 				['grid place-items-center'],
 				['cursor-pointer'],
 				['absolute top-3 right-3 h-8 w-8'],
-				['text-3xl leading-[0px] font-roboto text-white hover:text-orange-400']
+				['text-2xl md:text-3xl leading-[0px] font-roboto text-white hover:text-orange-400']
 			)}
 		>
 			×
@@ -29,7 +29,7 @@ export function Modal({ children, onClose, ...props }: ComponentPropsWithoutRef<
 	if (!visible) return null;
 
 	return (
-		<dialog className="fixed left-0 top-0 w-full h-full grid p-0 m-0 bg-black/30 ">
+		<dialog className="fixed left-0 top-0 w-screen h-screen grid p-0 m-0 bg-black/30 ">
 			<div
 				className={classNames(
 					['relative place-self-center rounded shadow-md text-neutral-50'],

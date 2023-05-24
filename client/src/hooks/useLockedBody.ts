@@ -36,6 +36,7 @@ export function useLockedBody(initialLocked = false, rootId = 'root'): UseLocked
 				document.body.style.paddingRight = originalPaddingRight;
 			}
 		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [locked]);
 
 	// Update state if initialValue changes
@@ -43,6 +44,7 @@ export function useLockedBody(initialLocked = false, rootId = 'root'): UseLocked
 		if (locked !== initialLocked) {
 			setLocked(initialLocked);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [initialLocked]);
 
 	return [locked, setLocked];

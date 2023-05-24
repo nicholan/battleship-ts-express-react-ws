@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Layout } from './components/Layout/Layout.js';
-import { ErrorPage } from './components/Error/Error.js';
+import ErrorPage from './components/Error/Error.js';
 import { Index } from './routes/Index.js';
 import { Lobby } from './routes/Lobby.js';
 import { loader as lobbyLoader } from './routes/Lobby.js';

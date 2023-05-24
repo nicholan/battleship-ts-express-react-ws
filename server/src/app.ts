@@ -9,9 +9,17 @@ import { createWsServer } from './wsSserver.js';
 import { createDbConnection } from './config/database.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import rateLimit from 'express-rate-limit';
 
 const __dirname = fileURLToPath(import.meta.url);
 const staticFilesDir = path.resolve(__dirname, '../../../client/dist');
+
+const apiLimiter = rateLimit({
+	windowMs: 1 * 60 * 1000, // 15 minutes
+	max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 const app: Application = express();
 app.disable('x-powered-by');
@@ -25,6 +33,7 @@ app.use(express.static(staticFilesDir));
 
 app.use(
 	'/trpc',
+	apiLimiter,
 	trpcExpress.createExpressMiddleware({
 		router: appRouter,
 		createContext,

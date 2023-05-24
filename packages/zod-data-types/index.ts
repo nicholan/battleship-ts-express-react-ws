@@ -49,7 +49,7 @@ const zodGameState = z.literal('STARTED').or(z.literal('NOT_STARTED')).or(z.lite
 
 const zodAxis = z.enum(['x', 'y']);
 
-export const zodGameId = z.string().trim().min(8, 'Invalid game code.');
+export const zodGameId = z.string().trim().toLowerCase().min(4, 'Invalid game code.');
 
 export const zodPlayerId = z.string().trim().min(8, 'Invalid player ID.');
 

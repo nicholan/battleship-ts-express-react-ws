@@ -34,7 +34,7 @@ const zodCellStyle = z.enum([
 ]);
 const zodGameState = z.literal('STARTED').or(z.literal('NOT_STARTED')).or(z.literal('GAME_OVER'));
 const zodAxis = z.enum(['x', 'y']);
-export const zodGameId = z.string().trim().min(8, 'Invalid game code.');
+export const zodGameId = z.string().trim().toLowerCase().min(4, 'Invalid game code.');
 export const zodPlayerId = z.string().trim().min(8, 'Invalid player ID.');
 export const zodPlayerName = z
     .string()
@@ -43,7 +43,7 @@ export const zodPlayerName = z
     .min(1, 'Name is required.')
     .max(20, 'Name must be less than 20 characters.')
     .regex(regex, 'Name may contain only letters and numbers.');
-const zodCoordinates = z.object({
+export const zodCoordinates = z.object({
     x: z.number().min(0).max(9),
     y: z.number().min(0).max(9),
 });

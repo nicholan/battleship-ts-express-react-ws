@@ -112,6 +112,7 @@ export function Lobby() {
 					key={gameState}
 					playerId={playerId}
 					playerName={name}
+					gameId={gameId}
 					enemyName={enemyName}
 					board={data.board}
 					gameEvents={gameEvents}

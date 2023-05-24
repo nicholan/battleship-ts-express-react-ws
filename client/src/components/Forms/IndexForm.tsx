@@ -27,6 +27,7 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 		register,
 		handleSubmit,
 		watch,
+		resetField,
 		formState: { errors, isValid },
 	} = useForm<IndexFormSchema>({
 		resolver: zodResolver(formSchema),
@@ -35,6 +36,11 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 	const watchGameId = watch('gameId');
 	const watchName = watch('name');
 	const watchAi = watch('isComputer');
+
+	useEffect(() => {
+		if (!watchAi) return;
+		resetField('gameId');
+	}, [watchAi]);
 
 	useEffect(() => {
 		if (!isValid) return;
@@ -51,7 +57,7 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 				['py-8 lg:py-12 px-8'],
 				['rounded border dark:border-neutral-300/10'],
 				['shadow-sm dark:shadow-inner'],
-				['bg-neutral-50 dark:bg-neutral-800/5']
+				['bg-neutral-50 dark:bg-neutral-700/5']
 			)}
 		>
 			<div>
@@ -66,17 +72,20 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 				/>
 			</div>
 
-			<div>
-				<Label htmlFor="gameId">Code</Label>
-				<FormInput<IndexFormSchema>
-					id="gameId"
-					type="text"
-					name="gameId"
-					label="Join code"
-					register={register}
-					errors={errors}
-				/>
-			</div>
+			{!watchAi && (
+				<div>
+					<Label htmlFor="gameId">Code</Label>
+					<FormInput<IndexFormSchema>
+						id="gameId"
+						type="text"
+						name="gameId"
+						label="Join existing game with a code"
+						register={register}
+						errors={errors}
+						disabled={watchAi}
+					/>
+				</div>
+			)}
 
 			<div className="flex flex-row gap-2 items-center">
 				<Label htmlFor="isComputer">Play against AI</Label>
@@ -98,11 +107,15 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 						['dark:text-white']
 					)}
 				>
-					<Label>Public name</Label>
-					<p>
+					<Label id="public-name-label">Public name</Label>
+					<p aria-labelledby="public-name-label" aria-describedby="public-name-description" tabIndex={0}>
 						{watchName.slice(0, 19)}
 						{suffix}
 					</p>
+					<span id="public-name-description" className="hidden">
+						{watchName.slice(0, 19)}
+						{suffix}
+					</span>
 				</div>
 			)}
 		</form>

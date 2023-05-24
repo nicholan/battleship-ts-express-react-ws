@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef } from 'react';
 import classNames from 'classnames';
 
-export function Button({ children, className, ...props }: ComponentPropsWithoutRef<'button'>) {
+export function Button({ children, className, type = 'button', ...props }: ComponentPropsWithoutRef<'button'>) {
 	return (
 		<button
 			className={classNames(
@@ -11,12 +11,13 @@ export function Button({ children, className, ...props }: ComponentPropsWithoutR
 						!props.disabled,
 					'bg-neutral-700': props.disabled,
 				},
-				['rounded shadow shadow-black/20 w-max select-none'],
+				['rounded-sm shadow shadow-black/20 w-max select-none'],
 				['px-3 md:px-4 lg:px-5'],
 				['py-[6px] md:py-2 lg:py-[10px]'],
 				['text-base md:text-lg lg:text-xl'],
 				['text-white text-shadow-sm font-staatliches tracking-widest']
 			)}
+			type={type}
 			{...props}
 		>
 			{children}

@@ -13,7 +13,7 @@
 		"watch-dev": "nodemon --watch \"dist/**/*\" -e js ./dist/app.js",
 		"test": "npx jest",
 		"build": "rm -rf dist && swc src --out-dir dist",
-		"start": "node dist/app.js",
+		"start": "pnpm run build && node dist/app.js",
 		"lint": "eslint --ext .ts src",
 		"lint:fix": "eslint --ext .ts src --fix"
 	},

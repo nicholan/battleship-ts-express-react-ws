@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import { useState } from 'react';
 import classNames from 'classnames';
 import 'react-toastify/dist/ReactToastify.css';
+import { Tooltip } from '../Tooltip/Tooltip.js';
 import { IconMoonFilled, IconSunFilled, IconBrandGithubFilled, IconBrandLinkedin } from '@tabler/icons-react';
 
 export function loader() {
@@ -36,7 +37,8 @@ export function Layout() {
 		setColorScheme(color);
 	};
 
-	const icon = colorScheme === 'dark' ? <IconSunFilled size={24} /> : <IconMoonFilled size={24} />;
+	const icon =
+		colorScheme === 'dark' ? <IconSunFilled size={24} tabIndex={-1} /> : <IconMoonFilled size={24} tabIndex={-1} />;
 
 	return (
 		<div
@@ -58,23 +60,39 @@ export function Layout() {
 					['dark:bg-none bg-gradient-to-r from-orange-400 to-orange-500']
 				)}
 			>
-				<Link
+				<div>
+					<Link
+						className={classNames(
+							['text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-staatliches'],
+							['tracking-[10px] hover:tracking-[11px] duration-1000 hover:duration-1000'],
+							['dark:bg-clip-text dark:text-transparent dark:bg-gradient-to-r'],
+							['dark:from-orange-400 dark:to-orange-500']
+						)}
+						to={''}
+						aria-label="Go to index page"
+					>
+						Battleship
+					</Link>
+				</div>
+				<span
 					className={classNames(
-						['text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-staatliches'],
-						['tracking-[10px] hover:tracking-[11px] duration-1000 hover:duration-1000'],
-						['dark:bg-clip-text dark:text-transparent dark:bg-gradient-to-r'],
-						['dark:from-orange-400 dark:to-orange-500']
+						['absolute right-5 md:right-10 lg:right-20 top-0 h-full'],
+						['dark:text-white select-none cursor-pointer'],
+						['flex items-center']
 					)}
-					to={''}
 				>
-					Battleship
-				</Link>
-				<button
-					className="absolute right-5 md:right-10 lg:right-20 top-0 h-full dark:text-white select-none cursor-pointer"
-					onClick={handleThemeChange}
-				>
-					{icon}
-				</button>
+					<Tooltip position="bottom" tooltipText={colorScheme === 'dark' ? 'Light' : 'Dark'}>
+						<button
+							role="button"
+							aria-pressed={colorScheme === 'dark'}
+							aria-label={`Switch to ${colorScheme === 'dark' ? 'light' : 'dark'} mode`}
+							tabIndex={0}
+							onClick={handleThemeChange}
+						>
+							{icon}
+						</button>
+					</Tooltip>
+				</span>
 			</header>
 
 			{/* -----------CONTENT OUTLET----------- */}
@@ -97,11 +115,25 @@ export function Layout() {
 				)}
 			>
 				<p className={classNames(['font-roboto text-sm md:text-base lg:text-lg'])}>Nicholas Anttila 2023</p>
-				<div className="absolute flex flex-row gap-2 items-center right-5 md:right-10 lg:right-20 top-0 h-full">
-					<Link to={'https://github.com/nicholan/battleship-ts-express-react-ws'}>
-						<IconBrandGithubFilled size={21} />
-					</Link>
-					<IconBrandLinkedin size={21} />
+				<div className="absolute flex flex-row gap-4 items-center right-5 md:right-10 lg:right-20 top-0 h-full">
+					<Tooltip position="top" tooltipText="Github" id="tooltip-github">
+						<Link
+							to={'https://github.com/nicholan/battleship-ts-express-react-ws'}
+							aria-describedby="tooltip-github"
+							aria-label="View source code on Github"
+						>
+							<IconBrandGithubFilled size={21} tabIndex={-1} />
+						</Link>
+					</Tooltip>
+					<Tooltip position="top" tooltipText="LinkedIn" id="tooltip-linkedin">
+						<Link
+							to={'linkedin.com'}
+							aria-describedby="tooltip-linkedin"
+							aria-label="Go to Linkedin profile"
+						>
+							<IconBrandLinkedin size={21} tabIndex={-1} />
+						</Link>
+					</Tooltip>
 				</div>
 			</footer>
 

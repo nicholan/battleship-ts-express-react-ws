@@ -17,7 +17,7 @@ const gameSchema: Schema = new Schema(
 	{
 		gameId: {
 			type: String,
-			default: () => generateUniqueId(),
+			default: () => generateUniqueId().slice(4),
 		},
 		players: [
 			{

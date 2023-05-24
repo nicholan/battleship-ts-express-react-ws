@@ -4,7 +4,14 @@ import { GameInviteToastProps } from './GameInviteToast';
 import { RematchToastProps } from './RematchToast';
 import { RematchToast } from './RematchToast';
 
-type ToastKeys = 'INVITE' | 'INVITE_RECEIVED' | 'PLAYER_JOIN' | 'REMATCH_REQUEST' | 'GAME_START' | 'API_RESPONSE';
+type ToastKeys =
+	| 'INVITE'
+	| 'INVITE_RECEIVED'
+	| 'PLAYER_JOIN'
+	| 'REMATCH_REQUEST'
+	| 'GAME_START'
+	| 'API_RESPONSE'
+	| 'COPIED';
 
 type Name = {
 	name: string;
@@ -56,6 +63,9 @@ const toasts: Record<ToastKeys, (props?: ToastDispatchProps) => void> = {
 	},
 	API_RESPONSE: (props) => {
 		props && 'message' in props && toast(<p>{props.message}</p>);
+	},
+	COPIED: () => {
+		toast(<p>Copied to clipboard!</p>);
 	},
 } as const;
 

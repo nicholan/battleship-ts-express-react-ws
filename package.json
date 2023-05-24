@@ -4,10 +4,16 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build:clean": "rm -rf node_modules && pnpm install",
-		"start": "concurrently \"pnpm start:server\" \"pnpm start:client\"",
-		"start:server": "pnpm --filter server run dev",
-		"start:client": "pnpm --filter client run dev"
+		"install:clean": "rm -rf node_modules && pnpm install",
+		"start:dev": "concurrently \"pnpm start:server:dev\" \"pnpm start:client:dev\"",
+		"start:server:dev": "pnpm --filter server run dev",
+		"start:client:dev": "pnpm --filter client run dev",
+		"lint": "concurrently \"pnpm lint:server\" \"pnpm lint:client\"",
+		"lint:server": "pnpm --filter server run lint:fix",
+		"lint:client": "pnpm --filter client run lint:fix",
+		"start": "pnpm run build:vite && pnpm run start:server",
+		"build:vite": "pnpm --filter client run build",
+		"start:server": "pnpm --filter server run start"
 	},
 	"repository": {
 		"type": "git",
@@ -37,6 +43,7 @@
 	},
 	"packageManager": "pnpm@8.3.1",
 	"engines": {
-		"pnpm": "^8.0.0"
+		"pnpm": "^8.0.0",
+		"node": "20.0.0"
 	}
 }
