@@ -3,13 +3,15 @@ import classNames from 'classnames';
 
 type ModalProps = {
 	onClose?: () => void;
+	isVisible?: boolean;
 };
 
-export function Modal({ children, onClose, ...props }: ComponentPropsWithoutRef<'div'> & ModalProps) {
-	const [visible, setVisible] = useState(true);
+export function Modal({ children, onClose, isVisible = true, ...props }: ComponentPropsWithoutRef<'div'> & ModalProps) {
+	const [visible, setVisible] = useState(isVisible);
 
 	const closeButton = (
 		<button
+			aria-label="Close modal"
 			tabIndex={0}
 			onClick={() => {
 				setVisible(false);
@@ -29,7 +31,7 @@ export function Modal({ children, onClose, ...props }: ComponentPropsWithoutRef<
 	if (!visible) return null;
 
 	return (
-		<dialog className="fixed left-0 top-0 w-screen h-screen grid p-0 m-0 bg-black/30 ">
+		<dialog role="dialog" className="fixed left-0 top-0 w-screen h-screen grid p-0 m-0 bg-black/30 ">
 			<div
 				className={classNames(
 					['relative place-self-center rounded shadow-md text-neutral-50'],

@@ -1,7 +1,7 @@
 import { FC, forwardRef, ComponentPropsWithRef } from 'react';
 import classNames from 'classnames';
 
-export type InputType = 'text' | 'email' | 'checkbox';
+export type InputType = 'text' | 'checkbox';
 
 export type InputProps = {
 	id: string;
@@ -14,7 +14,7 @@ export type InputProps = {
 
 // eslint-disable-next-line react/display-name
 export const Input: FC<InputProps> = forwardRef<HTMLInputElement, InputProps>(
-	({ id, name, label, type = 'text', className = '', placeholder = '', ...props }, ref) => {
+	({ id, name, label, type = 'text', className, placeholder = '', ...props }, ref) => {
 		return (
 			<input
 				id={id}

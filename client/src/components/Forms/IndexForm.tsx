@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { zodGameId, zodPlayerName } from '@packages/zod-data-types';
 import { Button } from '../Buttons/Button.js';
 import { FormInput } from '../Inputs/FormInput.js';
-import { Label } from '../Inputs/Label.js';
+import { Label } from '../Label/Label.js';
 import { useEffect } from 'react';
 import classNames from 'classnames';
 
