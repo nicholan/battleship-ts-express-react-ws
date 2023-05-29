@@ -1,10 +1,9 @@
 import type { Coordinates, PlayerBoard, GameEvent } from '@packages/zod-data-types';
-import { Cell } from './Cell.js';
-import { Ship } from './Ship.js';
-import { ai } from './AiController.js';
+import { Cell } from '../Cell/Cell.js';
+import { Ship } from '../Ship/Ship.js';
 import { randomNum } from '@packages/utilities';
 
-class Gameboard {
+export class Gameboard {
 	#grid = this.#createGrid();
 	#hits = new Map<string, Coordinates>();
 	#buildArr: PlayerBoard = [];
@@ -127,7 +126,7 @@ class Gameboard {
 	}
 
 	updateCellStyle(isValid: boolean) {
-		// Placement validation visual display on board; CSS classes valid / invalid rendered by the "Square" component.
+		// Placement validation visual display on board
 		if (isValid) {
 			this.#nodeStack.forEach((cell) => (cell.style = 'VALID'));
 		} else {
@@ -252,9 +251,8 @@ export const playerGameboard = new Gameboard();
 export const enemyGameboard = new Gameboard();
 export const aiGameboard = new Gameboard();
 
-export function initLobby() {
+export function resetGameboards() {
 	playerGameboard.reset();
 	enemyGameboard.reset();
 	aiGameboard.reset();
-	ai.reset();
 }

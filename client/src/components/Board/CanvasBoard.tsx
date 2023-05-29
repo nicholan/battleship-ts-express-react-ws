@@ -1,8 +1,8 @@
 import { useRef, useEffect, useState, type ComponentPropsWithoutRef } from 'react';
 import type { Coordinates, GameState } from '@packages/zod-data-types';
 import { zodCoordinates } from '@packages/zod-data-types';
-import { playerGameboard, enemyGameboard } from '../../../lib/Gameboard.js';
-import { CanvasController } from '../../../lib/CanvasController.js';
+import { playerGameboard, enemyGameboard } from '../../lib/Gameboard/Gameboard.js';
+import { CanvasController } from '../../lib/Canvas/CanvasController.js';
 import classNames from 'classnames';
 
 type CanvasProps = {
@@ -46,9 +46,7 @@ export function CanvasBoard({
 		getLastHitCoordinate,
 	} = isPlayerBoard ? playerGameboard : enemyGameboard;
 
-	const [coordinates, setCoordinates] = useState<Coordinates | null>(
-		!isPlayerBoard && isPlayerTurn ? getLastHitCoordinate() : null
-	);
+	const [coordinates, setCoordinates] = useState<Coordinates | null>(getLastHitCoordinate());
 
 	const coordinatesRef = useRef<Coordinates | null>(null);
 
@@ -120,10 +118,6 @@ export function CanvasBoard({
 			setCoordinates(null);
 		}
 
-		if (gameState === 'STARTED') {
-			setCoordinates(getLastHitCoordinate());
-		}
-
 		clearCellStyles();
 		drawBoard(canvasCtxRef.current);
 	};
@@ -184,24 +178,24 @@ export function CanvasBoard({
 	const handleWheel = isPlayerBoard ? playerWheelHandler : () => void 0;
 
 	const keyboardDispatch = {
-		Enter: handleClick,
-		ArrowDown: () =>
+		e: handleClick,
+		s: () =>
 			setCoordinates((prev) => {
 				return prev ? { x: prev.x, y: prev.y <= 9 ? prev.y++ : 0 } : prev;
 			}),
-		ArrowLeft: () =>
+		a: () =>
 			setCoordinates((prev) => {
 				return prev ? { x: prev.x >= 0 ? prev.x-- : 9, y: prev.y } : prev;
 			}),
-		ArrowRight: () =>
+		d: () =>
 			setCoordinates((prev) => {
 				return prev ? { x: prev.x <= 9 ? prev.x++ : 0, y: prev.y } : prev;
 			}),
-		ArrowUp: () =>
+		w: () =>
 			setCoordinates((prev) => {
 				return prev ? { x: prev.x, y: prev.y >= 0 ? prev.y-- : 9 } : prev;
 			}),
-		Shift: handleWheel,
+		q: handleWheel,
 	} as const;
 
 	useEffect(() => {

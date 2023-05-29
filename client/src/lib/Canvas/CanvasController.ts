@@ -1,5 +1,5 @@
 import type { Coordinates, CellStyle, CellState } from '@packages/zod-data-types';
-import type { Cell } from './Cell.js';
+import type { Cell } from '../Cell/Cell.js';
 
 type DrawProps = {
 	bgColor: string;

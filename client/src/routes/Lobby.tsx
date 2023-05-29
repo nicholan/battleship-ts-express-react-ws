@@ -6,11 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import { Game } from '../components/Game/Game.js';
 import { Modal } from '../components/Modal/Modal.js';
 import { Button } from '../components/Buttons/Button.js';
-import { initLobby } from '../lib/Gameboard.js';
+import { resetGameboards } from '../lib/Gameboard/Gameboard.js';
+import { ai } from '../lib/Ai/AiController.js';
 import { trpc } from '../trpc.js';
 import useWebSocket from 'react-use-websocket';
-import { multiplayerController } from '../lib/MultiplayerController.js';
-import { singleplayerController } from '../lib/SingleplayerController.js';
+import { multiplayerController } from '../lib/Multiplayer/MultiplayerController.js';
+import { singleplayerController } from '../lib/Singleplayer/SingleplayerController.js';
 
 export async function loader({ params }: LoaderFunctionArgs) {
 	const { gameId, name } = params;
@@ -18,10 +19,11 @@ export async function loader({ params }: LoaderFunctionArgs) {
 		throw new Error('Invalid route parameters.');
 	}
 
-	initLobby();
+	resetGameboards();
 
 	const localData = window.localStorage.getItem(gameId);
 	if (localData) {
+		ai.reset();
 		const json: unknown = JSON.parse(localData);
 		return json;
 	}
@@ -72,6 +74,7 @@ export function Lobby() {
 			ready,
 			name,
 			enemyName,
+			delayMs: 1000,
 			actions: {
 				sendMessage,
 				setGameEvents,
@@ -101,7 +104,9 @@ export function Lobby() {
 		if (lastMessage === null || isAiGame) return;
 
 		if ('parseSocketMessage' in actions) {
-			actions.parseSocketMessage(lastMessage);
+			actions.parseSocketMessage(lastMessage).catch((err) => {
+				console.log(err);
+			});
 		}
 	}, [lastMessage]);
 

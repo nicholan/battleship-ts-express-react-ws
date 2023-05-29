@@ -1,7 +1,7 @@
-import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Input, type InputProps } from './Input';
+import { vi } from 'vitest';
 
 describe('Input', () => {
 	const baseProps: InputProps = {
@@ -9,7 +9,7 @@ describe('Input', () => {
 		name: 'test-name',
 		label: 'Test Label',
 		placeholder: 'Test Placeholder',
-		onChange: jest.fn(),
+		onChange: vi.fn(),
 	};
 
 	it('should render with provided props', () => {

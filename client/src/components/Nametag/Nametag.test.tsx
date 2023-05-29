@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
 import { Nametag } from './Nametag';
 
@@ -19,12 +18,4 @@ describe('Nametag', () => {
 		const { container } = render(<Nametag active={true} className={className} />);
 		expect(container.firstChild).toHaveClass(className);
 	});
-
-	// it('applies "text-orange-400" class when active prop is true', () => {
-	// 	const { container, rerender } = render(<Nametag active={false} />);
-	// 	expect(container.firstChild).not.toHaveClass('text-orange-400');
-
-	// 	rerender(<Nametag active={true} />);
-	// 	expect(container.firstChild).toHaveClass('text-orange-400');
-	// });
 });

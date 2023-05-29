@@ -68,14 +68,15 @@ export function InvitePlayerForm({ invitePlayer, closeModal, gameId }: InvitePla
 					</Button>
 				</form>
 			</div>
-			<div className={classNames(['flex flex-col gap-2 items-center'], ['pt-4 lg:pt-6'])}>
+			<div className={classNames(['flex flex-col gap-2 items-center w-full'], ['pt-4 lg:pt-6'])}>
 				<p className={classNames(['text-xl md:text-3xl font-bebas-neue'])}>Or share game code</p>
-				<div className={classNames(['flex flex-row gap-4 items-center'])}>
+				<div className={classNames(['flex flex-row gap-4 items-center w-full'])}>
 					<span
 						className={classNames(
 							['text-black font-roboto'],
 							['bg-neutral-50 border rounded-sm shadow-inner'],
-							['p-2 md:p-3']
+							['p-2 md:p-3'],
+							['w-full']
 						)}
 					>
 						{gameId}

@@ -8,3 +8,5 @@ export const trpc = createTRPCProxyClient<AppRouter>({
 		}),
 	],
 });
+
+export type TRPC = typeof trpc;

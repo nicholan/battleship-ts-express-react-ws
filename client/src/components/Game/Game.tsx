@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
 import type { ComponentPropsWithoutRef } from 'react';
-import { CoordinatesBar } from './CoordinatesBar/CoordinatesBar.js';
+import { CoordinatesBar } from '../CoordinatesBar/CoordinatesBar.js';
 import type { PlayerBoard, GameEvent, Coordinates, GameState } from '@packages/zod-data-types';
-import { Nametag } from './Nametag/Nametag.js';
-import { CanvasBoard } from './Board/CanvasBoard.js';
+import { Nametag } from '../Nametag/Nametag.js';
+import { CanvasBoard, type BoardSize } from '../Board/CanvasBoard.js';
 import { Button } from '../Buttons/Button.js';
-import { playerGameboard, enemyGameboard, aiGameboard } from '../../lib/Gameboard.js';
-import { ai } from '../../lib/AiController.js';
+import { playerGameboard, enemyGameboard, aiGameboard } from '../../lib/Gameboard/Gameboard.js';
+import { ai } from '../../lib/Ai/AiController.js';
 import { InvitePlayerForm } from '../Forms/InvitePlayerForm.js';
 import { Modal } from '../Modal/Modal.js';
 import classNames from 'classnames';
 import { useWindowSize } from '../../hooks/useWindowSize.js';
-import type { BoardSize } from './Board/CanvasBoard.js';
 
 type Props = {
 	playerId: string;
@@ -110,10 +109,14 @@ export function Game({
 					/>
 				</Modal>
 			)}
+			{/* ----------- GAME WRAPPER ----------- */}
+			{/* Game wrapper creates a 22r x 21c grid at lg screen sizes and places boards, coordinatebars, nametags etc.
+			using row-start col-start row-end col-end on the board. Coordinatebars are removed when screen size is below
+			lg; grid gets reduced to 21r x 20c. When screen is less than md, elements are placed in a single column. */}
 			<div
 				className={classNames(
 					['grid mx-auto'],
-					['pt-4 md:py-4'],
+					['pt-0 md:pt-4 md:py-4'],
 					['row-auto grid-cols-1'],
 					['md:grid-rows-21 md:grid-cols-20'],
 					['lg:grid-rows-22 lg:grid-cols-21']
@@ -236,15 +239,15 @@ export function Game({
 							)}
 						>
 							<div className="text-sm font-semibold font-mono dark:text-white">
-								<Kbd>Arrow keys</Kbd> Navigate board
+								<Kbd>wasd</Kbd> Navigate board
 							</div>
 							{isSetupPhase && (
 								<div className="text-sm font-semibold font-mono dark:text-white">
-									<Kbd>Shift</Kbd> Change ship axis
+									<Kbd>q</Kbd> Change ship axis
 								</div>
 							)}
 							<div className="text-sm font-semibold font-mono dark:text-white">
-								<Kbd>Enter</Kbd> {isSetupPhase ? 'Place ship' : 'Attack'}
+								<Kbd>e</Kbd> {isSetupPhase ? 'Place ship' : 'Attack'}
 							</div>
 						</div>
 					)}
@@ -279,7 +282,11 @@ export function Game({
 						)}
 						{isSetupPhase && !shipsRemaining && ready && <Text>Waiting for {enemyName ?? 'Player 2'}</Text>}
 						{gameState === 'STARTED' &&
-							(isPlayerTurn ? <Text color="text-orange-400">Your turn</Text> : <Text>Enemy turn</Text>)}
+							(isPlayerTurn ? (
+								<Text color="text-orange-400">Your turn</Text>
+							) : (
+								<Text>{aiBoard.length > 0 ? 'Computer turn' : 'Enemy turn'}</Text>
+							))}
 					</div>
 				</div>
 			</div>

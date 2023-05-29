@@ -12,7 +12,6 @@ export function createWsServer(port: number) {
 		socket.on('message', (msg) => {
 			wsServer.clients.forEach((client) => {
 				if (client.readyState === WebSocket.OPEN) {
-					// check if client is ready
 					client.send(msg.toString());
 				}
 			});

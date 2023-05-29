@@ -169,30 +169,6 @@ export const appRouter = router({
 	readyPlayer: publicProcedure
 		// Called when ships are placed on board and player clicks ready;
 		// Save board build instructions; set player ready.
-		.input(zGameId)
-		.input(zPlayerName)
-		.input(zPlayerBoard)
-		.mutation(async ({ input }) => {
-			const { gameId, name, playerBoard } = input;
-			const player = await Player.findOne({ name, gameId });
-			if (!player) {
-				return {
-					code: 404,
-					message: 'Player not found.',
-				};
-			}
-			// If player is already 'ready', prevent uploading new gameboard.
-			if (player.ready) return { ready: player.ready };
-
-			player.board = playerBoard;
-			player.ready = true;
-			await player.save();
-			return { ready: player.ready };
-		}),
-
-	readyPlayerNew: publicProcedure
-		// Called when ships are placed on board and player clicks ready;
-		// Save board build instructions; set player ready.
 		.input(zPlayerId)
 		.input(zPlayerBoard)
 		.mutation(async ({ input }) => {

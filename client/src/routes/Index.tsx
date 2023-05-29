@@ -6,7 +6,7 @@ import { IndexForm } from '../components/Forms/IndexForm.js';
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket.js';
 import { zParse, zodGameInvitationMessage, type GameInvitationMessage, LoaderData } from '@packages/zod-data-types';
 import { useEffect, useState, useRef } from 'react';
-import { aiGameboard } from '../lib/Gameboard.js';
+import { aiGameboard } from '../lib/Gameboard/Gameboard.js';
 import { generateUniqueId } from '@packages/utilities';
 import { dispatchToast } from '../components/Toasts/Toaster.js';
 

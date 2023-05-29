@@ -1,19 +1,23 @@
 import { render } from '@testing-library/react';
 import { useRouteError, isRouteErrorResponse } from 'react-router-dom';
-import '@testing-library/jest-dom';
-import ErrorPage from './Error';
 
-jest.mock('react-router-dom', () => ({
-	useRouteError: jest.fn(),
-	isRouteErrorResponse: jest.fn(),
+import ErrorPage from './Error';
+import { vi, MockedFunction } from 'vitest';
+
+type MockedUseRouteError = MockedFunction<typeof useRouteError>;
+type MockedIsRouteErrorResponse = MockedFunction<typeof isRouteErrorResponse>;
+
+vi.mock('react-router-dom', () => ({
+	useRouteError: vi.fn(),
+	isRouteErrorResponse: vi.fn(),
 }));
 
-const mockedUseRouteError = useRouteError as jest.MockedFunction<typeof useRouteError>;
-const mockedIsRouteErrorResponse = isRouteErrorResponse as jest.MockedFunction<typeof isRouteErrorResponse>;
+const mockedUseRouteError = useRouteError as MockedUseRouteError;
+const mockedIsRouteErrorResponse = isRouteErrorResponse as unknown as MockedIsRouteErrorResponse;
 
 describe('ErrorPage component', () => {
 	afterEach(() => {
-		jest.resetAllMocks();
+		vi.resetAllMocks();
 	});
 
 	it('renders an error message when there is no error response', () => {

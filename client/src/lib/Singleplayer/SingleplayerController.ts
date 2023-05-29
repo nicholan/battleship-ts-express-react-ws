@@ -1,18 +1,15 @@
-import { aiGameboard, playerGameboard } from './Gameboard.js';
+import { aiGameboard, playerGameboard } from '../Gameboard/Gameboard.js';
 import { delay } from '@packages/utilities';
 import type { Coordinates, GameEvent, GameState, LoaderData } from '@packages/zod-data-types';
 import type { Dispatch, SetStateAction } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
-import type { SendMessage } from 'react-use-websocket';
-import { ai } from './AiController.js';
-import { dispatchToast } from '../components/Toasts/Toaster.js';
+import { ai } from '../Ai/AiController.js';
+import { dispatchToast } from '../../components/Toasts/Toaster.js';
 
 type StateActions = {
-	sendMessage: SendMessage;
 	setGameEvents: Dispatch<SetStateAction<GameEvent[]>>;
 	setGameState: Dispatch<SetStateAction<GameState>>;
 	setIsPlayerTurn: Dispatch<SetStateAction<boolean>>;
-	setEnemyName: Dispatch<SetStateAction<string | null>>;
 	setReady: Dispatch<SetStateAction<boolean>>;
 	setWinner: Dispatch<SetStateAction<string | null>>;
 	setRematchModalVisible: Dispatch<SetStateAction<boolean>>;
@@ -25,6 +22,8 @@ export type ControllerProps = {
 	playerTurn: number;
 	ready: boolean;
 	name: string;
+	turn?: number;
+	delayMs?: number;
 	actions: StateActions;
 };
 
@@ -53,11 +52,14 @@ export function singleplayerController({
 	gameId,
 	playerId,
 	playerTurn,
+	turn,
+	delayMs = 0,
 	actions: { setGameEvents, setGameState, setIsPlayerTurn, setReady, setWinner, navigate, setRematchModalVisible },
 }: ControllerProps) {
 	const { getDataByKey, setLocalData, getLocalData } = localData(gameId);
 
 	const readyPlayer = () => {
+		if (playerGameboard.getShipLength() > 0) return Promise.resolve(false);
 		setLocalData({ board: playerGameboard.getBuildArray(), ready: true });
 		setReady(true);
 		startGame();
@@ -65,11 +67,11 @@ export function singleplayerController({
 	};
 
 	const startGame = () => {
-		const turn = Math.round(Math.random());
-		setLocalData({ gameState: 'STARTED', turn });
+		const turnNum = turn ?? Math.round(Math.random());
+		setLocalData({ gameState: 'STARTED', turn: turnNum });
 		setGameState('STARTED');
 		dispatchToast('GAME_START');
-		setIsPlayerTurn(turn === playerTurn);
+		setIsPlayerTurn(turnNum === playerTurn);
 	};
 
 	const attack = async (coordinates: Coordinates) => {
@@ -116,8 +118,10 @@ export function singleplayerController({
 	};
 
 	const aiAttack = async () => {
-		await delay(1000);
-		await processAttack(ai.getAiMove(), false);
+		await delay(delayMs);
+		const coordinates = ai.getAiMove();
+		if (!coordinates) return;
+		await processAttack(coordinates, false);
 	};
 
 	const processGameEnding = async (loserTurnNumber: number) => {

@@ -6,6 +6,6 @@
 		"target": "ES2022",
 		"lib": ["ES2020"]
 	},
-	"include": ["src", "*.ts"],
-	"exclude": ["jest.config.ts", ".eslintrc.cjs"]
+	"include": ["src", "*.ts", "jest.config.js"],
+	"exclude": ["jest.config.js", ".eslintrc.cjs"]
 }

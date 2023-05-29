@@ -1,4 +1,4 @@
-import { Cell } from './Cell.js';
+import { Cell } from '../Cell/Cell.js';
 
 export class Ship {
 	health;

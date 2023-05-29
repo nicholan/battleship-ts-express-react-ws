@@ -1,6 +1,6 @@
-import '@testing-library/jest-dom';
 import { render, fireEvent } from '@testing-library/react';
 import { Button } from './Button';
+import { vi } from 'vitest';
 
 describe('Button', () => {
 	it('renders with children', () => {
@@ -20,7 +20,7 @@ describe('Button', () => {
 	});
 
 	it('calls onClick function when clicked', () => {
-		const handleClick = jest.fn();
+		const handleClick = vi.fn();
 		const { getByText } = render(<Button onClick={handleClick}>Click Me</Button>);
 		fireEvent.click(getByText('Click Me'));
 		expect(handleClick).toHaveBeenCalled();

@@ -1,6 +1,6 @@
-import '@testing-library/jest-dom';
 import { render, fireEvent } from '@testing-library/react';
 import { Modal } from './Modal';
+import { vi } from 'vitest';
 
 describe('Modal', () => {
 	it('renders children when visible prop is true', () => {
@@ -22,7 +22,7 @@ describe('Modal', () => {
 	});
 
 	it('calls onClose when close button is clicked', () => {
-		const handleClose = jest.fn();
+		const handleClose = vi.fn();
 		const { getByLabelText } = render(
 			<Modal onClose={handleClose} isVisible={true}>
 				<div>This is a test modal</div>
@@ -33,7 +33,7 @@ describe('Modal', () => {
 	});
 
 	it('does not render children after close button is clicked', () => {
-		const handleClose = jest.fn();
+		const handleClose = vi.fn();
 		const { getByLabelText, queryByText, getByText } = render(
 			<Modal onClose={handleClose} isVisible={true}>
 				<div>This is a test modal</div>

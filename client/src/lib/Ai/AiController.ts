@@ -1,4 +1,4 @@
-import { Cell } from './Cell.js';
+import { Cell } from '../Cell/Cell.js';
 import { randomNum } from '@packages/utilities';
 import type { Coordinates, GameEvent } from '@packages/zod-data-types';
 
@@ -105,6 +105,8 @@ export class AiController {
 	};
 
 	getAiMove = () => {
+		if (this.#hits.size === 100) return null;
+
 		const node = this.#nodeStack.shift();
 		if (node) {
 			return node.coordinates;
@@ -124,6 +126,7 @@ export class AiController {
 			coordinates = this.#getRandomCoordinate();
 		}
 
+		this.#hits.set(key, coordinates);
 		return coordinates;
 	};
 }

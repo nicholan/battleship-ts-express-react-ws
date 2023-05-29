@@ -1,5 +1,5 @@
 import type { Coordinates, CellStyle, CellState, Result } from '@packages/zod-data-types';
-import type { Ship } from './Ship.js';
+import type { Ship } from '../Ship/Ship.js';
 
 export class Cell {
 	state: CellState = 'EMPTY';

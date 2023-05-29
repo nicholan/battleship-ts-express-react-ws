@@ -17,7 +17,7 @@ const positionMap: Record<Position, string> = {
 
 export const Tooltip = ({ children, tooltipText, position = 'bottom', ...props }: TooltipProps) => {
 	return (
-		<span tabIndex={-1} role="tooltip" className={classNames(['relative group'])}>
+		<span tabIndex={-1} role="tooltip" className={classNames(['relative group grid'])}>
 			{children}
 			<span
 				tabIndex={-1}
