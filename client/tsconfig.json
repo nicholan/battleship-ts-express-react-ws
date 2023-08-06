@@ -1,7 +1,7 @@
 {
 	"extends": "@nicholan/tsconfig",
 	"include": ["vite.config.ts", "src", "testSetup.vite.ts"],
-	"exclude": [".eslintrc.cjs", "src/**/*.test.ts", "**/tests/**", "**/*.test.*"],
+	"exclude": [".eslintrc.cjs", "src/**/*.test.ts", "mockSetup.ts"],
 	"compilerOptions": {
 		"target": "ES6",
 		"composite": false,

@@ -2,6 +2,7 @@ import type { Coordinates, PlayerBoard, GameEvent } from '@packages/zod-data-typ
 import { Cell } from '../Cell/Cell.js';
 import { Ship } from '../Ship/Ship.js';
 import { randomNum } from '@packages/utilities';
+import { keyboardDispatch } from '../Keyboard/Dispatcher.js';
 
 export class Gameboard {
 	#grid = this.#createGrid();
@@ -17,6 +18,19 @@ export class Gameboard {
 		{ allowed: 2, length: 1, placed: 0 },
 	];
 	#numSunkShips = 0;
+	#selectedCoordinate: Coordinates = { x: 0, y: 0 };
+
+	setSelectedCoordinate = ({ code, coordinates }: { code?: string; coordinates?: Coordinates }) => {
+		if (code) {
+			this.#selectedCoordinate =
+				keyboardDispatch().move(code, this.#selectedCoordinate) ?? this.#selectedCoordinate;
+			return;
+		}
+
+		this.#selectedCoordinate = coordinates ?? this.#selectedCoordinate;
+	};
+
+	getSelectedCoordinate = () => this.#selectedCoordinate;
 
 	getBuildArray = () => this.#buildArr;
 
@@ -85,6 +99,8 @@ export class Gameboard {
 		this.#grid = this.#createGrid();
 		this.#hits.clear();
 		this.#numSunkShips = 0;
+		this.#selectedCoordinate = { x: 0, y: 0 };
+		this.#axis = 'x';
 	};
 
 	buildPlayerBoard = (eventArr: GameEvent[], shipArr: PlayerBoard = []) => {
@@ -112,6 +128,7 @@ export class Gameboard {
 			});
 		}
 		copyArr.forEach(({ coordinates: { x, y }, result }) => (this.#grid[x][y].state = result));
+		this.#selectedCoordinate = this.getLastHitCoordinate() ?? { x: 0, y: 0 };
 	};
 
 	#createGrid() {
@@ -134,13 +151,19 @@ export class Gameboard {
 		}
 	}
 
-	placeShip = ({ x, y }: Coordinates, shipLength = this.getShipLength(), id: string | null = null) => {
+	placeShip = (
+		coordinates = this.getSelectedCoordinate(),
+		shipLength = this.getShipLength(),
+		id: string | null = null
+	) => {
 		// Check available ships; check validity of placement; place ship on board; save ship to build array; update inventory.
 		// Called either when player clicks on board while in build phase or when board is loaded from database.
 		if (shipLength === 0) return;
-		if (!this.isValidPlacement({ x, y }, false)) return;
+		if (!this.isValidPlacement(coordinates, false)) return;
 
 		const ship = new Ship(shipLength, id);
+
+		const { x, y } = coordinates;
 
 		if (this.#axis === 'x') {
 			for (let i = 0; i < shipLength; i++) {
@@ -178,7 +201,7 @@ export class Gameboard {
 		while (this.getShipLength() > 0) {
 			this.#axis = Math.random() > 0.5 ? 'x' : 'y';
 
-			const [x, y] = [randomNum(10), randomNum(10)]; // Generate random coordinates.
+			const [x, y] = [randomNum(10), randomNum(10)];
 			const isValid = this.isValidPlacement({ x, y }, false);
 			if (isValid) {
 				this.placeShip({ x, y });
@@ -191,14 +214,22 @@ export class Gameboard {
 		const isValid = this.isValidPlacement({ x, y }, true, 1);
 		if (isValid) {
 			this.#grid[x][y].style = 'SELECTED_VALID';
+			return true;
 		} else if (!isValid && this.#grid[x][y].state === 'SHOT_MISS') {
 			this.#grid[x][y].style = 'SELECTED_INVALID_MISS';
+			return false;
 		} else if (!isValid && this.#grid[x][y].state === 'SHIP_HIT') {
 			this.#grid[x][y].style = 'SELECTED_INVALID_SHIP';
+			return false;
 		}
+		return false;
 	};
 
-	isValidPlacement = (coordinates: Coordinates, useNodeStack = true, shipLen = this.getShipLength()) => {
+	isValidPlacement = (
+		coordinates = this.getSelectedCoordinate(),
+		useNodeStack = true,
+		shipLen = this.getShipLength()
+	) => {
 		// Check that placement is not out of bounds or overlapping.
 		this.clearCellStyles();
 		if (this.getShipLength() === 0) return false;

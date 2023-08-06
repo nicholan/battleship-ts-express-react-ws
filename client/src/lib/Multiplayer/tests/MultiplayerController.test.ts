@@ -1,7 +1,7 @@
 import { playerGameboard } from '../../Gameboard/Gameboard.js';
 import { multiplayerController } from '../MultiplayerController.js';
-import { vi } from 'vitest';
 import { actions, data, db } from './mockSetup.js';
+import { vi } from 'vitest';
 
 describe('multiplayerController', () => {
 	beforeEach(() => {
@@ -36,13 +36,11 @@ describe('multiplayerController', () => {
 			await readyPlayer();
 
 			expect(actions.setReady).toHaveBeenCalledWith(true);
-			expect(actions.sendMessage).toHaveBeenCalledWith(
-				JSON.stringify({
-					type: 'PLAYER_READY',
-					gameId: data.gameId,
-					playerId: data.playerId,
-				})
-			);
+			expect(actions.sendJsonMessage).toHaveBeenCalledWith({
+				type: 'PLAYER_READY',
+				gameId: data.gameId,
+				playerId: data.playerId,
+			});
 			expect(db.readyPlayer.mutate).toBeCalledWith({
 				playerBoard: playerGameboard.getBuildArray(),
 				playerId: data.playerId,
@@ -57,24 +55,22 @@ describe('multiplayerController', () => {
 			actions,
 		});
 
-		it('calls actions setIsPlayerTurn and sendMessage with correct values', async () => {
+		it('calls actions setIsPlayerTurn and sendJsonMessage with correct values', async () => {
 			const coordinates = { x: 0, y: 0 };
 			await attack(coordinates);
-			expect(actions.sendMessage).toHaveBeenCalledWith(
-				JSON.stringify({
-					type: 'ATTACK',
-					coordinates,
-					gameId: data.gameId,
-					playerId: data.playerId,
-				})
-			);
+			expect(actions.sendJsonMessage).toHaveBeenCalledWith({
+				type: 'ATTACK',
+				coordinates,
+				gameId: data.gameId,
+				playerId: data.playerId,
+			});
 			expect(db.getGameTurn.query).toBeCalled();
 			expect(actions.setIsPlayerTurn).toHaveBeenCalledWith(false);
 		});
 	});
 
 	describe('requestRematch', () => {
-		it('calls actions setReady and sendMessage with correct values', () => {
+		it('calls actions setReady and sendJsonMessage with correct values', () => {
 			const { requestRematch } = multiplayerController({
 				...data,
 				db,
@@ -82,14 +78,12 @@ describe('multiplayerController', () => {
 			});
 
 			requestRematch();
-			expect(actions.sendMessage).toHaveBeenCalledWith(
-				JSON.stringify({
-					type: 'REQUEST_REMATCH',
-					name: data.name,
-					gameId: data.gameId,
-					playerId: data.playerId,
-				})
-			);
+			expect(actions.sendJsonMessage).toHaveBeenCalledWith({
+				type: 'REQUEST_REMATCH',
+				name: data.name,
+				gameId: data.gameId,
+				playerId: data.playerId,
+			});
 			expect(actions.setReady).toHaveBeenCalledWith(false);
 		});
 
@@ -114,19 +108,17 @@ describe('multiplayerController', () => {
 			actions,
 		});
 
-		it('calls sendMessage with correct values', () => {
+		it('calls sendJsonMessage with correct values', () => {
 			const playerName = 'testName';
 			invite(playerName);
 
-			expect(actions.sendMessage).toHaveBeenCalledWith(
-				JSON.stringify({
-					type: 'PLAYER_INVITE',
-					hostName: data.name,
-					name: playerName,
-					gameId: data.gameId,
-					playerId: data.playerId,
-				})
-			);
+			expect(actions.sendJsonMessage).toHaveBeenCalledWith({
+				type: 'PLAYER_INVITE',
+				hostName: data.name,
+				name: playerName,
+				gameId: data.gameId,
+				playerId: data.playerId,
+			});
 		});
 	});
 });

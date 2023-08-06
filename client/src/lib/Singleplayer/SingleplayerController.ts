@@ -23,7 +23,7 @@ export type ControllerProps = {
 	ready: boolean;
 	name: string;
 	turn?: number;
-	delayMs?: number;
+	wait?: number;
 	actions: StateActions;
 };
 
@@ -53,7 +53,7 @@ export function singleplayerController({
 	playerId,
 	playerTurn,
 	turn,
-	delayMs = 0,
+	wait = 0,
 	actions: { setGameEvents, setGameState, setIsPlayerTurn, setReady, setWinner, navigate, setRematchModalVisible },
 }: ControllerProps) {
 	const { getDataByKey, setLocalData, getLocalData } = localData(gameId);
@@ -118,7 +118,7 @@ export function singleplayerController({
 	};
 
 	const aiAttack = async () => {
-		await delay(delayMs);
+		await delay(wait);
 		const coordinates = ai.getAiMove();
 		if (!coordinates) return;
 		await processAttack(coordinates, false);
@@ -138,7 +138,7 @@ export function singleplayerController({
 		setWinner(winner);
 		setIsPlayerTurn(false);
 
-		await delay(1000);
+		await delay(wait);
 		setRematchModalVisible(true);
 		setGameState('GAME_OVER');
 	};

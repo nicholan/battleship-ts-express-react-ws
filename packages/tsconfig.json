@@ -2,7 +2,7 @@
 	"extends": ["@nicholan/tsconfig"],
 	"compilerOptions": {
 		"noEmit": false,
-		"target": "ES2022",
+		"target": "ES6",
 		"lib": ["ES2020"],
 		"sourceMap": true,
 		"inlineSources": true,

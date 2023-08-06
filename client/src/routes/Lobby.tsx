@@ -1,17 +1,22 @@
 import { useEffect, useState, useRef } from 'react';
-import { zParse, loaderDataSchema } from '@packages/zod-data-types';
+import { useNavigate } from 'react-router-dom';
 import { useLoaderData } from 'react-router-dom';
 import type { LoaderFunctionArgs } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import useWebSocket from 'react-use-websocket';
+
+import { Button } from '../components/Buttons/Button.js';
 import { Game } from '../components/Game/Game.js';
 import { Modal } from '../components/Modal/Modal.js';
-import { Button } from '../components/Buttons/Button.js';
-import { resetGameboards } from '../lib/Gameboard/Gameboard.js';
+
 import { ai } from '../lib/Ai/AiController.js';
-import { trpc } from '../trpc.js';
-import useWebSocket from 'react-use-websocket';
 import { multiplayerController } from '../lib/Multiplayer/MultiplayerController.js';
 import { singleplayerController } from '../lib/Singleplayer/SingleplayerController.js';
+
+import { resetGameboards } from '../lib/Gameboard/Gameboard.js';
+
+import { trpc } from '../trpc.js';
+
+import { zParse, loaderDataSchema, zodMessage } from '@packages/zod-data-types';
 
 export async function loader({ params }: LoaderFunctionArgs) {
 	const { gameId, name } = params;
@@ -36,7 +41,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 	return response;
 }
 
-const url = 'ws://localhost:3001';
+const url = 'ws://localhost:3000';
 
 export function Lobby() {
 	const navigate = useNavigate();
@@ -50,7 +55,7 @@ export function Lobby() {
 	const [winner, setWinner] = useState<string | null>(data.winner);
 	const [rematchModalVisible, setRematchModalVisible] = useState(gameState === 'GAME_OVER' ? true : false);
 
-	const { sendMessage, lastMessage } = useWebSocket(url, {
+	const { sendJsonMessage } = useWebSocket(url, {
 		onOpen: () => {
 			if (gameState === 'STARTED' && !isAiGame) return;
 			const data = {
@@ -59,9 +64,10 @@ export function Lobby() {
 				playerId,
 				name,
 			};
-			sendMessage(JSON.stringify(data));
+			sendJsonMessage(data);
 		},
 		shouldReconnect: (_e: CloseEvent) => (isAiGame ? false : true),
+		filter: parseMessage,
 	});
 
 	const controller = isAiGame ? singleplayerController : multiplayerController;
@@ -74,9 +80,9 @@ export function Lobby() {
 			ready,
 			name,
 			enemyName,
-			delayMs: 1000,
+			wait: 1000,
 			actions: {
-				sendMessage,
+				sendJsonMessage,
 				setGameEvents,
 				setEnemyName,
 				setGameState,
@@ -93,22 +99,27 @@ export function Lobby() {
 		current: { attack, readyPlayer, requestRematch, ...actions },
 	} = game;
 
+	function parseMessage({ data }: MessageEvent) {
+		if (isAiGame) return false;
+		if (typeof data !== 'string') return false;
+
+		const json: unknown = JSON.parse(data);
+		const parsed = zodMessage.safeParse(json);
+		if (!parsed.success) return false;
+
+		if ('processMessage' in actions) {
+			actions.processMessage(parsed.data).catch((err) => console.log(err));
+		}
+
+		return false;
+	}
+
 	useEffect(() => {
 		// Runs when ai starts the game.
 		if (gameState === 'STARTED' && gameEvents.length === 0 && !isPlayerTurn && 'aiAttack' in actions) {
 			actions.aiAttack().catch((err) => console.log(err));
 		}
 	}, [gameState]);
-
-	useEffect(() => {
-		if (lastMessage === null || isAiGame) return;
-
-		if ('parseSocketMessage' in actions) {
-			actions.parseSocketMessage(lastMessage).catch((err) => {
-				console.log(err);
-			});
-		}
-	}, [lastMessage]);
 
 	return (
 		<>

@@ -1,14 +1,11 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import cfg from './config';
+import cfg from '../configs/config';
 
 export async function connectDatabase({ IS_DEVELOPMENT, DATABASE_URI }: typeof cfg) {
-	let closeDatabase;
-	if (IS_DEVELOPMENT) {
-		closeDatabase = (await startDevelopmentDatabase()).close;
-	} else {
-		closeDatabase = (await startProductionDatabase(DATABASE_URI)).close;
-	}
+	const closeDatabase = IS_DEVELOPMENT
+		? (await startDevelopmentDatabase()).close
+		: (await startProductionDatabase(DATABASE_URI)).close;
 
 	return { closeDatabase };
 }

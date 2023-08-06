@@ -3,7 +3,7 @@ import type { TRPC } from '../../../trpc.js';
 import type { GameEvent } from '@packages/zod-data-types';
 
 export const actions = {
-	sendMessage: vi.fn(),
+	sendJsonMessage: vi.fn(),
 	setEnemyName: vi.fn(),
 	setGameEvents: vi.fn(),
 	setGameState: vi.fn(),

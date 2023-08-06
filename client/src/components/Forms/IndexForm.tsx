@@ -44,7 +44,7 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 
 	useEffect(() => {
 		if (!isValid) return;
-		setName(watchName);
+		setName(watchName.toLowerCase());
 	}, [watchName]);
 
 	return (
@@ -109,11 +109,11 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 				>
 					<Label id="public-name-label">Public name</Label>
 					<p aria-labelledby="public-name-label" aria-describedby="public-name-description" tabIndex={0}>
-						{watchName.slice(0, 19)}
+						{watchName.slice(0, 19).toLowerCase()}
 						{suffix}
 					</p>
 					<span id="public-name-description" className="hidden">
-						{watchName.slice(0, 19)}
+						{watchName.slice(0, 19).toLowerCase()}
 						{suffix}
 					</span>
 				</div>

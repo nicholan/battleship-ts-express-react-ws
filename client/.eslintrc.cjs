@@ -6,7 +6,7 @@ module.exports = {
 		'@nicholan/eslint-config/rules',
 	],
 	parserOptions: {
-		project: ['./tsconfig.json'],
+		project: ['./tsconfig.test.json'],
 		tsconfigRootDir: __dirname,
 	},
 	root: true,

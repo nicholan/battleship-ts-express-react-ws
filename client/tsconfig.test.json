@@ -1,0 +1,12 @@
+{
+	"extends": "@nicholan/tsconfig",
+	"include": ["vite.config.ts", "src", "testSetup.vite.ts"],
+	"compilerOptions": {
+		"target": "ES6",
+		"composite": false,
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"jsx": "react-jsx",
+		"noEmit": false,
+		"outDir": "dist"
+	}
+}

@@ -1,15 +1,18 @@
 import { Schema, ObjectId, model, Document } from 'mongoose';
 import type { PlayerBoard } from '@packages/zod-data-types';
 
-export interface PlayerType extends Document {
+export interface PlayerType extends PlayerProps, Document {
 	_id: ObjectId;
+	isAi: boolean;
+	playerTurn: number;
+}
+
+export type PlayerProps = {
 	name: string;
 	board: PlayerBoard;
-	gameId: string;
-	playerTurn: number;
 	ready: boolean;
-	isAi: boolean;
-}
+	gameId: string;
+};
 
 const playerSchema = new Schema(
 	{
@@ -36,4 +39,4 @@ const playerSchema = new Schema(
 // Expire player after 24 hours.
 playerSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 });
 
-export const Player = model<PlayerType>('Player', playerSchema);
+export default model<PlayerType>('Player', playerSchema);

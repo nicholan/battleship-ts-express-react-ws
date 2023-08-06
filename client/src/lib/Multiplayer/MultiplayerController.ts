@@ -1,4 +1,4 @@
-import type { SendMessage } from 'react-use-websocket';
+import type { SendJsonMessage } from 'react-use-websocket/dist/lib/types.js';
 import type { Message, Coordinates, GameEvent, GameState, GameInvitationMessage } from '@packages/zod-data-types';
 import type { Dispatch, SetStateAction } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
@@ -9,7 +9,7 @@ import { delay } from '@packages/utilities';
 import { dispatchToast } from '../../components/Toasts/Toaster.js';
 
 type StateActions = {
-	sendMessage: SendMessage;
+	sendJsonMessage: SendJsonMessage;
 	setGameEvents: Dispatch<SetStateAction<GameEvent[]>>;
 	setGameState: Dispatch<SetStateAction<GameState>>;
 	setIsPlayerTurn: Dispatch<SetStateAction<boolean>>;
@@ -28,7 +28,7 @@ export type ControllerProps = {
 	name: string;
 	actions: StateActions;
 	enemyName: string | null;
-	delayMs?: number;
+	wait?: number;
 	db?: typeof trpc;
 };
 
@@ -39,10 +39,10 @@ export function multiplayerController({
 	ready,
 	name,
 	enemyName,
-	delayMs = 0,
+	wait = 0,
 	db = trpc,
 	actions: {
-		sendMessage,
+		sendJsonMessage,
 		setGameEvents,
 		setGameState,
 		setIsPlayerTurn,
@@ -58,13 +58,11 @@ export function multiplayerController({
 	let enemyJoined = enemyName ? true : false;
 
 	const send = (data: Partial<Message> | GameInvitationMessage) => {
-		sendMessage(
-			JSON.stringify({
-				...data,
-				gameId,
-				playerId,
-			})
-		);
+		sendJsonMessage({
+			...data,
+			gameId,
+			playerId,
+		});
 	};
 
 	const dispatchTable: Record<string, (data: Message) => Promise<unknown>> = {
@@ -78,21 +76,15 @@ export function multiplayerController({
 		REMATCH_ACCEPT: async () => await Promise.resolve(navigate(0)),
 	};
 
-	const parseSocketMessage = async ({ data }: MessageEvent) => {
-		if (typeof data !== 'string') return false;
+	const processMessage = async (data: Message) => {
+		const z = zodMessage.safeParse(data);
+		if (!z.success) return false;
 
-		const json: unknown = JSON.parse(data);
-		const parsed = zodMessage.safeParse(json);
-		if (!parsed.success) return false;
+		if (z.data.gameId !== gameId || z.data.playerId === playerId) return false;
 
-		if (parsed.data.gameId !== gameId || parsed.data.playerId === playerId) return;
-		await processMessageData(parsed.data);
+		if (!Object.hasOwn(dispatchTable, z.data.type)) return false;
+		await dispatchTable[z.data.type as keyof typeof dispatchTable](z.data);
 		return true;
-	};
-
-	const processMessageData = async (data: Message) => {
-		if (!Object.hasOwn(dispatchTable, data.type)) return;
-		await dispatchTable[data.type as keyof typeof dispatchTable](data);
 	};
 
 	const readyPlayer = async () => {
@@ -206,7 +198,7 @@ export function multiplayerController({
 		setIsPlayerTurn(false);
 		setRematchModalVisible(true);
 
-		await delay(delayMs);
+		await delay(wait);
 		setGameState('GAME_OVER');
 	};
 
@@ -240,5 +232,5 @@ export function multiplayerController({
 		dispatchToast('INVITE', { name: playerName });
 	};
 
-	return { parseSocketMessage, attack, readyPlayer, requestRematch, invite };
+	return { processMessage, attack, readyPlayer, requestRematch, invite };
 }

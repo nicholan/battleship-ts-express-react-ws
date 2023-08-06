@@ -51,15 +51,10 @@ const TestForm = ({ showErrorMessage = true, label = 'testInput label', onSubmit
 };
 
 describe('FormInput', () => {
-	describe('Render', () => {
-		beforeEach(() => {
-			render(<TestForm />);
-		});
-
-		it('renders without errors', () => {
-			expect(screen.getByLabelText('testInput label')).toBeInTheDocument();
-			expect(screen.getByText('Submit')).toBeInTheDocument();
-		});
+	it('renders without errors', () => {
+		render(<TestForm />);
+		expect(screen.getByLabelText('testInput label')).toBeInTheDocument();
+		expect(screen.getByText('Submit')).toBeInTheDocument();
 	});
 
 	describe('When showErrorMessage={true}', () => {
@@ -122,10 +117,10 @@ describe('FormInput', () => {
 	});
 
 	describe('Form submission', () => {
-		let submitHandler: () => void;
+		const submitHandler = vi.fn();
 
 		beforeEach(() => {
-			submitHandler = vi.fn();
+			vi.clearAllMocks();
 			render(<TestForm onSubmit={submitHandler} />);
 		});
 

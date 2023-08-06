@@ -9,7 +9,7 @@ describe('Label', () => {
 	});
 
 	it('applies additional classNames passed in as props', () => {
-		const className = 'xl:text-2xl';
+		const className = 'test-class-name';
 		const { container } = render(<Label className={className}>Label Text</Label>);
 		expect(container.firstChild).toHaveClass(className);
 	});

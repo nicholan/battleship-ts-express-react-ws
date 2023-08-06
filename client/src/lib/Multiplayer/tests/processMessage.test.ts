@@ -2,11 +2,11 @@ import { playerGameboard } from '../../Gameboard/Gameboard.js';
 import { multiplayerController } from '../MultiplayerController.js';
 import { vi } from 'vitest';
 import { actions, data, db, msgBase } from './mockSetup.js';
-import { GameEvent } from '@packages/zod-data-types';
+import type { GameEvent, Message } from '@packages/zod-data-types';
 
-// parseSocketMessage is destructured from multiplayerController.
+// processMessage is destructured from multiplayerController.
 // tests functions that should run when websocket receives message.
-describe('parseSocketMessage', () => {
+describe('processMessage', () => {
 	beforeEach(() => {
 		playerGameboard.reset();
 	});
@@ -15,54 +15,43 @@ describe('parseSocketMessage', () => {
 		vi.clearAllMocks();
 	});
 
-	const { parseSocketMessage, readyPlayer } = multiplayerController({
-		...data,
-		db,
-		actions,
+	let processMessage: (data: Message) => Promise<boolean>;
+	let readyPlayer: () => Promise<boolean>;
+
+	beforeEach(() => {
+		const controller = multiplayerController({
+			...data,
+			db,
+			actions,
+		});
+
+		processMessage = controller.processMessage;
+		readyPlayer = controller.readyPlayer;
 	});
 
-	it('returns false and does not call any actions if data is not a string', async () => {
-		const message = new MessageEvent('message', {
-			data: 0,
+	describe('', () => {
+		it('returns false and does not call any actions if data does not match zodMessage schema', async () => {
+			const message = {
+				something: 'NOT_IN_SCHEMA',
+			} as unknown as Message;
+
+			const result = await processMessage(message);
+			expect(result).toEqual(false);
+
+			for (const key of Object.keys(actions)) {
+				expect(actions[key as keyof typeof actions]).not.toBeCalled();
+			}
 		});
-
-		const result = await parseSocketMessage(message);
-		expect(result).toEqual(false);
-
-		for (const key of Object.keys(actions)) {
-			expect(actions[key as keyof typeof actions]).not.toBeCalled();
-		}
-	});
-
-	it('returns false and does not call any actions if data does not match zodMessage schema', async () => {
-		const mockMsg = JSON.stringify({
-			something: 'NOT_IN_SCHEMA',
-		});
-
-		const message = new MessageEvent('message', {
-			data: mockMsg,
-		});
-
-		const result = await parseSocketMessage(message);
-		expect(result).toEqual(false);
-
-		for (const key of Object.keys(actions)) {
-			expect(actions[key as keyof typeof actions]).not.toBeCalled();
-		}
 	});
 
 	describe('dispatchTable[PLAYER_READY]', () => {
 		it('does not run processGameStart when player is not ready', async () => {
-			const mockMsg = JSON.stringify({
+			const message = {
 				type: 'PLAYER_READY',
 				...msgBase,
-			});
+			} as Message;
 
-			const message = new MessageEvent('message', {
-				data: mockMsg,
-			});
-
-			const result = await parseSocketMessage(message);
+			const result = await processMessage(message);
 			expect(result).toEqual(true);
 
 			expect(actions.setGameState).not.toBeCalledWith('STARTED');
@@ -70,19 +59,15 @@ describe('parseSocketMessage', () => {
 		});
 
 		it('runs processGameStart when player is ready', async () => {
-			const mockMsg = JSON.stringify({
+			const message = {
 				type: 'PLAYER_READY',
 				...msgBase,
-			});
-
-			const message = new MessageEvent('message', {
-				data: mockMsg,
-			});
+			} as Message;
 
 			playerGameboard.populateBoard();
 			await readyPlayer();
 
-			const result = await parseSocketMessage(message);
+			const result = await processMessage(message);
 			expect(result).toEqual(true);
 
 			expect(db.startGame.mutate).toBeCalledWith({ gameId: data.gameId });
@@ -93,49 +78,41 @@ describe('parseSocketMessage', () => {
 
 	describe('dispatchTable[PLAYER_JOIN]', () => {
 		it('does not run processPlayerJoin if enemyName is not null', async () => {
-			const { parseSocketMessage } = multiplayerController({
+			const { processMessage } = multiplayerController({
 				...data,
 				enemyName: 'enemy',
 				db,
 				actions,
 			});
 
-			const mockMsg = JSON.stringify({
+			const message = {
 				type: 'PLAYER_JOIN',
-				name: 'newName',
+				name: 'John',
 				...msgBase,
-			});
+			} as Message;
 
-			const message = new MessageEvent('message', {
-				data: mockMsg,
-			});
-
-			const result = await parseSocketMessage(message);
+			const result = await processMessage(message);
 			expect(result).toEqual(true);
 
 			// Name gets transformed to lowercase by zod.
-			expect(actions.setEnemyName).not.toBeCalledWith('newname');
+			expect(actions.setEnemyName).not.toBeCalledWith('john');
 		});
 
 		it('runs processPlayerJoin if enemyName is null', async () => {
-			const { parseSocketMessage } = multiplayerController({
+			const { processMessage } = multiplayerController({
 				...data,
 				enemyName: null,
 				db,
 				actions,
 			});
 
-			const mockMsg = JSON.stringify({
+			const message = {
 				type: 'PLAYER_JOIN',
 				name: 'John',
 				...msgBase,
-			});
+			} as Message;
 
-			const message = new MessageEvent('message', {
-				data: mockMsg,
-			});
-
-			const result = await parseSocketMessage(message);
+			const result = await processMessage(message);
 			expect(result).toEqual(true);
 
 			// Name gets transformed to lowercase by zod.
@@ -145,23 +122,19 @@ describe('parseSocketMessage', () => {
 
 	describe('dispatchTable[GAME_START]', () => {
 		it('runs startGame', async () => {
-			const { parseSocketMessage } = multiplayerController({
+			const { processMessage } = multiplayerController({
 				...data,
 				db,
 				actions,
 			});
 
-			const mockMsg = JSON.stringify({
+			const message = {
 				type: 'GAME_START',
 				turn: 1,
 				...msgBase,
-			});
+			} as Message;
 
-			const message = new MessageEvent('message', {
-				data: mockMsg,
-			});
-
-			const result = await parseSocketMessage(message);
+			const result = await processMessage(message);
 			expect(result).toEqual(true);
 
 			expect(actions.setGameState).toBeCalledWith('STARTED');
@@ -171,7 +144,7 @@ describe('parseSocketMessage', () => {
 
 	describe('dispatchTable[ATTACK]', () => {
 		it('runs processAttack', async () => {
-			const { parseSocketMessage } = multiplayerController({
+			const { processMessage } = multiplayerController({
 				...data,
 				db,
 				actions,
@@ -187,17 +160,13 @@ describe('parseSocketMessage', () => {
 				shipId: null,
 			};
 
-			const mockMsg = JSON.stringify({
+			const message = {
 				type: 'ATTACK',
 				coordinates,
 				...msgBase,
-			});
+			} as Message;
 
-			const message = new MessageEvent('message', {
-				data: mockMsg,
-			});
-
-			const result = await parseSocketMessage(message);
+			const result = await processMessage(message);
 			expect(result).toEqual(true);
 
 			expect(db.addEvent.mutate).toBeCalledWith({ gameEvent: expectedEvent, gameId: data.gameId });
@@ -206,7 +175,7 @@ describe('parseSocketMessage', () => {
 		});
 
 		it('runs processGameEnding if receiveAttack sinks the last ship', async () => {
-			const { parseSocketMessage } = multiplayerController({
+			const { processMessage } = multiplayerController({
 				...data,
 				db,
 				actions,
@@ -228,17 +197,13 @@ describe('parseSocketMessage', () => {
 				shipId: 'testid1',
 			};
 
-			const mockMsg = JSON.stringify({
+			const message = {
 				type: 'ATTACK',
 				coordinates,
 				...msgBase,
-			});
+			} as Message;
 
-			const message = new MessageEvent('message', {
-				data: mockMsg,
-			});
-
-			const result = await parseSocketMessage(message);
+			const result = await processMessage(message);
 			expect(result).toEqual(true);
 
 			expect(db.gameOver.mutate).toBeCalledWith({ gameId: data.gameId, playerTurn: data.playerTurn });
@@ -252,7 +217,7 @@ describe('parseSocketMessage', () => {
 
 	describe('dispatchTable[RESULT]', () => {
 		it('calls setGameEvents with the received result', async () => {
-			const { parseSocketMessage } = multiplayerController({
+			const { processMessage } = multiplayerController({
 				...data,
 				db,
 				actions,
@@ -267,17 +232,13 @@ describe('parseSocketMessage', () => {
 				shipId: 'testid1',
 			};
 
-			const mockMsg = JSON.stringify({
+			const message = {
 				type: 'RESULT',
 				events: [event],
 				...msgBase,
-			});
+			} as Message;
 
-			const message = new MessageEvent('message', {
-				data: mockMsg,
-			});
-
-			const result = await parseSocketMessage(message);
+			const result = await processMessage(message);
 			expect(result).toEqual(true);
 
 			expect(actions.setGameEvents).toBeCalledWith([event]);
@@ -286,23 +247,19 @@ describe('parseSocketMessage', () => {
 
 	describe('dispatchTable[GAME_OVER]', () => {
 		it('runs processGameOver', async () => {
-			const { parseSocketMessage } = multiplayerController({
+			const { processMessage } = multiplayerController({
 				...data,
 				db,
 				actions,
 			});
 
-			const mockMsg = JSON.stringify({
+			const message = {
 				type: 'GAME_OVER',
 				winner: 'WINNERNAME',
 				...msgBase,
-			});
+			} as Message;
 
-			const message = new MessageEvent('message', {
-				data: mockMsg,
-			});
-
-			const result = await parseSocketMessage(message);
+			const result = await processMessage(message);
 			expect(result).toEqual(true);
 
 			expect(actions.setIsPlayerTurn).toBeCalledWith(false);
@@ -314,23 +271,19 @@ describe('parseSocketMessage', () => {
 
 	describe('dispatchTable[REQUEST_REMATCH]', () => {
 		it('runs processRematch and closes rematch modal if player has not requested rematch first', async () => {
-			const { parseSocketMessage } = multiplayerController({
+			const { processMessage } = multiplayerController({
 				...data,
 				db,
 				actions,
 			});
 
-			const mockMsg = JSON.stringify({
+			const message = {
 				type: 'REQUEST_REMATCH',
 				name: 'mockName',
 				...msgBase,
-			});
+			} as Message;
 
-			const message = new MessageEvent('message', {
-				data: mockMsg,
-			});
-
-			const result = await parseSocketMessage(message);
+			const result = await processMessage(message);
 			expect(result).toEqual(true);
 
 			expect(actions.setRematchModalVisible).toBeCalledWith(false);
@@ -338,7 +291,7 @@ describe('parseSocketMessage', () => {
 		});
 
 		it('runs processRematch, resets game and reloads current page if player has requested rematch first', async () => {
-			const { parseSocketMessage, requestRematch } = multiplayerController({
+			const { processMessage, requestRematch } = multiplayerController({
 				...data,
 				db,
 				actions,
@@ -346,17 +299,13 @@ describe('parseSocketMessage', () => {
 
 			requestRematch();
 
-			const mockMsg = JSON.stringify({
+			const message = {
 				type: 'REQUEST_REMATCH',
 				name: 'mockName',
 				...msgBase,
-			});
+			} as Message;
 
-			const message = new MessageEvent('message', {
-				data: mockMsg,
-			});
-
-			const result = await parseSocketMessage(message);
+			const result = await processMessage(message);
 			expect(result).toEqual(true);
 
 			expect(actions.navigate).toBeCalledWith(0);
@@ -365,22 +314,18 @@ describe('parseSocketMessage', () => {
 
 	describe('dispatchTable[REMATCH_ACCEPT]', () => {
 		it('reloads page with navigate(0)', async () => {
-			const { parseSocketMessage } = multiplayerController({
+			const { processMessage } = multiplayerController({
 				...data,
 				db,
 				actions,
 			});
 
-			const mockMsg = JSON.stringify({
+			const message = {
 				type: 'REMATCH_ACCEPT',
 				...msgBase,
-			});
+			} as Message;
 
-			const message = new MessageEvent('message', {
-				data: mockMsg,
-			});
-
-			const result = await parseSocketMessage(message);
+			const result = await processMessage(message);
 			expect(result).toEqual(true);
 
 			expect(actions.navigate).toBeCalledWith(0);

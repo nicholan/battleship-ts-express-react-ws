@@ -1,6 +1,6 @@
 import { publicProcedure, router } from './trpc.js';
-import { Player } from '../models/userModel.js';
-import { Game } from '../models/gameModel.js';
+import Player from '../models/userModel.js';
+import Game from '../models/gameModel.js';
 import type { PlayerType } from '../models/userModel.js';
 import { zodGameEvent, zodGameId, zodPlayerName, zodPlayerBoard, zodPlayerId } from '@packages/zod-data-types';
 import { z } from 'zod';

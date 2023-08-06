@@ -22,6 +22,7 @@ const zodMessageType = z.enum([
     'REMATCH_ACCEPT',
     'PLAYER_INVITE',
 ]);
+const zodGameState = z.enum(['STARTED', 'NOT_STARTED', 'GAME_OVER']);
 const zodCellState = z.enum(['EMPTY', 'SHIP', 'SHOT_MISS', 'SHIP_HIT', 'SHIP_SUNK']);
 const zodResult = z.enum(['SHOT_MISS', 'SHIP_HIT', 'SHIP_SUNK']);
 const zodCellStyle = z.enum([
@@ -32,7 +33,6 @@ const zodCellStyle = z.enum([
     'SELECTED_INVALID_SHIP',
     'SELECTED_INVALID_MISS',
 ]);
-const zodGameState = z.literal('STARTED').or(z.literal('NOT_STARTED')).or(z.literal('GAME_OVER'));
 const zodAxis = z.enum(['x', 'y']);
 export const zodGameId = z.string().trim().toLowerCase().min(4, 'Invalid game code.');
 export const zodPlayerId = z.string().trim().min(8, 'Invalid player ID.');

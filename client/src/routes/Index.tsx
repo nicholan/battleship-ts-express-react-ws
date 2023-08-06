@@ -4,21 +4,22 @@ import { SubmitHandler } from 'react-hook-form';
 import type { IndexFormSchema } from '../components/Forms/IndexForm.js';
 import { IndexForm } from '../components/Forms/IndexForm.js';
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket.js';
-import { zParse, zodGameInvitationMessage, type GameInvitationMessage, LoaderData } from '@packages/zod-data-types';
-import { useEffect, useState, useRef } from 'react';
+import { zodGameInvitationMessage, type GameInvitationMessage, LoaderData } from '@packages/zod-data-types';
+import { useState, useRef } from 'react';
 import { aiGameboard } from '../lib/Gameboard/Gameboard.js';
 import { generateUniqueId } from '@packages/utilities';
 import { dispatchToast } from '../components/Toasts/Toaster.js';
 
-const url = 'ws://localhost:3001';
+const url = 'ws://localhost:3000';
 
 export function Index() {
 	const navigate = useNavigate();
 	const [name, setName] = useState('');
 	const suffix = useRef(Date.now().toString().slice(-3));
 
-	const { lastMessage } = useWebSocket(url, {
+	useWebSocket(url, {
 		shouldReconnect: (_e: CloseEvent) => true,
+		filter: parseMessage,
 	});
 
 	const onSubmit: SubmitHandler<IndexFormSchema> = async (data) => {
@@ -86,24 +87,21 @@ export function Index() {
 	function processSocketMessage({ hostName, gameId, type, ...data }: GameInvitationMessage) {
 		if (type !== 'PLAYER_INVITE') return;
 		if (data.name === undefined || hostName === undefined || gameId === undefined) return;
-		if (data.name !== name + suffix.current) return;
+		if (data.name.toLowerCase() !== name + suffix.current) return;
 
 		dispatchToast('INVITE_RECEIVED', { gameId, name, hostName, joinGame });
 	}
 
-	function parseSocketMessage({ data }: MessageEvent) {
-		if (typeof data !== 'string') return;
+	function parseMessage({ data }: MessageEvent) {
+		if (typeof data !== 'string') return false;
 
 		const json: unknown = JSON.parse(data);
-		const zData = zParse(zodGameInvitationMessage, json);
-		processSocketMessage(zData);
-	}
+		const parsed = zodGameInvitationMessage.safeParse(json);
+		if (!parsed.success) return false;
 
-	useEffect(() => {
-		if (lastMessage !== null) {
-			parseSocketMessage(lastMessage);
-		}
-	}, [lastMessage]);
+		processSocketMessage(parsed.data);
+		return false;
+	}
 
 	return <IndexForm onSubmit={onSubmit} setName={setName} suffix={suffix.current} />;
 }

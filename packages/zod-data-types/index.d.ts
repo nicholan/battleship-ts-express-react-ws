@@ -10,10 +10,10 @@ export type CellState = z.infer<typeof zodCellState>;
 export type GameState = z.infer<typeof zodGameState>;
 export type LoaderData = z.infer<typeof loaderDataSchema>;
 export type GameInvitationMessage = z.infer<typeof zodGameInvitationMessage>;
+declare const zodGameState: z.ZodEnum<["STARTED", "NOT_STARTED", "GAME_OVER"]>;
 declare const zodCellState: z.ZodEnum<["EMPTY", "SHIP", "SHOT_MISS", "SHIP_HIT", "SHIP_SUNK"]>;
 declare const zodResult: z.ZodEnum<["SHOT_MISS", "SHIP_HIT", "SHIP_SUNK"]>;
 declare const zodCellStyle: z.ZodEnum<["NONE", "INVALID", "VALID", "SELECTED_VALID", "SELECTED_INVALID_SHIP", "SELECTED_INVALID_MISS"]>;
-declare const zodGameState: z.ZodUnion<[z.ZodUnion<[z.ZodLiteral<"STARTED">, z.ZodLiteral<"NOT_STARTED">]>, z.ZodLiteral<"GAME_OVER">]>;
 export declare const zodGameId: z.ZodString;
 export declare const zodPlayerId: z.ZodString;
 export declare const zodPlayerName: z.ZodString;
@@ -264,7 +264,7 @@ export declare const loaderDataSchema: z.ZodObject<{
     turn: z.ZodNumber;
     playerTurn: z.ZodNumber;
     ready: z.ZodBoolean;
-    gameState: z.ZodUnion<[z.ZodUnion<[z.ZodLiteral<"STARTED">, z.ZodLiteral<"NOT_STARTED">]>, z.ZodLiteral<"GAME_OVER">]>;
+    gameState: z.ZodEnum<["STARTED", "NOT_STARTED", "GAME_OVER"]>;
     winner: z.ZodNullable<z.ZodString>;
     isAiGame: z.ZodBoolean;
     aiBoard: z.ZodArray<z.ZodObject<{

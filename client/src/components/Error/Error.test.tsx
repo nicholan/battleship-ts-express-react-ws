@@ -1,6 +1,5 @@
 import { render } from '@testing-library/react';
 import { useRouteError, isRouteErrorResponse } from 'react-router-dom';
-
 import ErrorPage from './Error';
 import { vi, MockedFunction } from 'vitest';
 
@@ -17,7 +16,7 @@ const mockedIsRouteErrorResponse = isRouteErrorResponse as unknown as MockedIsRo
 
 describe('ErrorPage component', () => {
 	afterEach(() => {
-		vi.resetAllMocks();
+		vi.clearAllMocks();
 	});
 
 	it('renders an error message when there is no error response', () => {

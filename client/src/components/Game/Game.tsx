@@ -1,18 +1,22 @@
-import { useEffect, useState } from 'react';
-import type { ComponentPropsWithoutRef } from 'react';
+import { useEffect, useState, type ComponentPropsWithoutRef } from 'react';
+import classNames from 'classnames';
+
 import { CoordinatesBar } from '../CoordinatesBar/CoordinatesBar.js';
-import type { PlayerBoard, GameEvent, Coordinates, GameState } from '@packages/zod-data-types';
 import { Nametag } from '../Nametag/Nametag.js';
-import { CanvasBoard, type BoardSize } from '../Board/CanvasBoard.js';
 import { Button } from '../Buttons/Button.js';
-import { playerGameboard, enemyGameboard, aiGameboard } from '../../lib/Gameboard/Gameboard.js';
-import { ai } from '../../lib/Ai/AiController.js';
 import { InvitePlayerForm } from '../Forms/InvitePlayerForm.js';
 import { Modal } from '../Modal/Modal.js';
-import classNames from 'classnames';
-import { useWindowSize } from '../../hooks/useWindowSize.js';
 
-type Props = {
+import { useWindowSize } from '../../hooks/useWindowSize.js';
+import { PlayerCanvas } from '../Board/PlayerCanvas.js';
+import { EnemyCanvas } from '../Board/EnemyCanvas.js';
+import type { BoardSize } from '../Board/utilities.js';
+
+import type { PlayerBoard, GameEvent, Coordinates, GameState } from '@packages/zod-data-types';
+import { playerGameboard, enemyGameboard, aiGameboard } from '../../lib/Gameboard/Gameboard.js';
+import { ai } from '../../lib/Ai/AiController.js';
+
+export type GameProps = {
 	playerId: string;
 	playerName: string;
 	enemyName: string | null | undefined;
@@ -42,7 +46,7 @@ export function Game({
 	readyPlayer,
 	invitePlayer,
 	aiBoard,
-}: Props) {
+}: GameProps) {
 	const playerEvents = gameEvents.filter((evt) => {
 		return evt.playerId === playerId;
 	});
@@ -174,7 +178,7 @@ export function Game({
 				</Nametag>
 
 				{/* ----------- PLAYER BOARD ----------- */}
-				<CanvasBoard
+				<PlayerCanvas
 					key={dateKey.toString(36)}
 					gameEventsLen={gameEvents.length}
 					className={classNames(
@@ -182,15 +186,13 @@ export function Game({
 						['md:row-start-1 md:col-start-1 md:row-end-11 md:col-end-11'],
 						['lg:row-start-2 lg:col-start-2 lg:row-end-12 lg:col-end-12']
 					)}
-					isPlayerBoard={true}
-					isPlayerTurn={isPlayerTurn}
 					size={size}
 					setShipsRemaining={setShipsRemaining}
 					gameState={gameState}
 				/>
 
 				{/* ----------- ENEMY BOARD ----------- */}
-				<CanvasBoard
+				<EnemyCanvas
 					key={`${gameState}_enemy_board`}
 					gameEventsLen={gameEvents.length}
 					className={classNames(
@@ -198,7 +200,6 @@ export function Game({
 						['md:row-start-[11] md:col-start-11 md:row-end-[21] md:col-end-[21]'],
 						['lg:row-start-[12] lg:col-start-12 lg:row-end-[22] lg:col-end-[22]']
 					)}
-					isPlayerBoard={false}
 					isPlayerTurn={isPlayerTurn}
 					size={size}
 					attack={attack}
@@ -285,7 +286,7 @@ export function Game({
 							(isPlayerTurn ? (
 								<Text color="text-orange-400">Your turn</Text>
 							) : (
-								<Text>{aiBoard.length > 0 ? 'Computer turn' : 'Enemy turn'}</Text>
+								<Text>{enemyName ?? 'Enemy'} turn</Text>
 							))}
 					</div>
 				</div>
