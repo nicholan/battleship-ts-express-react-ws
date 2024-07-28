@@ -44,7 +44,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 	return response;
 }
 
-const url = "ws://localhost:3000";
+const websocketURL =  process.env.WEBSOCKET_URL ?? "ws://localhost:3000";
 
 export function Lobby() {
 	const navigate = useNavigate();
@@ -61,7 +61,7 @@ export function Lobby() {
 		gameState === "GAME_OVER",
 	);
 
-	const { sendJsonMessage } = useWebSocket(url, {
+	const { sendJsonMessage } = useWebSocket(websocketURL, {
 		onOpen: () => {
 			if (gameState === "STARTED" && !isAiGame) return;
 			const data = {
