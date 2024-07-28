@@ -14,14 +14,14 @@ import { dispatchToast } from "../components/Toasts/Toaster.js";
 import { aiGameboard } from "../lib/Gameboard/Gameboard.js";
 import { trpc } from "../trpc.js";
 
-const url = "ws://localhost:3000";
+const websocketURL =  process.env.WEBSOCKET_URL ?? "ws://localhost:3000";
 
 export function Index() {
 	const navigate = useNavigate();
 	const [name, setName] = useState("");
 	const suffix = useRef(Date.now().toString().slice(-3));
 
-	useWebSocket(url, {
+	useWebSocket(websocketURL, {
 		shouldReconnect: (_e: CloseEvent) => true,
 		filter: parseMessage,
 	});
