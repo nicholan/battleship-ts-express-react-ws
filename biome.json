@@ -12,5 +12,5 @@
 	"files": {
 		"ignore": ["*.js", "*.d.ts", "*.map", "*.tsbuildinfo"],
 		"include": ["*.ts"]
-	  }
+	}
 }
