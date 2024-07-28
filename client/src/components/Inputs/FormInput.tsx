@@ -1,16 +1,19 @@
 import {
-	UseFormRegister,
-	FieldValues,
-	Path,
-	RegisterOptions,
-	DeepMap,
-	FieldError,
-	FieldName,
+	ErrorMessage,
+	type FieldValuesFromFieldErrors,
+} from "@hookform/error-message";
+import classNames from "classnames";
+import {
+	type DeepMap,
+	type FieldError,
+	type FieldName,
+	type FieldValues,
+	type Path,
+	type RegisterOptions,
+	type UseFormRegister,
 	get,
-} from 'react-hook-form';
-import { Input, type InputProps } from './Input';
-import { ErrorMessage, FieldValuesFromFieldErrors } from '@hookform/error-message';
-import classNames from 'classnames';
+} from "react-hook-form";
+import { Input, type InputProps } from "./Input";
 
 export type FormInputProps<TFormValues> = {
 	name: Path<TFormValues>;
@@ -18,7 +21,7 @@ export type FormInputProps<TFormValues> = {
 	rules?: RegisterOptions;
 	errors?: Partial<DeepMap<TFormValues, FieldError>>;
 	showErrorMessage?: boolean;
-} & Omit<InputProps, 'name'>;
+} & Omit<InputProps, "name">;
 
 export const FormInput = <TFormValues extends FieldValues>({
 	className,
@@ -38,19 +41,30 @@ export const FormInput = <TFormValues extends FieldValues>({
 				aria-invalid={hasError}
 				name={name}
 				{...props}
-				{...(register && register(name))}
+				{...register?.(name)}
 				className={classNames({
-					'transition-colors focus:outline-none focus:ring-2 focus:ring-opacity-50 border-red-500 hover:border-red-500 focus:border-red-500 focus:ring-red-500':
+					"transition-colors focus:outline-none focus:ring-2 focus:ring-opacity-50 border-red-500 hover:border-red-500 focus:border-red-500 focus:ring-red-500":
 						hasError,
 				})}
 			/>
 			<ErrorMessage
 				errors={showErrorMessage ? errors : {}}
 				name={
-					name as unknown as FieldName<FieldValuesFromFieldErrors<Partial<DeepMap<TFormValues, FieldError>>>>
+					name as unknown as FieldName<
+						FieldValuesFromFieldErrors<
+							Partial<DeepMap<TFormValues, FieldError>>
+						>
+					>
 				}
 				render={({ message }) => (
-					<p className={classNames(['text-red-500 text-sm'], ['mt-2 md:mt-3 lg:mt-4'])}>{message}</p>
+					<p
+						className={classNames(
+							["text-red-500 text-sm"],
+							["mt-2 md:mt-3 lg:mt-4"],
+						)}
+					>
+						{message}
+					</p>
 				)}
 			/>
 		</div>

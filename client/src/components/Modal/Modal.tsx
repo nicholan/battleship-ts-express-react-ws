@@ -1,28 +1,39 @@
-import { useState, useEffect, useRef, type ComponentPropsWithoutRef } from 'react';
-import classNames from 'classnames';
+import classNames from "classnames";
+import {
+	type ComponentPropsWithoutRef,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 
 type ModalProps = {
 	onClose?: () => void;
 	isVisible?: boolean;
 };
 
-export function Modal({ children, onClose, isVisible = true, ...props }: ComponentPropsWithoutRef<'div'> & ModalProps) {
+export function Modal({
+	children,
+	onClose,
+	isVisible = true,
+	...props
+}: ComponentPropsWithoutRef<"div"> & ModalProps) {
 	const [visible, setVisible] = useState(isVisible);
 	const modalRef = useRef<HTMLDialogElement | null>(null);
 
 	const closeButton = (
 		<button
 			aria-label="Close modal"
+			type="button"
 			tabIndex={0}
 			onClick={() => {
 				setVisible(false);
-				onClose && onClose();
+				onClose?.();
 			}}
 			className={classNames(
-				['grid place-items-center'],
-				['cursor-pointer'],
-				['absolute top-3 right-3 h-8 w-8'],
-				['text-2xl md:text-2xl font-roboto text-white hover:text-orange-400']
+				["grid place-items-center"],
+				["cursor-pointer"],
+				["absolute top-3 right-3 h-8 w-8"],
+				["text-2xl md:text-2xl font-roboto text-white hover:text-orange-400"],
 			)}
 		>
 			×
@@ -32,9 +43,10 @@ export function Modal({ children, onClose, isVisible = true, ...props }: Compone
 	const handleTabSelection = (event: KeyboardEvent) => {
 		if (!modalRef.current) return;
 
-		const focusableElements: NodeListOf<HTMLElement> = modalRef.current.querySelectorAll(
-			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-		);
+		const focusableElements: NodeListOf<HTMLElement> =
+			modalRef.current.querySelectorAll(
+				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+			);
 
 		if (focusableElements.length < 1) return;
 
@@ -58,7 +70,7 @@ export function Modal({ children, onClose, isVisible = true, ...props }: Compone
 
 	const keyboardDispatch = {
 		Escape: () => {
-			onClose && onClose();
+			onClose?.();
 			setVisible(false);
 		},
 		Tab: (event: KeyboardEvent) => handleTabSelection(event),
@@ -67,24 +79,25 @@ export function Modal({ children, onClose, isVisible = true, ...props }: Compone
 	useEffect(() => {
 		if (!modalRef.current) return;
 
-		const input = modalRef.current.querySelector('input');
+		const input = modalRef.current.querySelector("input");
 		if (input) {
 			input.focus();
 			return;
 		}
 
-		const button = modalRef.current.querySelector('button');
+		const button = modalRef.current.querySelector("button");
 		if (button) {
 			button.focus();
 			return;
 		}
 	}, []);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies(handleKeyboardEvent): FIXME
 	useEffect(() => {
-		window.addEventListener('keydown', handleKeyboardEvent);
+		window.addEventListener("keydown", handleKeyboardEvent);
 
 		return () => {
-			window.removeEventListener('keydown', handleKeyboardEvent);
+			window.removeEventListener("keydown", handleKeyboardEvent);
 		};
 	}, []);
 
@@ -95,17 +108,17 @@ export function Modal({ children, onClose, isVisible = true, ...props }: Compone
 			ref={modalRef}
 			role="dialog"
 			className={classNames(
-				['fixed inset-0 left-0 top-0 w-screen h-screen'],
-				['grid p-0 m-0 z-50'],
-				['bg-black/30 pointer-events-auto']
+				["fixed inset-0 left-0 top-0 w-screen h-screen"],
+				["grid p-0 m-0 z-50"],
+				["bg-black/30 pointer-events-auto"],
 			)}
 		>
 			<div
 				className={classNames(
-					['relative place-self-center rounded shadow-md text-neutral-50'],
-					['bg-gradient-to-b from-neutral-800 to-neutral-900'],
-					['border dark:border-neutral-300/10'],
-					['p-8 lg:p-12']
+					["relative place-self-center rounded shadow-md text-neutral-50"],
+					["bg-gradient-to-b from-neutral-800 to-neutral-900"],
+					["border dark:border-neutral-300/10"],
+					["p-8 lg:p-12"],
 				)}
 			>
 				{closeButton}

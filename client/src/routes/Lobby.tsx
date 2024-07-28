@@ -1,27 +1,27 @@
-import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLoaderData } from 'react-router-dom';
-import type { LoaderFunctionArgs } from 'react-router-dom';
-import useWebSocket from 'react-use-websocket';
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useLoaderData } from "react-router-dom";
+import type { LoaderFunctionArgs } from "react-router-dom";
+import useWebSocket from "react-use-websocket";
 
-import { Button } from '../components/Buttons/Button.js';
-import { Game } from '../components/Game/Game.js';
-import { Modal } from '../components/Modal/Modal.js';
+import { Button } from "../components/Buttons/Button.js";
+import { Game } from "../components/Game/Game.js";
+import { Modal } from "../components/Modal/Modal.js";
 
-import { ai } from '../lib/Ai/AiController.js';
-import { multiplayerController } from '../lib/Multiplayer/MultiplayerController.js';
-import { singleplayerController } from '../lib/Singleplayer/SingleplayerController.js';
+import { ai } from "../lib/Ai/AiController.js";
+import { multiplayerController } from "../lib/Multiplayer/MultiplayerController.js";
+import { singleplayerController } from "../lib/Singleplayer/SingleplayerController.js";
 
-import { resetGameboards } from '../lib/Gameboard/Gameboard.js';
+import { resetGameboards } from "../lib/Gameboard/Gameboard.js";
 
-import { trpc } from '../trpc.js';
+import { trpc } from "../trpc.js";
 
-import { zParse, loaderDataSchema, zodMessage } from '@packages/zod-data-types';
+import { loaderDataSchema, zParse, zodMessage } from "@packages/zod-data-types";
 
 export async function loader({ params }: LoaderFunctionArgs) {
 	const { gameId, name } = params;
 	if (!gameId || !name) {
-		throw new Error('Invalid route parameters.');
+		throw new Error("Invalid route parameters.");
 	}
 
 	resetGameboards();
@@ -34,18 +34,22 @@ export async function loader({ params }: LoaderFunctionArgs) {
 	}
 
 	const response = await trpc.getGame.query({ gameId, name });
-	if ('message' in response) {
-		throw new Response(response.message, { status: response.code, statusText: response.message });
+	if ("message" in response) {
+		throw new Response(response.message, {
+			status: response.code,
+			statusText: response.message,
+		});
 	}
 
 	return response;
 }
 
-const url = 'ws://localhost:3000';
+const url = "ws://localhost:3000";
 
 export function Lobby() {
 	const navigate = useNavigate();
-	const { gameId, playerId, name, playerTurn, events, isAiGame, ...data } = zParse(loaderDataSchema, useLoaderData());
+	const { gameId, playerId, name, playerTurn, events, isAiGame, ...data } =
+		zParse(loaderDataSchema, useLoaderData());
 
 	const [isPlayerTurn, setIsPlayerTurn] = useState(data.turn === playerTurn);
 	const [ready, setReady] = useState(data.ready);
@@ -53,20 +57,22 @@ export function Lobby() {
 	const [gameEvents, setGameEvents] = useState(events);
 	const [enemyName, setEnemyName] = useState<string | null>(data.enemyName);
 	const [winner, setWinner] = useState<string | null>(data.winner);
-	const [rematchModalVisible, setRematchModalVisible] = useState(gameState === 'GAME_OVER' ? true : false);
+	const [rematchModalVisible, setRematchModalVisible] = useState(
+		gameState === "GAME_OVER",
+	);
 
 	const { sendJsonMessage } = useWebSocket(url, {
 		onOpen: () => {
-			if (gameState === 'STARTED' && !isAiGame) return;
+			if (gameState === "STARTED" && !isAiGame) return;
 			const data = {
-				type: 'PLAYER_JOIN',
+				type: "PLAYER_JOIN",
 				gameId,
 				playerId,
 				name,
 			};
 			sendJsonMessage(data);
 		},
-		shouldReconnect: (_e: CloseEvent) => (isAiGame ? false : true),
+		shouldReconnect: (_e: CloseEvent) => !isAiGame,
 		filter: parseMessage,
 	});
 
@@ -92,7 +98,7 @@ export function Lobby() {
 				setRematchModalVisible,
 				navigate,
 			},
-		})
+		}),
 	);
 
 	const {
@@ -101,25 +107,37 @@ export function Lobby() {
 
 	function parseMessage({ data }: MessageEvent) {
 		if (isAiGame) return false;
-		if (typeof data !== 'string') return false;
+		if (typeof data !== "string") return false;
 
 		const json: unknown = JSON.parse(data);
 		const parsed = zodMessage.safeParse(json);
 		if (!parsed.success) return false;
 
-		if ('processMessage' in actions) {
+		if ("processMessage" in actions) {
 			actions.processMessage(parsed.data).catch((err) => console.log(err));
 		}
 
 		return false;
 	}
 
-	useEffect(() => {
-		// Runs when ai starts the game.
-		if (gameState === 'STARTED' && gameEvents.length === 0 && !isPlayerTurn && 'aiAttack' in actions) {
+	function aiFirstMove() {
+		if ("aiAttack" in actions) {
 			actions.aiAttack().catch((err) => console.log(err));
 		}
-	}, [gameState]);
+	}
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies(aiFirstMove): FIXME
+	useEffect(() => {
+		// Runs when ai starts the game.
+		if (
+			gameState === "STARTED" &&
+			gameEvents.length === 0 &&
+			!isPlayerTurn &&
+			isAiGame
+		) {
+			aiFirstMove();
+		}
+	}, [gameState, gameEvents.length, isPlayerTurn, isAiGame]);
 
 	return (
 		<>
@@ -137,17 +155,18 @@ export function Lobby() {
 					ready={ready}
 					isPlayerTurn={isPlayerTurn}
 					gameState={gameState}
-					invitePlayer={'invite' in actions ? actions.invite : undefined}
+					invitePlayer={"invite" in actions ? actions.invite : undefined}
 					aiBoard={data.aiBoard}
 				/>
 			</div>
-			{gameState === 'GAME_OVER' && rematchModalVisible && (
+			{gameState === "GAME_OVER" && rematchModalVisible && (
 				<Modal onClose={() => setRematchModalVisible(false)}>
 					<div className="flex flex-col gap-4 items-center px-8">
 						<div className="tracking-wide text-center select-none font-bebas-neue">
 							{ready && (
 								<p className="text-3xl md:text-4xl lg:text-5xl">
-									{enemyName && (winner === enemyName ? `${enemyName} wins!` : 'You win!')}
+									{enemyName &&
+										(winner === enemyName ? `${enemyName} wins!` : "You win!")}
 								</p>
 							)}
 							{!ready && <p className="text-5xl">Waiting for {enemyName}</p>}
@@ -155,9 +174,9 @@ export function Lobby() {
 						{ready && (
 							<div className="flex flex-row gap-4">
 								<Button onClick={() => requestRematch()}>
-									{isAiGame ? 'Play again' : 'Request rematch'}
+									{isAiGame ? "Play again" : "Request rematch"}
 								</Button>
-								<Button onClick={() => navigate('/')}>Home</Button>
+								<Button onClick={() => navigate("/")}>Home</Button>
 							</div>
 						)}
 					</div>

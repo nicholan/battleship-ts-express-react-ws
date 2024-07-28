@@ -1,17 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { Layout } from './components/Layout/Layout.js';
-import ErrorPage from './components/Error/Error.js';
-import { Index } from './routes/Index.js';
-import { Lobby } from './routes/Lobby.js';
-import { loader as lobbyLoader } from './routes/Lobby.js';
-import { loader as layoutLoader } from './components/Layout/Layout.js';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import './global.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import ErrorPage from "./components/Error/Error.js";
+import { Layout } from "./components/Layout/Layout.js";
+import { loader as layoutLoader } from "./components/Layout/Layout.js";
+import { Index } from "./routes/Index.js";
+import { Lobby } from "./routes/Lobby.js";
+import { loader as lobbyLoader } from "./routes/Lobby.js";
+import "./global.css";
 
 const router = createBrowserRouter([
 	{
-		path: '',
+		path: "",
 		element: <Layout />,
 		loader: layoutLoader,
 		errorElement: <ErrorPage />,
@@ -20,21 +20,21 @@ const router = createBrowserRouter([
 				errorElement: <ErrorPage />,
 				children: [
 					{
-						path: '/',
+						path: "/",
 						element: <Index />,
 					},
 					{
-						path: '/:gameId/:name',
+						path: "/:gameId/:name",
 						loader: lobbyLoader,
 						element: <Lobby />,
 					},
 					{
 						// All other paths; 404 to <Outlet />
-						path: '*',
+						path: "*",
 						loader: () => {
-							throw new Response('Page not found.', {
+							throw new Response("Page not found.", {
 								status: 404,
-								statusText: 'Page not found',
+								statusText: "Page not found",
 							});
 						},
 					},
@@ -44,8 +44,8 @@ const router = createBrowserRouter([
 	},
 ]);
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 	<React.StrictMode>
 		<RouterProvider router={router} />
-	</React.StrictMode>
+	</React.StrictMode>,
 );

@@ -1,8 +1,11 @@
-import { AnyZodObject, z, ZodError } from 'zod';
+import { type AnyZodObject, ZodError, z } from "zod";
 
 const regex = /^[a-z0-9]+$/i;
 
-export function zParse<T extends AnyZodObject>(schema: T, data: unknown): z.infer<T> {
+export function zParse<T extends AnyZodObject>(
+	schema: T,
+	data: unknown,
+): z.infer<T> {
 	try {
 		return schema.parse(data);
 	} catch (error) {
@@ -25,42 +28,52 @@ export type LoaderData = z.infer<typeof loaderDataSchema>;
 export type GameInvitationMessage = z.infer<typeof zodGameInvitationMessage>;
 
 const zodMessageType = z.enum([
-	'PLAYER_READY',
-	'GAME_START',
-	'PLAYER_JOIN',
-	'ATTACK',
-	'RESULT',
-	'GAME_OVER',
-	'REQUEST_REMATCH',
-	'REMATCH_ACCEPT',
-	'PLAYER_INVITE',
+	"PLAYER_READY",
+	"GAME_START",
+	"PLAYER_JOIN",
+	"ATTACK",
+	"RESULT",
+	"GAME_OVER",
+	"REQUEST_REMATCH",
+	"REMATCH_ACCEPT",
+	"PLAYER_INVITE",
 ]);
 
-const zodGameState = z.enum(['STARTED', 'NOT_STARTED', 'GAME_OVER']);
-const zodCellState = z.enum(['EMPTY', 'SHIP', 'SHOT_MISS', 'SHIP_HIT', 'SHIP_SUNK']);
-const zodResult = z.enum(['SHOT_MISS', 'SHIP_HIT', 'SHIP_SUNK']);
+const zodGameState = z.enum(["STARTED", "NOT_STARTED", "GAME_OVER"]);
+const zodCellState = z.enum([
+	"EMPTY",
+	"SHIP",
+	"SHOT_MISS",
+	"SHIP_HIT",
+	"SHIP_SUNK",
+]);
+const zodResult = z.enum(["SHOT_MISS", "SHIP_HIT", "SHIP_SUNK"]);
 const zodCellStyle = z.enum([
-	'NONE',
-	'INVALID',
-	'VALID',
-	'SELECTED_VALID',
-	'SELECTED_INVALID_SHIP',
-	'SELECTED_INVALID_MISS',
+	"NONE",
+	"INVALID",
+	"VALID",
+	"SELECTED_VALID",
+	"SELECTED_INVALID_SHIP",
+	"SELECTED_INVALID_MISS",
 ]);
 
-const zodAxis = z.enum(['x', 'y']);
+const zodAxis = z.enum(["x", "y"]);
 
-export const zodGameId = z.string().trim().toLowerCase().min(4, 'Invalid game code.');
+export const zodGameId = z
+	.string()
+	.trim()
+	.toLowerCase()
+	.min(4, "Invalid game code.");
 
-export const zodPlayerId = z.string().trim().min(8, 'Invalid player ID.');
+export const zodPlayerId = z.string().trim().min(8, "Invalid player ID.");
 
 export const zodPlayerName = z
 	.string()
 	.trim()
 	.toLowerCase()
-	.min(1, 'Name is required.')
-	.max(20, 'Name must be less than 20 characters.')
-	.regex(regex, 'Name may contain only letters and numbers.');
+	.min(1, "Name is required.")
+	.max(20, "Name must be less than 20 characters.")
+	.regex(regex, "Name may contain only letters and numbers.");
 
 export const zodCoordinates = z.object({
 	x: z.number().min(0).max(9),

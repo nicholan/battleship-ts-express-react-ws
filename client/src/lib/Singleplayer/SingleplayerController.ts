@@ -1,10 +1,15 @@
-import { aiGameboard, playerGameboard } from '../Gameboard/Gameboard.js';
-import { delay } from '@packages/utilities';
-import type { Coordinates, GameEvent, GameState, LoaderData } from '@packages/zod-data-types';
-import type { Dispatch, SetStateAction } from 'react';
-import type { NavigateFunction } from 'react-router-dom';
-import { ai } from '../Ai/AiController.js';
-import { dispatchToast } from '../../components/Toasts/Toaster.js';
+import { delay } from "@packages/utilities";
+import type {
+	Coordinates,
+	GameEvent,
+	GameState,
+	LoaderData,
+} from "@packages/zod-data-types";
+import type { Dispatch, SetStateAction } from "react";
+import type { NavigateFunction } from "react-router-dom";
+import { dispatchToast } from "../../components/Toasts/Toaster.js";
+import { ai } from "../Ai/AiController.js";
+import { aiGameboard, playerGameboard } from "../Gameboard/Gameboard.js";
 
 type StateActions = {
 	setGameEvents: Dispatch<SetStateAction<GameEvent[]>>;
@@ -30,7 +35,7 @@ export type ControllerProps = {
 function localData(gameId: string) {
 	const getLocalData = () => {
 		const data = window.localStorage.getItem(gameId);
-		if (!data) throw new Error('Local data not found.');
+		if (!data) throw new Error("Local data not found.");
 
 		return JSON.parse(data) as LoaderData;
 	};
@@ -42,7 +47,10 @@ function localData(gameId: string) {
 
 	const setLocalData = (newData: Partial<LoaderData>) => {
 		const data = getLocalData();
-		window.localStorage.setItem(gameId, JSON.stringify({ ...data, ...newData }));
+		window.localStorage.setItem(
+			gameId,
+			JSON.stringify({ ...data, ...newData }),
+		);
 	};
 
 	return { setLocalData, getDataByKey, getLocalData };
@@ -54,7 +62,15 @@ export function singleplayerController({
 	playerTurn,
 	turn,
 	wait = 0,
-	actions: { setGameEvents, setGameState, setIsPlayerTurn, setReady, setWinner, navigate, setRematchModalVisible },
+	actions: {
+		setGameEvents,
+		setGameState,
+		setIsPlayerTurn,
+		setReady,
+		setWinner,
+		navigate,
+		setRematchModalVisible,
+	},
 }: ControllerProps) {
 	const { getDataByKey, setLocalData, getLocalData } = localData(gameId);
 
@@ -68,14 +84,14 @@ export function singleplayerController({
 
 	const startGame = () => {
 		const turnNum = turn ?? Math.round(Math.random());
-		setLocalData({ gameState: 'STARTED', turn: turnNum });
-		setGameState('STARTED');
-		dispatchToast('GAME_START');
+		setLocalData({ gameState: "STARTED", turn: turnNum });
+		setGameState("STARTED");
+		dispatchToast("GAME_START");
 		setIsPlayerTurn(turnNum === playerTurn);
 	};
 
 	const attack = async (coordinates: Coordinates) => {
-		const isTurn = getDataByKey('turn') === playerTurn;
+		const isTurn = getDataByKey("turn") === playerTurn;
 		if (!isTurn) {
 			setIsPlayerTurn(false);
 			return;
@@ -84,7 +100,10 @@ export function singleplayerController({
 		await processAttack(coordinates, true);
 	};
 
-	const processAttack = async (coordinates: Coordinates, playerIsAttacker: boolean) => {
+	const processAttack = async (
+		coordinates: Coordinates,
+		playerIsAttacker: boolean,
+	) => {
 		const attack = playerIsAttacker
 			? aiGameboard.receiveAttack(coordinates)
 			: playerGameboard.receiveAttack(coordinates);
@@ -93,7 +112,7 @@ export function singleplayerController({
 		const { result, shipId, allShipsSunk } = attack;
 
 		const gameEvent = {
-			playerId: playerIsAttacker ? 'ai0000000000' : playerId,
+			playerId: playerIsAttacker ? "ai0000000000" : playerId,
 			coordinates,
 			result,
 			shipId,
@@ -126,9 +145,10 @@ export function singleplayerController({
 
 	const processGameEnding = async (loserTurnNumber: number) => {
 		const data = getLocalData();
-		data.gameState = 'GAME_OVER';
+		data.gameState = "GAME_OVER";
 		data.turn = 2;
-		data.winner = loserTurnNumber === 0 ? data.enemyName ?? 'computer' : data.name;
+		data.winner =
+			loserTurnNumber === 0 ? data.enemyName ?? "computer" : data.name;
 		setLocalData(data);
 
 		await processGameOver(data.winner);
@@ -140,7 +160,7 @@ export function singleplayerController({
 
 		await delay(wait);
 		setRematchModalVisible(true);
-		setGameState('GAME_OVER');
+		setGameState("GAME_OVER");
 	};
 
 	const initializeAi = () => {
@@ -153,7 +173,7 @@ export function singleplayerController({
 
 	const requestRematch = () => {
 		const data = getLocalData();
-		data.gameState = 'NOT_STARTED';
+		data.gameState = "NOT_STARTED";
 		data.events.length = 0;
 		data.board.length = 0;
 		data.ready = false;

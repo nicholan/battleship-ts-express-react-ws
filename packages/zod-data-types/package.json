@@ -1,7 +1,7 @@
 {
 	"name": "@packages/zod-data-types",
-	"main": "./index.js",
-	"types": "./index.d.ts",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"type": "module",
 	"private": true,
 	"version": "1.0.0"

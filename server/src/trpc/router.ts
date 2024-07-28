@@ -1,9 +1,15 @@
-import { publicProcedure, router } from './trpc.js';
-import Player from '../models/userModel.js';
-import Game from '../models/gameModel.js';
-import type { PlayerType } from '../models/userModel.js';
-import { zodGameEvent, zodGameId, zodPlayerName, zodPlayerBoard, zodPlayerId } from '@packages/zod-data-types';
-import { z } from 'zod';
+import {
+	zodGameEvent,
+	zodGameId,
+	zodPlayerBoard,
+	zodPlayerId,
+	zodPlayerName,
+} from "@packages/zod-data-types";
+import { z } from "zod";
+import Game from "../models/gameModel.js";
+import Player from "../models/userModel.js";
+import type { PlayerType } from "../models/userModel.js";
+import { publicProcedure, router } from "./trpc.js";
 
 const zPlayerName = z.object({ name: zodPlayerName });
 const zGameId = z.object({ gameId: zodGameId });
@@ -41,22 +47,24 @@ export const appRouter = router({
 			if (!game) {
 				return {
 					code: 404,
-					message: 'Game not found.',
+					message: "Game not found.",
 				};
 			}
 
 			if (game.players.length > 1) {
 				return {
 					code: 403,
-					message: 'Game is full.',
+					message: "Game is full.",
 				};
 			}
 
-			const { players } = await game.populate<{ players: PlayerType[] }>('players');
+			const { players } = await game.populate<{ players: PlayerType[] }>(
+				"players",
+			);
 			if (players[0].name === name) {
 				return {
 					code: 404,
-					message: 'Name already in use.',
+					message: "Name already in use.",
 				};
 			}
 
@@ -84,15 +92,17 @@ export const appRouter = router({
 			if (!game) {
 				return {
 					code: 404,
-					message: 'Game not found.',
+					message: "Game not found.",
 				};
 			}
-			const { players } = await game.populate<{ players: PlayerType[] }>('players');
+			const { players } = await game.populate<{ players: PlayerType[] }>(
+				"players",
+			);
 			const playerData = players.find((p) => p.name === name);
 			if (!playerData) {
 				return {
 					code: 404,
-					message: 'Player not found.',
+					message: "Player not found.",
 				};
 			}
 
@@ -129,17 +139,25 @@ export const appRouter = router({
 			if (!game) {
 				return {
 					code: 404,
-					message: 'Game not found.',
+					message: "Game not found.",
 				};
 			}
-			if (game.gameState !== 'STARTED') {
+			if (game.gameState !== "STARTED") {
 				return {
 					code: 403,
-					message: 'Game has not started yet.',
+					message: "Game has not started yet.",
 				};
 			}
 			game.events.push(gameEvent);
-			game.turn !== 2 && (game.turn === 0 ? (game.turn = 1) : (game.turn = 0));
+
+			if (game.turn !== 2) {
+				if (game.turn === 0) {
+					game.turn = 1;
+				} else {
+					game.turn = 0;
+				}
+			}
+
 			await game.save();
 			return {
 				gameEvents: game.events,
@@ -157,11 +175,11 @@ export const appRouter = router({
 			if (!game) {
 				return {
 					code: 404,
-					message: 'Game not found.',
+					message: "Game not found.",
 				};
 			}
 			game.turn = Math.round(Math.random()); // 0 or 1;
-			game.gameState = 'STARTED';
+			game.gameState = "STARTED";
 			await game.save();
 			return { turn: game.turn };
 		}),
@@ -177,7 +195,7 @@ export const appRouter = router({
 			if (!player) {
 				return {
 					code: 404,
-					message: 'Player not found.',
+					message: "Player not found.",
 				};
 			}
 			// If player is already 'ready', prevent uploading new gameboard.
@@ -199,11 +217,11 @@ export const appRouter = router({
 			if (!game) {
 				return {
 					code: 404,
-					message: 'Game not found.',
+					message: "Game not found.",
 				};
 			}
 
-			const gameOver = game.gameState === 'GAME_OVER';
+			const gameOver = game.gameState === "GAME_OVER";
 
 			const isPlayerTurn = game.turn === playerTurn;
 			return { isPlayerTurn, gameOver };
@@ -219,14 +237,16 @@ export const appRouter = router({
 			if (!game) {
 				return {
 					code: 404,
-					message: 'Game not found.',
+					message: "Game not found.",
 				};
 			}
-			game.gameState = 'GAME_OVER';
+			game.gameState = "GAME_OVER";
 
 			// Querying player turn will always be false for both players:
 			game.turn = 2;
-			const { players } = await game.populate<{ players: PlayerType[] }>('players');
+			const { players } = await game.populate<{ players: PlayerType[] }>(
+				"players",
+			);
 
 			const winner = playerTurn === 0 ? 1 : 0;
 			game.winner = players[winner].name;
@@ -243,19 +263,21 @@ export const appRouter = router({
 			if (!game) {
 				return {
 					code: 404,
-					message: 'Game not found.',
+					message: "Game not found.",
 				};
 			}
 
-			game.gameState = 'NOT_STARTED';
+			game.gameState = "NOT_STARTED";
 			game.events = [];
 
-			const { players } = await game.populate<{ players: PlayerType[] }>('players');
-			players.forEach(async (p) => {
+			const { players } = await game.populate<{ players: PlayerType[] }>(
+				"players",
+			);
+			for (const p of players) {
 				p.board = [];
 				p.ready = false;
 				await p.save();
-			});
+			}
 
 			await game.save();
 			return { gameId };

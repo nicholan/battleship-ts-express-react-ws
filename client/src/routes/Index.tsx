@@ -1,20 +1,24 @@
-import { useNavigate } from 'react-router-dom';
-import { trpc } from '../trpc.js';
-import { SubmitHandler } from 'react-hook-form';
-import type { IndexFormSchema } from '../components/Forms/IndexForm.js';
-import { IndexForm } from '../components/Forms/IndexForm.js';
-import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket.js';
-import { zodGameInvitationMessage, type GameInvitationMessage, LoaderData } from '@packages/zod-data-types';
-import { useState, useRef } from 'react';
-import { aiGameboard } from '../lib/Gameboard/Gameboard.js';
-import { generateUniqueId } from '@packages/utilities';
-import { dispatchToast } from '../components/Toasts/Toaster.js';
+import { generateUniqueId } from "@packages/utilities";
+import {
+	type GameInvitationMessage,
+	type LoaderData,
+	zodGameInvitationMessage,
+} from "@packages/zod-data-types";
+import { useRef, useState } from "react";
+import type { SubmitHandler } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket.js";
+import type { IndexFormSchema } from "../components/Forms/IndexForm.js";
+import { IndexForm } from "../components/Forms/IndexForm.js";
+import { dispatchToast } from "../components/Toasts/Toaster.js";
+import { aiGameboard } from "../lib/Gameboard/Gameboard.js";
+import { trpc } from "../trpc.js";
 
-const url = 'ws://localhost:3000';
+const url = "ws://localhost:3000";
 
 export function Index() {
 	const navigate = useNavigate();
-	const [name, setName] = useState('');
+	const [name, setName] = useState("");
 	const suffix = useRef(Date.now().toString().slice(-3));
 
 	useWebSocket(url, {
@@ -39,12 +43,12 @@ export function Index() {
 
 	async function joinGame(name: string, gameId: string) {
 		const response = await trpc.joinGame.mutate({ gameId, name });
-		if ('message' in response) {
-			dispatchToast('API_RESPONSE', { message: response.message });
+		if ("message" in response) {
+			dispatchToast("API_RESPONSE", { message: response.message });
 			return;
 		}
 
-		if ('name' in response && 'gameId' in response) {
+		if ("name" in response && "gameId" in response) {
 			navigate(`/${response.gameId}/${response.name}`);
 			return;
 		}
@@ -52,7 +56,7 @@ export function Index() {
 
 	async function createGame(name: string) {
 		const response = await trpc.createGame.mutate({ name });
-		if ('name' in response && 'gameId' in response) {
+		if ("name" in response && "gameId" in response) {
 			navigate(`/${response.gameId}/${response.name}`);
 			return;
 		}
@@ -72,11 +76,11 @@ export function Index() {
 			turn: 2,
 			playerTurn: 0,
 			ready: false,
-			gameState: 'NOT_STARTED',
+			gameState: "NOT_STARTED",
 			winner: null,
 			aiBoard,
 			isAiGame: true,
-			enemyName: 'computer',
+			enemyName: "computer",
 		};
 		window.localStorage.setItem(data.gameId, JSON.stringify(data));
 
@@ -84,16 +88,26 @@ export function Index() {
 		return;
 	}
 
-	function processSocketMessage({ hostName, gameId, type, ...data }: GameInvitationMessage) {
-		if (type !== 'PLAYER_INVITE') return;
-		if (data.name === undefined || hostName === undefined || gameId === undefined) return;
+	function processSocketMessage({
+		hostName,
+		gameId,
+		type,
+		...data
+	}: GameInvitationMessage) {
+		if (type !== "PLAYER_INVITE") return;
+		if (
+			data.name === undefined ||
+			hostName === undefined ||
+			gameId === undefined
+		)
+			return;
 		if (data.name.toLowerCase() !== name + suffix.current) return;
 
-		dispatchToast('INVITE_RECEIVED', { gameId, name, hostName, joinGame });
+		dispatchToast("INVITE_RECEIVED", { gameId, name, hostName, joinGame });
 	}
 
 	function parseMessage({ data }: MessageEvent) {
-		if (typeof data !== 'string') return false;
+		if (typeof data !== "string") return false;
 
 		const json: unknown = JSON.parse(data);
 		const parsed = zodGameInvitationMessage.safeParse(json);
@@ -103,5 +117,7 @@ export function Index() {
 		return false;
 	}
 
-	return <IndexForm onSubmit={onSubmit} setName={setName} suffix={suffix.current} />;
+	return (
+		<IndexForm onSubmit={onSubmit} setName={setName} suffix={suffix.current} />
+	);
 }

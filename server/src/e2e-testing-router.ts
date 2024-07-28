@@ -1,13 +1,16 @@
-import express, { Router } from 'express';
-import Player, { type PlayerProps, PlayerType } from './models/userModel.js';
-import Game, { type GameProps } from './models/gameModel.js';
+import express, { type Router } from "express";
+import Game, { type GameProps } from "./models/gameModel.js";
+import Player, {
+	type PlayerProps,
+	type PlayerType,
+} from "./models/userModel.js";
 
-const [p1name, p2name] = ['alice', 'bobby'];
+const [p1name, p2name] = ["alice", "bobby"];
 
 // Used for creating games quickly for e2e testing; different gamestates etc.
 const multiplayerRouter: Router = express.Router();
 
-multiplayerRouter.post('/', async (req, res) => {
+multiplayerRouter.post("/", async (req, res) => {
 	const data = req.body as PlayerProps & GameProps & { numPlayers: 1 | 2 };
 
 	let p1: PlayerType | null = null;
@@ -33,7 +36,7 @@ multiplayerRouter.post('/', async (req, res) => {
 					name: p2name,
 					playerTurn: 1,
 					ready: data.ready,
-			  })
+				})
 			: null;
 
 	game.players = [p1._id];
@@ -43,7 +46,7 @@ multiplayerRouter.post('/', async (req, res) => {
 
 	res.send({
 		p1: p1.name,
-		p2: p2 && p2.name,
+		p2: p2?.name,
 		gameCode: game.gameId,
 	});
 });

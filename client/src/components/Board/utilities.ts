@@ -1,6 +1,6 @@
-export type BoardSize = 'xxs' | 'xs' | 'sm' | 'md' | 'lg';
+export type BoardSize = "xxs" | "xs" | "sm" | "md" | "lg";
 
-export const KEYS = ['KeyE', 'KeyW', 'KeyA', 'KeyS', 'KeyD'];
+export const KEYS = ["KeyE", "KeyW", "KeyA", "KeyS", "KeyD"];
 
 export const boardSizeMap: { [key in BoardSize]: number } = {
 	xxs: 350,
@@ -13,7 +13,7 @@ export const boardSizeMap: { [key in BoardSize]: number } = {
 export function getCoordinates(
 	{ pageX, pageY }: React.MouseEvent<HTMLCanvasElement, MouseEvent>,
 	canvas: HTMLCanvasElement | null,
-	size: number
+	size: number,
 ) {
 	if (!canvas) {
 		return null;

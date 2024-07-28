@@ -1,20 +1,20 @@
-import classNames from 'classnames';
-import type { ComponentPropsWithoutRef } from 'react';
+import classNames from "classnames";
+import type { ComponentPropsWithoutRef } from "react";
 
 type Props = {
-	type: 'num' | 'letter';
-} & ComponentPropsWithoutRef<'div'>;
+	type: "num" | "letter";
+} & ComponentPropsWithoutRef<"div">;
 
 export function CoordinatesBar({ type, className }: Props) {
-	const content = type === 'num' ? getNumbers(1, 10) : getLetters('A', 'J');
+	const content = type === "num" ? getNumbers(1, 10) : getLetters("A", "J");
 
 	return (
 		<div
 			className={classNames(
 				[className],
-				['text-black dark:text-neutral-100'],
-				['font-bebas-neue text-xl !leading-[0px] select-none'],
-				['hidden lg:flex']
+				["text-black dark:text-neutral-100"],
+				["font-bebas-neue text-xl !leading-[0px] select-none"],
+				["hidden lg:flex"],
 			)}
 			tabIndex={-1}
 		>
@@ -23,7 +23,7 @@ export function CoordinatesBar({ type, className }: Props) {
 	);
 }
 
-const style = classNames(['grid place-items-center'], ['w-full h-full']);
+const style = classNames(["grid place-items-center"], ["w-full h-full"]);
 
 function getNumbers(start: number, end: number) {
 	const numbers = [];
@@ -31,7 +31,7 @@ function getNumbers(start: number, end: number) {
 		numbers.push(
 			<div className={style} key={i}>
 				{i}
-			</div>
+			</div>,
 		);
 	}
 	return numbers;
@@ -45,7 +45,7 @@ function getLetters(start: string, end: string) {
 		letters.push(
 			<div className={style} key={i}>
 				{String.fromCharCode(i)}
-			</div>
+			</div>,
 		);
 	}
 	return letters;

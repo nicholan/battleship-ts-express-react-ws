@@ -1,15 +1,19 @@
-import type { GameEvent } from '@packages/zod-data-types';
-import { ai } from './AiController';
+import type { GameEvent } from "@packages/zod-data-types";
+import { ai } from "./AiController";
 
-describe('aiController', () => {
-	const data: Omit<GameEvent, 'coordinates'> = { playerId: '000', result: 'SHIP_HIT', shipId: 'testShip1' };
+describe("aiController", () => {
+	const data: Omit<GameEvent, "coordinates"> = {
+		playerId: "000",
+		result: "SHIP_HIT",
+		shipId: "testShip1",
+	};
 
 	beforeEach(() => {
 		ai.reset();
 	});
 
-	describe('getAiMove', () => {
-		test('returns unique coordinate when no GameEvent array is provided', () => {
+	describe("getAiMove", () => {
+		test("returns unique coordinate when no GameEvent array is provided", () => {
 			const coordinatesSet = new Set();
 			for (let i = 0; i < 100; i++) {
 				const coordinates = ai.getAiMove();
@@ -24,8 +28,8 @@ describe('aiController', () => {
 			expect(coordinatesSet.size).toEqual(100);
 		});
 
-		test('returns null if all coordinates have been hit', () => {
-			let shouldBeNull;
+		test("returns null if all coordinates have been hit", () => {
+			let shouldBeNull: unknown;
 			for (let i = 0; i < 101; i++) {
 				if (i === 100) {
 					shouldBeNull = ai.getAiMove();
@@ -37,8 +41,8 @@ describe('aiController', () => {
 		});
 	});
 
-	describe('getAiMove and calculateMoveSet', () => {
-		test('getAiMove does not return coordinates that are passed into calculateMoveSet', () => {
+	describe("getAiMove and calculateMoveSet", () => {
+		test("getAiMove does not return coordinates that are passed into calculateMoveSet", () => {
 			const coordinate1 = { x: 0, y: 0 };
 			const coordinate2 = { x: 1, y: 0 };
 			const events: GameEvent[] = [
@@ -63,7 +67,7 @@ describe('aiController', () => {
 			expect(coordinatesSet.size).toEqual(98);
 		});
 
-		test('returns correctly calculated coordinate on the x-axis based on GameEvents', () => {
+		test("returns correctly calculated coordinate on the x-axis based on GameEvents", () => {
 			const events: GameEvent[] = [
 				{ coordinates: { x: 0, y: 0 }, ...data },
 				{ coordinates: { x: 1, y: 0 }, ...data },
@@ -76,7 +80,7 @@ describe('aiController', () => {
 			expect(coordinates).toEqual(expected);
 		});
 
-		test('returns correctly calculated coordinate on the y-axis based on GameEvents', () => {
+		test("returns correctly calculated coordinate on the y-axis based on GameEvents", () => {
 			const events: GameEvent[] = [
 				{ coordinates: { x: 0, y: 0 }, ...data },
 				{ coordinates: { x: 0, y: 1 }, ...data },

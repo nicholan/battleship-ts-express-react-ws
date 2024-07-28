@@ -1,18 +1,18 @@
-import { z } from 'zod';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { zodGameId, zodPlayerName } from '@packages/zod-data-types';
-import { Button } from '../Buttons/Button.js';
-import { FormInput } from '../Inputs/FormInput.js';
-import { Label } from '../Label/Label.js';
-import { useEffect } from 'react';
-import classNames from 'classnames';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { zodGameId, zodPlayerName } from "@packages/zod-data-types";
+import classNames from "classnames";
+import { useEffect } from "react";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "../Buttons/Button.js";
+import { FormInput } from "../Inputs/FormInput.js";
+import { Label } from "../Label/Label.js";
 
 export type IndexFormSchema = z.infer<typeof formSchema>;
 
 const formSchema = z.object({
 	name: zodPlayerName,
-	gameId: zodGameId.optional().or(z.literal('')),
+	gameId: zodGameId.optional().or(z.literal("")),
 	isComputer: z.boolean(),
 });
 
@@ -33,31 +33,31 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 		resolver: zodResolver(formSchema),
 	});
 
-	const watchGameId = watch('gameId');
-	const watchName = watch('name');
-	const watchAi = watch('isComputer');
+	const watchGameId = watch("gameId");
+	const watchName = watch("name");
+	const watchAi = watch("isComputer");
 
 	useEffect(() => {
 		if (!watchAi) return;
-		resetField('gameId');
-	}, [watchAi]);
+		resetField("gameId");
+	}, [watchAi, resetField]);
 
 	useEffect(() => {
 		if (!isValid) return;
 		setName(watchName.toLowerCase());
-	}, [watchName]);
+	}, [watchName, isValid, setName]);
 
 	return (
 		<form
 			onSubmit={handleSubmit(onSubmit)}
 			className={classNames(
-				['font-roboto text-center'],
-				['flex flex-col gap-4 items-center'],
-				['w-full max-w-md mt-4 mx-auto'],
-				['py-8 lg:py-12 px-8'],
-				['rounded border dark:border-neutral-300/10'],
-				['shadow-sm dark:shadow-inner'],
-				['bg-neutral-50 dark:bg-neutral-700/5']
+				["font-roboto text-center"],
+				["flex flex-col gap-4 items-center"],
+				["w-full max-w-md mt-4 mx-auto"],
+				["py-8 lg:py-12 px-8"],
+				["rounded border dark:border-neutral-300/10"],
+				["shadow-sm dark:shadow-inner"],
+				["bg-neutral-50 dark:bg-neutral-700/5"],
 			)}
 		>
 			<div>
@@ -98,17 +98,20 @@ export function IndexForm({ onSubmit, setName, suffix }: IndexFormProps) {
 					errors={errors}
 				/>
 			</div>
-			<Button type="submit">{watchGameId ? 'Join' : 'Create'}</Button>
+			<Button type="submit">{watchGameId ? "Join" : "Create"}</Button>
 			{isValid && watchName && !watchAi && !watchGameId && (
 				<div
 					className={classNames(
-						['w-full pt-8'],
-						['rounded-sm border-t dark:border-neutral-300/10'],
-						['dark:text-white']
+						["w-full pt-8"],
+						["rounded-sm border-t dark:border-neutral-300/10"],
+						["dark:text-white"],
 					)}
 				>
 					<Label id="public-name-label">Public name</Label>
-					<p aria-labelledby="public-name-label" aria-describedby="public-name-description" tabIndex={0}>
+					<p
+						aria-labelledby="public-name-label"
+						aria-describedby="public-name-description"
+					>
 						{watchName.slice(0, 19).toLowerCase()}
 						{suffix}
 					</p>

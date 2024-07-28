@@ -1,4 +1,4 @@
-import { Cell } from '../Cell/Cell.js';
+import type { Cell } from "../Cell/Cell.js";
 
 export class Ship {
 	health;
@@ -19,16 +19,18 @@ export class Ship {
 	}
 
 	setSunk() {
-		this.shipNodes.forEach((node) => (node.state = 'SHIP_SUNK'));
+		for (const node of this.shipNodes) {
+			node.state = "SHIP_SUNK";
+		}
 	}
 
 	damage() {
 		this.health--;
 		if (this.health < 1) {
 			this.setSunk();
-			return 'SHIP_SUNK';
+			return "SHIP_SUNK";
 		}
-		return 'SHIP_HIT';
+		return "SHIP_HIT";
 	}
 }
 

@@ -1,7 +1,7 @@
-import { FC, forwardRef, ComponentPropsWithRef } from 'react';
-import classNames from 'classnames';
+import classNames from "classnames";
+import { type ComponentPropsWithRef, forwardRef } from "react";
 
-export type InputType = 'text' | 'checkbox';
+export type InputType = "text" | "checkbox";
 
 export type InputProps = {
 	id: string;
@@ -10,11 +10,14 @@ export type InputProps = {
 	type?: InputType;
 	placeholder?: string;
 	className?: string;
-} & ComponentPropsWithRef<'input'>;
+} & ComponentPropsWithRef<"input">;
 
 // eslint-disable-next-line react/display-name
-export const Input: FC<InputProps> = forwardRef<HTMLInputElement, InputProps>(
-	({ id, name, label, type = 'text', className, placeholder = '', ...props }, ref) => {
+export const Input = forwardRef<HTMLInputElement, InputProps>(
+	(
+		{ id, name, label, type = "text", className, placeholder = "", ...props },
+		ref,
+	) => {
 		return (
 			<input
 				id={id}
@@ -26,14 +29,14 @@ export const Input: FC<InputProps> = forwardRef<HTMLInputElement, InputProps>(
 				placeholder={placeholder}
 				className={classNames(
 					[className],
-					['text-black font-roboto'],
-					['p-2 md:p-3'],
-					['dark:bg-neutral-50'],
-					['border rounded-sm'],
-					['shadow-sm dark:shadow-inner']
+					["text-black font-roboto"],
+					["p-2 md:p-3"],
+					["dark:bg-neutral-50"],
+					["border rounded-sm"],
+					["shadow-sm dark:shadow-inner"],
 				)}
 				{...props}
 			/>
 		);
-	}
+	},
 );

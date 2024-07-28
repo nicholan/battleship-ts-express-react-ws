@@ -1,6 +1,6 @@
-import { vi } from 'vitest';
-import type { TRPC } from '../../../trpc.js';
-import type { GameEvent } from '@packages/zod-data-types';
+import type { GameEvent } from "@packages/zod-data-types";
+import { vi } from "vitest";
+import type { TRPC } from "../../../trpc.js";
 
 export const actions = {
 	sendJsonMessage: vi.fn(),
@@ -15,23 +15,23 @@ export const actions = {
 };
 
 export const data = {
-	playerId: 'playerId',
-	name: 'Player',
-	gameId: 'game1',
+	playerId: "playerId",
+	name: "Player",
+	gameId: "game1",
 	board: [],
 	events: [],
 	turn: 2,
 	playerTurn: 0,
 	ready: false,
-	gameState: 'NOT_STARTED',
+	gameState: "NOT_STARTED",
 	winner: null,
 	aiBoard: [],
 	isAiGame: true,
-	enemyName: 'player2',
+	enemyName: "player2",
 };
 
 export const msgBase = {
-	playerId: 'notPlayerId',
+	playerId: "notPlayerId",
 	gameId: data.gameId,
 };
 
@@ -62,8 +62,8 @@ export const db = {
 	gameOver: {
 		mutate: vi.fn(() => {
 			return {
-				winner: 'winner',
-				gameState: 'GAME_OVER',
+				winner: "winner",
+				gameState: "GAME_OVER",
 			};
 		}),
 	},

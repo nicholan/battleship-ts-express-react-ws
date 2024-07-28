@@ -1,24 +1,35 @@
-import { useRef, useEffect } from 'react';
-import type { ComponentPropsWithoutRef, KeyboardEvent } from 'react';
-import classNames from 'classnames';
+import classNames from "classnames";
+import { useEffect, useRef } from "react";
+import type { ComponentPropsWithoutRef, KeyboardEvent } from "react";
 
-import type { GameState } from '@packages/zod-data-types';
-import { boardSizeMap, KEYS, type BoardSize } from './utilities.js';
+import type { GameState } from "@packages/zod-data-types";
+import { type BoardSize, KEYS, boardSizeMap } from "./utilities.js";
 
-import { getCoordinates } from './utilities.js';
-import { playerGameboard } from '../../lib/Gameboard/Gameboard.js';
-import { CanvasController } from '../../lib/Canvas/CanvasController.js';
+import { CanvasController } from "../../lib/Canvas/CanvasController.js";
+import { playerGameboard } from "../../lib/Gameboard/Gameboard.js";
+import { getCoordinates } from "./utilities.js";
 
 type PlayerCanvasProps = {
 	size: BoardSize;
 	gameState: GameState;
 	setShipsRemaining: (val: boolean) => void;
-	gameEventsLen: number;
-} & ComponentPropsWithoutRef<'canvas'>;
+} & ComponentPropsWithoutRef<"canvas">;
 
-export function PlayerCanvas({ setShipsRemaining, gameState, className, size, gameEventsLen }: PlayerCanvasProps) {
-	const { getGrid, isValidPlacement, clearCellStyles, toggleAxis, placeShip, getShipLength, setSelectedCoordinate } =
-		playerGameboard;
+export function PlayerCanvas({
+	setShipsRemaining,
+	gameState,
+	className,
+	size,
+}: PlayerCanvasProps) {
+	const {
+		getGrid,
+		isValidPlacement,
+		clearCellStyles,
+		toggleAxis,
+		placeShip,
+		getShipLength,
+		setSelectedCoordinate,
+	} = playerGameboard;
 
 	const grid = getGrid();
 	const { drawBoard } = new CanvasController(boardSizeMap[size], grid);
@@ -29,17 +40,23 @@ export function PlayerCanvas({ setShipsRemaining, gameState, className, size, ga
 	function update() {
 		if (!canvasCtxRef.current) return;
 
-		if (gameState === 'NOT_STARTED') {
+		if (gameState === "NOT_STARTED") {
 			isValidPlacement();
 		}
 
 		drawBoard(canvasCtxRef.current);
 	}
 
-	function handleMouseMove(event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
+	function handleMouseMove(
+		event: React.MouseEvent<HTMLCanvasElement, MouseEvent>,
+	) {
 		if (getShipLength() < 1) return;
 
-		const coordinates = getCoordinates(event, canvasRef.current, boardSizeMap[size]);
+		const coordinates = getCoordinates(
+			event,
+			canvasRef.current,
+			boardSizeMap[size],
+		);
 		if (coordinates === null) return;
 
 		setSelectedCoordinate({ coordinates });
@@ -60,7 +77,7 @@ export function PlayerCanvas({ setShipsRemaining, gameState, className, size, ga
 	}
 
 	function boardClickHandler() {
-		if (gameState !== 'NOT_STARTED') return;
+		if (gameState !== "NOT_STARTED") return;
 
 		if (getShipLength() > 0) {
 			placeShip();
@@ -80,11 +97,11 @@ export function PlayerCanvas({ setShipsRemaining, gameState, className, size, ga
 			canvasRef.current.focus();
 		}
 
-		if (code === 'KeyQ') {
+		if (code === "KeyQ") {
 			wheelHandler();
 		}
 
-		if (code === 'KeyE') {
+		if (code === "KeyE") {
 			boardClickHandler();
 		}
 
@@ -94,7 +111,7 @@ export function PlayerCanvas({ setShipsRemaining, gameState, className, size, ga
 
 	useEffect(() => {
 		if (canvasRef.current) {
-			canvasCtxRef.current = canvasRef.current.getContext('2d');
+			canvasCtxRef.current = canvasRef.current.getContext("2d");
 			drawBoard(canvasCtxRef.current);
 		}
 
@@ -102,10 +119,10 @@ export function PlayerCanvas({ setShipsRemaining, gameState, className, size, ga
 
 		update();
 
-		if (gameState === 'NOT_STARTED' && canvasRef.current) {
+		if (gameState === "NOT_STARTED" && canvasRef.current) {
 			canvasRef.current.focus();
 		}
-	}, [gameEventsLen, size]);
+	});
 
 	return (
 		<canvas
@@ -114,7 +131,11 @@ export function PlayerCanvas({ setShipsRemaining, gameState, className, size, ga
 			width={boardSizeMap[size]}
 			height={boardSizeMap[size]}
 			ref={canvasRef}
-			className={classNames([className], ['select-none'], ['shadow dark:shadow-none'])}
+			className={classNames(
+				[className],
+				["select-none"],
+				["shadow dark:shadow-none"],
+			)}
 			onMouseMove={handleMouseMove}
 			onMouseEnter={handleMouseMove}
 			onClick={boardClickHandler}

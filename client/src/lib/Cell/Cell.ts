@@ -1,9 +1,14 @@
-import type { Coordinates, CellStyle, CellState, Result } from '@packages/zod-data-types';
-import type { Ship } from '../Ship/Ship.js';
+import type {
+	CellState,
+	CellStyle,
+	Coordinates,
+	Result,
+} from "@packages/zod-data-types";
+import type { Ship } from "../Ship/Ship.js";
 
 export class Cell {
-	state: CellState = 'EMPTY';
-	style: CellStyle = 'NONE';
+	state: CellState = "EMPTY";
+	style: CellStyle = "NONE";
 	coordinates;
 	#ship: Ship | null = null;
 
@@ -13,7 +18,7 @@ export class Cell {
 
 	addShip(ship: Ship) {
 		this.#ship = ship;
-		this.state = 'SHIP';
+		this.state = "SHIP";
 	}
 
 	getShipId() {
@@ -23,10 +28,10 @@ export class Cell {
 
 	receiveAttack(): Result {
 		if (this.#ship) {
-			this.state = 'SHIP_HIT';
+			this.state = "SHIP_HIT";
 			return this.#ship.damage();
 		}
-		this.state = 'SHOT_MISS';
+		this.state = "SHOT_MISS";
 		return this.state;
 	}
 }

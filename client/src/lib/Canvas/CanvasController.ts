@@ -1,5 +1,9 @@
-import type { Coordinates, CellStyle, CellState } from '@packages/zod-data-types';
-import type { Cell } from '../Cell/Cell.js';
+import type {
+	CellState,
+	CellStyle,
+	Coordinates,
+} from "@packages/zod-data-types";
+import type { Cell } from "../Cell/Cell.js";
 
 type DrawProps = {
 	bgColor: string;
@@ -7,24 +11,24 @@ type DrawProps = {
 };
 
 const colorMap = {
-	BLACK: 'rgb(25, 25, 25)',
-	WHITE: 'rgb(250, 250, 250)',
-	ORANGE: 'rgb(251, 146, 60)',
-	SQUARE_BORDER: 'rgb(225, 225, 225)',
-	CANVAS_BORDER: 'rgb(0, 0, 0)',
-	INVALID: 'rgb(253, 211, 177)',
-	VALID: 'rgb(210, 210, 210)',
-	SELECTED_INVALID_MISS: 'rgb(251, 146, 60)',
-	SELECTED_INVALID_SHIP: 'rgb(251, 146, 60)',
+	BLACK: "rgb(25, 25, 25)",
+	WHITE: "rgb(250, 250, 250)",
+	ORANGE: "rgb(251, 146, 60)",
+	SQUARE_BORDER: "rgb(225, 225, 225)",
+	CANVAS_BORDER: "rgb(0, 0, 0)",
+	INVALID: "rgb(253, 211, 177)",
+	VALID: "rgb(210, 210, 210)",
+	SELECTED_INVALID_MISS: "rgb(251, 146, 60)",
+	SELECTED_INVALID_SHIP: "rgb(251, 146, 60)",
 } as const;
 
 const styleMap: { [key in CellStyle]: string } = {
-	NONE: colorMap['WHITE'],
-	INVALID: colorMap['ORANGE'],
-	VALID: colorMap['VALID'],
-	SELECTED_VALID: colorMap['VALID'],
-	SELECTED_INVALID_MISS: colorMap['SELECTED_INVALID_MISS'],
-	SELECTED_INVALID_SHIP: colorMap['SELECTED_INVALID_SHIP'],
+	NONE: colorMap.WHITE,
+	INVALID: colorMap.ORANGE,
+	VALID: colorMap.VALID,
+	SELECTED_VALID: colorMap.VALID,
+	SELECTED_INVALID_MISS: colorMap.SELECTED_INVALID_MISS,
+	SELECTED_INVALID_SHIP: colorMap.SELECTED_INVALID_SHIP,
 } as const;
 
 const crossStyle = {
@@ -34,22 +38,22 @@ const crossStyle = {
 
 const stateMap: { [key in CellState]: DrawProps } = {
 	EMPTY: {
-		bgColor: colorMap['WHITE'],
+		bgColor: colorMap.WHITE,
 	},
 	SHIP: {
-		bgColor: colorMap['BLACK'],
+		bgColor: colorMap.BLACK,
 	},
 	SHOT_MISS: {
-		bgColor: colorMap['WHITE'],
-		markerColor: colorMap['BLACK'],
+		bgColor: colorMap.WHITE,
+		markerColor: colorMap.BLACK,
 	},
 	SHIP_HIT: {
-		bgColor: colorMap['BLACK'],
-		markerColor: colorMap['WHITE'],
+		bgColor: colorMap.BLACK,
+		markerColor: colorMap.WHITE,
 	},
 	SHIP_SUNK: {
-		bgColor: colorMap['BLACK'],
-		markerColor: colorMap['ORANGE'],
+		bgColor: colorMap.BLACK,
+		markerColor: colorMap.ORANGE,
 	},
 } as const;
 
@@ -59,7 +63,7 @@ export class CanvasController {
 	#grid;
 	#ctx: CanvasRenderingContext2D | null = null;
 
-	constructor(size = 500, grid: Cell[][]) {
+	constructor(size: number, grid: Cell[][]) {
 		this.#size = size;
 		this.#squareSize = size / 10;
 		this.#grid = grid;
@@ -76,10 +80,10 @@ export class CanvasController {
 
 				this.#drawCellStyle({ x, y }, style);
 				this.#drawCellState({ x, y }, state, style);
-				this.#drawBorder({ x, y }, colorMap['SQUARE_BORDER'], this.#squareSize);
+				this.#drawBorder({ x, y }, colorMap.SQUARE_BORDER, this.#squareSize);
 			}
 		}
-		this.#drawBorder({ x: 0, y: 0 }, colorMap['CANVAS_BORDER'], this.#size);
+		this.#drawBorder({ x: 0, y: 0 }, colorMap.CANVAS_BORDER, this.#size);
 	};
 
 	#drawBorder = ({ x, y }: Coordinates, color: string, size: number) => {
@@ -92,18 +96,32 @@ export class CanvasController {
 	#drawCellStyle = ({ x, y }: Coordinates, style: CellStyle) => {
 		if (!this.#ctx) return;
 		this.#ctx.fillStyle = styleMap[style];
-		this.#ctx.fillRect(x * this.#squareSize, y * this.#squareSize, this.#squareSize, this.#squareSize);
+		this.#ctx.fillRect(
+			x * this.#squareSize,
+			y * this.#squareSize,
+			this.#squareSize,
+			this.#squareSize,
+		);
 	};
 
-	#drawCellState = ({ x, y }: Coordinates, state: CellState, style: CellStyle) => {
+	#drawCellState = (
+		{ x, y }: Coordinates,
+		state: CellState,
+		style: CellStyle,
+	) => {
 		if (!this.#ctx) return;
-		if (state === 'EMPTY') return;
+		if (state === "EMPTY") return;
 
 		const { bgColor, markerColor } = stateMap[state];
-		const hover = style === 'NONE' ? null : styleMap[style];
+		const hover = style === "NONE" ? null : styleMap[style];
 
 		this.#ctx.fillStyle = hover ? hover : bgColor;
-		this.#ctx.fillRect(x * this.#squareSize, y * this.#squareSize, this.#squareSize, this.#squareSize);
+		this.#ctx.fillRect(
+			x * this.#squareSize,
+			y * this.#squareSize,
+			this.#squareSize,
+			this.#squareSize,
+		);
 
 		if (markerColor) {
 			this.#drawCross({ x, y }, markerColor);
@@ -119,8 +137,10 @@ export class CanvasController {
 		// Draw the first diagonal line of the 'x' (start at top left, end bottom right).
 		let startX = x * this.#squareSize + this.#squareSize / lineDivideBy;
 		let startY = y * this.#squareSize + this.#squareSize / lineDivideBy;
-		let endX = x * this.#squareSize + this.#squareSize - this.#squareSize / lineDivideBy;
-		let endY = y * this.#squareSize + this.#squareSize - this.#squareSize / lineDivideBy;
+		let endX =
+			x * this.#squareSize + this.#squareSize - this.#squareSize / lineDivideBy;
+		let endY =
+			y * this.#squareSize + this.#squareSize - this.#squareSize / lineDivideBy;
 
 		this.#ctx.beginPath();
 		this.#ctx.moveTo(startX, startY);
@@ -128,10 +148,12 @@ export class CanvasController {
 		this.#ctx.stroke();
 
 		// Draw the second diagonal line of the 'x' (start at top right, end bottom left).
-		startX = x * this.#squareSize + this.#squareSize - this.#squareSize / lineDivideBy;
+		startX =
+			x * this.#squareSize + this.#squareSize - this.#squareSize / lineDivideBy;
 		startY = y * this.#squareSize + this.#squareSize / lineDivideBy;
 		endX = x * this.#squareSize + this.#squareSize / lineDivideBy;
-		endY = y * this.#squareSize + this.#squareSize - this.#squareSize / lineDivideBy;
+		endY =
+			y * this.#squareSize + this.#squareSize - this.#squareSize / lineDivideBy;
 
 		this.#ctx.beginPath();
 		this.#ctx.moveTo(startX, startY);

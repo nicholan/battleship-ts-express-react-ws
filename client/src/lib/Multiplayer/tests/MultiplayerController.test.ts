@@ -1,9 +1,9 @@
-import { playerGameboard } from '../../Gameboard/Gameboard.js';
-import { multiplayerController } from '../MultiplayerController.js';
-import { actions, data, db } from './mockSetup.js';
-import { vi } from 'vitest';
+import { vi } from "vitest";
+import { playerGameboard } from "../../Gameboard/Gameboard.js";
+import { multiplayerController } from "../MultiplayerController.js";
+import { actions, data, db } from "./mockSetup.js";
 
-describe('multiplayerController', () => {
+describe("multiplayerController", () => {
 	beforeEach(() => {
 		playerGameboard.reset();
 	});
@@ -12,32 +12,32 @@ describe('multiplayerController', () => {
 		vi.clearAllMocks();
 	});
 
-	describe('readyPlayer', () => {
+	describe("readyPlayer", () => {
 		const { readyPlayer } = multiplayerController({
 			...data,
 			db,
 			actions,
 		});
 
-		it('returns false if gameboard is not populated', async () => {
+		it("returns false if gameboard is not populated", async () => {
 			playerGameboard.reset();
 			const readyState = await readyPlayer();
 			expect(readyState).toEqual(false);
 		});
 
-		it('returns true when all ships are placed on the board', async () => {
+		it("returns true when all ships are placed on the board", async () => {
 			playerGameboard.populateBoard();
 			const readyState = await readyPlayer();
 			expect(readyState).toEqual(true);
 		});
 
-		it('calls actions and db calls with correct values', async () => {
+		it("calls actions and db calls with correct values", async () => {
 			playerGameboard.populateBoard();
 			await readyPlayer();
 
 			expect(actions.setReady).toHaveBeenCalledWith(true);
 			expect(actions.sendJsonMessage).toHaveBeenCalledWith({
-				type: 'PLAYER_READY',
+				type: "PLAYER_READY",
 				gameId: data.gameId,
 				playerId: data.playerId,
 			});
@@ -48,18 +48,18 @@ describe('multiplayerController', () => {
 		});
 	});
 
-	describe('attack', () => {
+	describe("attack", () => {
 		const { attack } = multiplayerController({
 			...data,
 			db,
 			actions,
 		});
 
-		it('calls actions setIsPlayerTurn and sendJsonMessage with correct values', async () => {
+		it("calls actions setIsPlayerTurn and sendJsonMessage with correct values", async () => {
 			const coordinates = { x: 0, y: 0 };
 			await attack(coordinates);
 			expect(actions.sendJsonMessage).toHaveBeenCalledWith({
-				type: 'ATTACK',
+				type: "ATTACK",
 				coordinates,
 				gameId: data.gameId,
 				playerId: data.playerId,
@@ -69,8 +69,8 @@ describe('multiplayerController', () => {
 		});
 	});
 
-	describe('requestRematch', () => {
-		it('calls actions setReady and sendJsonMessage with correct values', () => {
+	describe("requestRematch", () => {
+		it("calls actions setReady and sendJsonMessage with correct values", () => {
 			const { requestRematch } = multiplayerController({
 				...data,
 				db,
@@ -79,7 +79,7 @@ describe('multiplayerController', () => {
 
 			requestRematch();
 			expect(actions.sendJsonMessage).toHaveBeenCalledWith({
-				type: 'REQUEST_REMATCH',
+				type: "REQUEST_REMATCH",
 				name: data.name,
 				gameId: data.gameId,
 				playerId: data.playerId,
@@ -87,7 +87,7 @@ describe('multiplayerController', () => {
 			expect(actions.setReady).toHaveBeenCalledWith(false);
 		});
 
-		it('returns true when called first time and false when called again', () => {
+		it("returns true when called first time and false when called again", () => {
 			const { requestRematch } = multiplayerController({
 				...data,
 				db,
@@ -101,19 +101,19 @@ describe('multiplayerController', () => {
 		});
 	});
 
-	describe('invite', () => {
+	describe("invite", () => {
 		const { invite } = multiplayerController({
 			...data,
 			db,
 			actions,
 		});
 
-		it('calls sendJsonMessage with correct values', () => {
-			const playerName = 'testName';
+		it("calls sendJsonMessage with correct values", () => {
+			const playerName = "testName";
 			invite(playerName);
 
 			expect(actions.sendJsonMessage).toHaveBeenCalledWith({
-				type: 'PLAYER_INVITE',
+				type: "PLAYER_INVITE",
 				hostName: data.name,
 				name: playerName,
 				gameId: data.gameId,

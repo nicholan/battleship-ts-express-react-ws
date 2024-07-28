@@ -1,6 +1,8 @@
 {
 	"name": "packages",
 	"scripts": {
-		"build": "npx tsc"
+		"build": "pnpm build:types && pnpm build:utilities",
+		"build:types": "cd zod-data-types && rm -rf dist && npx tsc -b",
+		"build:utilities": "cd utilities && rm -rf dist && npx tsc -b"
 	}
 }

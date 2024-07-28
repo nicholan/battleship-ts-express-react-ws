@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { debounce } from '@packages/utilities';
+import { debounce } from "@packages/utilities";
+import { useEffect, useState } from "react";
 
 type WindowSize = {
 	width: number;
@@ -7,17 +7,19 @@ type WindowSize = {
 };
 
 export function useWindowSize(debounceMs = 300) {
-	const [windowSize, setWindowSize] = useState<WindowSize>({ width: window.innerWidth, height: window.innerHeight });
+	const [windowSize, setWindowSize] = useState<WindowSize>({
+		width: window.innerWidth,
+		height: window.innerHeight,
+	});
 
 	useEffect(() => {
 		const debouncedResizeHandler = debounce(() => {
 			setWindowSize({ width: window.innerWidth, height: window.innerHeight });
 		}, debounceMs);
 
-		window.addEventListener('resize', debouncedResizeHandler);
-		return () => window.removeEventListener('resize', debouncedResizeHandler);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+		window.addEventListener("resize", debouncedResizeHandler);
+		return () => window.removeEventListener("resize", debouncedResizeHandler);
+	}, [debounceMs]);
 
 	return windowSize;
 }

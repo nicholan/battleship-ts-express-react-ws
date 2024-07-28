@@ -1,13 +1,13 @@
-import { Cell } from '../Cell/Cell.js';
-import { randomNum } from '@packages/utilities';
-import type { Coordinates, GameEvent } from '@packages/zod-data-types';
+import { randomNum } from "@packages/utilities";
+import type { Coordinates, GameEvent } from "@packages/zod-data-types";
+import { Cell } from "../Cell/Cell.js";
 
 export class AiController {
 	#grid = this.#createGrid();
 	#nodeStack: Cell[] = [];
 	#hits = new Map<string, Coordinates>();
 	#results: Coordinates[] = [];
-	#preference: 'x' | 'y' | null = null;
+	#preference: "x" | "y" | null = null;
 
 	reset = () => {
 		this.#grid = this.#createGrid();
@@ -38,8 +38,8 @@ export class AiController {
 			y - 1 < 0 ? undefined : this.#grid[x][y - 1],
 		];
 
-		if (this.#preference === 'x') return [...adjacentX];
-		if (this.#preference === 'y') return [...adjacentY];
+		if (this.#preference === "x") return [...adjacentX];
+		if (this.#preference === "y") return [...adjacentY];
 		if (!this.#preference) return [...adjacentY, ...adjacentX];
 	};
 
@@ -48,13 +48,13 @@ export class AiController {
 
 		if (this.#results.length < 1) return;
 
-		const adjacent = this.#results.map(this.#getAdjacentCells).flat();
+		const adjacent = this.#results.flatMap(this.#getAdjacentCells);
 
-		adjacent.forEach((cell) => {
-			if (cell !== undefined && cell.state === 'EMPTY') {
+		for (const cell of adjacent) {
+			if (cell !== undefined && cell.state === "EMPTY") {
 				this.#nodeStack.push(cell);
 			}
-		});
+		}
 	};
 
 	#determineAxisPreference = () => {
@@ -65,8 +65,8 @@ export class AiController {
 			return;
 		}
 
-		if (this.#results[0].x === this.#results[1].x) this.#preference = 'y';
-		if (this.#results[0].y === this.#results[1].y) this.#preference = 'x';
+		if (this.#results[0].x === this.#results[1].x) this.#preference = "y";
+		if (this.#results[0].y === this.#results[1].y) this.#preference = "x";
 	};
 
 	#filterResults = (arr: GameEvent[]) => {
@@ -74,17 +74,20 @@ export class AiController {
 		const events = [...arr].reverse();
 
 		// Mark sunk ships first.
-		const sunkShips = events.filter(({ result }) => result === 'SHIP_SUNK');
+		const sunkShips = events.filter(({ result }) => result === "SHIP_SUNK");
 		for (const ship of sunkShips) {
-			events.forEach((evt) => {
+			for (const evt of events) {
 				if (ship.shipId === evt.shipId) {
 					evt.result = ship.result;
 				}
-			});
+			}
 		}
 
 		// Find ships that aren't sunk, save coordinates.
-		events.forEach(({ coordinates: { x, y }, result }) => {
+		for (const {
+			coordinates: { x, y },
+			result,
+		} of events) {
 			this.#grid[x][y].state = result;
 
 			const key = JSON.stringify({ x, y });
@@ -92,10 +95,10 @@ export class AiController {
 				this.#hits.set(key, { x, y });
 			}
 
-			if (result === 'SHIP_HIT') {
+			if (result === "SHIP_HIT") {
 				this.#results.push({ x, y });
 			}
-		});
+		}
 	};
 
 	calculateMoveSet = (arr: GameEvent[]) => {

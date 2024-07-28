@@ -1,40 +1,45 @@
-import { defineConfig, devices } from '@playwright/test';
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { defineConfig, devices } from "@playwright/test";
 
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// require('dotenv').config();
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
+
+const __dirname = fileURLToPath(import.meta.url);
+const tearDown = path.resolve(__dirname, "../global-teardown");
+
 export default defineConfig({
-	testDir: './e2e',
+	testDir: "./e2e",
 	/* Run tests in files in parallel */
 	fullyParallel: false,
 	/* Fail the build on CI if you accidentally left test.only in the source code. */
 	forbidOnly: !!process.env.CI,
 	/* Retry on CI only */
-	retries: process.env.CI ? 3 : 0,
+	retries: process.env.CI ? 3 : 3,
 	/* Opt out of parallel tests on CI. */
-	workers: process.env.CI ? 1 : undefined,
+	workers: process.env.CI ? 1 : 4,
 	/* Reporter to use. See https://playwright.dev/docs/test-reporters */
-	reporter: 'list',
+	reporter: [["list", { printSteps: true }]],
 	/* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
 	use: {
 		/* Base URL to use in actions like `await page.goto('/')`. */
-		baseURL: 'http://localhost:3000/',
+		baseURL: "http://localhost:3000/",
 
 		/* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-		trace: 'on-first-retry',
+		trace: "on-first-retry",
 	},
 
 	/* Configure projects for major browsers */
 	projects: [
 		{
-			name: 'chromium',
-			use: { ...devices['Desktop Chrome'] },
+			name: "chromium",
+			use: { ...devices["Desktop Chrome"] },
 		},
 		// {
 		// 	name: 'firefox',
@@ -68,9 +73,11 @@ export default defineConfig({
 	],
 
 	/* Run your local dev server before starting the tests */
-	webServer: {
-		command: 'npm run start',
-		url: 'http://localhost:3000',
-		reuseExistingServer: !process.env.CI,
-	},
+	// webServer: {
+	// 	command: "",
+	// 	url: "http://localhost:3000",
+	// 	reuseExistingServer: !process.env.CI,
+	// },
+	globalTeardown: tearDown,
+	timeout: 10000, // 10 seconds
 });

@@ -11,11 +11,12 @@
 		"dev:static": "NODE_ENV=dev pnpm run build && concurrently \"pnpm run watch-compile\" \"pnpm run watch-dev\"",
 		"watch-compile": "swc src -w --out-dir dist",
 		"watch-dev": "nodemon --watch \"dist/**/*\" -e js ./dist/e2e-server.js",
-		"test": "ava",
 		"build": "rm -rf dist && swc src --out-dir dist",
 		"start": "pnpm run build && node dist/app.js",
-		"lint": "eslint --ext .ts src",
-		"lint:fix": "eslint --ext .ts src --fix"
+		"start:e2e": "pnpm run build && node dist/e2e-testing-server.js",
+		"start:production": "node dist/app.js",
+		"lint": "npx @biomejs/biome check ./src",
+		"lint:fix": "npx @biomejs/biome check --write --unsafe ./src"
 	},
 	"dependencies": {
 		"cors": "^2.8.5",
@@ -33,10 +34,9 @@
 		"@types/node": "^18.15.3",
 		"@types/supertest": "^2.0.12",
 		"@types/ws": "^8.5.4",
-		"ava": "^5.3.0",
 		"chokidar": "latest",
 		"dotenv": "^16.0.3",
-		"mongodb-memory-server": "^8.12.2",
+		"mongodb-memory-server": "10.0.0",
 		"morgan": "^1.10.0",
 		"nodemon": "latest"
 	}

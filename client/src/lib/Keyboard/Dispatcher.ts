@@ -1,4 +1,4 @@
-import type { Coordinates } from '@packages/zod-data-types';
+import type { Coordinates } from "@packages/zod-data-types";
 
 const moveDown = (c: Coordinates) => {
 	return { x: c.x, y: c.y < 9 ? ++c.y : 0 };
