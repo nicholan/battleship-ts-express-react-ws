@@ -8,8 +8,8 @@ const envSchema = z.object({
 	SECRET_KEY: z.string().min(1),
 	DATABASE_URI: z.string().min(1),
 	NODE_ENV: z.string().min(1),
-	WEBSOCKET_URL: z.string().min(1),
-	HOST_URL: z.string().min(1)
+	VITE_WEBSOCKET_URL: z.string().min(1),
+	VITE_HOST_URL: z.string().min(1),
 });
 
 export type cfgSchema = z.infer<typeof envSchema>;
@@ -28,7 +28,7 @@ export function createConfig(cfg: Config = process.env) {
 		IS_TESTING: env.NODE_ENV === "test",
 		IS_DEVELOPMENT: env.NODE_ENV === "dev",
 		API_PORT: env.API_PORT ? env.API_PORT : 8080,
-		ALLOWED_HOSTS: env.NODE_ENV === "prod" ? env.HOST_URL :_devHosts,
+		ALLOWED_HOSTS: env.NODE_ENV === "prod" ? env.HOST_URL : _devHosts,
 		DATABASE_URI: env.DATABASE_URI,
 	};
 

@@ -44,7 +44,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 	return response;
 }
 
-const websocketURL =  process.env.WEBSOCKET_URL ?? "ws://localhost:3000";
+const websocketURL =  import.meta.env.VITE_WEBSOCKET_URL ?? "ws://localhost:3000";
 
 export function Lobby() {
 	const navigate = useNavigate();
