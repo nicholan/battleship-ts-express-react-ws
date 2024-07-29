@@ -7,14 +7,9 @@
 		"node": "20.0.0"
 	},
 	"scripts": {
-		"dev": "pnpm run build && concurrently \"pnpm run watch-compile\" \"pnpm run watch-dev\"",
-		"dev:static": "NODE_ENV=dev pnpm run build && concurrently \"pnpm run watch-compile\" \"pnpm run watch-dev\"",
-		"watch-compile": "swc src -w --out-dir dist",
-		"watch-dev": "nodemon --watch \"dist/**/*\" -e js ./dist/e2e-server.js",
 		"build": "rm -rf dist && swc src --out-dir dist",
 		"start": "node dist/app.js",
 		"start:e2e": "pnpm run build && node dist/e2e-testing-server.js",
-		"start:production": "node dist/app.js",
 		"lint": "npx @biomejs/biome check ./src",
 		"lint:fix": "npx @biomejs/biome check --write --unsafe ./src"
 	},

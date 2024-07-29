@@ -5,6 +5,5 @@ dist
 package-lock.json
 pnpm-lock.yaml
 tsconfig.tsbuildinfo
-.github/workflows/deploy.yml
 .tsbuildinfo
 packages/.tsbuildinfo/tsconfig.tsbuildinfo

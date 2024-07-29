@@ -28,7 +28,7 @@ export function createConfig(cfg: Config = process.env) {
 		IS_TESTING: env.NODE_ENV === "test",
 		IS_DEVELOPMENT: env.NODE_ENV === "dev",
 		API_PORT: env.API_PORT ? env.API_PORT : 8080,
-		ALLOWED_HOSTS: env.NODE_ENV === "prod" ? env.HOST_URL : _devHosts,
+		ALLOWED_HOSTS: env.NODE_ENV === "prod" ? env.VITE_HOST_URL : _devHosts,
 		DATABASE_URI: env.DATABASE_URI,
 	};
 
