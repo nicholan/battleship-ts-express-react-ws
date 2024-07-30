@@ -5,14 +5,6 @@
 
 Welcome to the Multiplayer Battleship Game! This web application allows you to play the classic game of Battleship with friends online or in singleplayer against AI! Built with modern web technologies, it offers a seamless, responsive, and accessible gaming experience. Try it at [https://battleship-nicholan.onrender.com/](https://battleship-nicholan.onrender.com/)!
 
-## 📜 Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Testing](#testing)
-
 ## ✨ Features
 
 - 🕹️ **Real-time Multiplayer Gameplay**: Play Battleship with friends in real-time through WebSockets.
@@ -27,9 +19,9 @@ Welcome to the Multiplayer Battleship Game! This web application allows you to p
 - **Frontend**: Built with [React](https://reactjs.org/), styled with [TailwindCSS](https://tailwindcss.com/), bundled with [Vite](https://vitejs.dev/).
 - **Backend**: Backend running on [Express](https://expressjs.com/) and [Node.js](https://nodejs.org/).
 - **Database**: [MongoDB](https://www.mongodb.com/)
-- **WebSockets**: [ws](https://github.com/websockets/ws) for real-time gameplay.
+- **WebSockets**: [ws](https://github.com/websockets/ws) for real-time multiplayer gameplay.
 - **Data fetching**: [tRPC](https://trpc.io/) for End-to-end typesafe API.
-- **Type validation**: [Zod](https://zod.dev/) 
+- **Data validation**: [Zod](https://zod.dev/) for schema declarations and validation.
 - **Testing**: [Vitest](https://vitest.dev/) for unit tests, [Playwright](https://playwright.dev/) for end-to-end testing.
 - **Hosting**: Demo deployed and playable on [Render.com](https://battleship-nicholan.onrender.com/).
 

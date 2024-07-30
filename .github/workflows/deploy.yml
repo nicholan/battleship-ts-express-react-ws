@@ -1,17 +1,28 @@
-name: Deploy to Render
+name: Deploy
 
 on:
-  workflow_run:
-    workflows: ["Lint", "Test"]
-    types:
-      - completed
+  workflow_dispatch:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Render
+      - name: Check Lint Workflow Status
+        id: lint-status
+        run: |
+          lint_status=$(gh api -X GET "repos/${{ github.repository }}/actions/runs" -F event=push -F branch=main -F status=completed)
+          lint_status=$(echo "$lint_status" | python -c "import sys, json; data = json.load(sys.stdin); print(next((run['conclusion'] for run in data['workflow_runs'] if run['name'] == 'Lint'), ''))")
+          echo "::set-output name=lint_status::${lint_status}"
+          
+      - name: Check Test Workflow Status
+        id: test-status
+        run: |
+          test_status=$(gh api -X GET "repos/${{ github.repository }}/actions/runs" -F event=push -F branch=main -F status=completed)
+          test_status=$(echo "$test_status" | python -c "import sys, json; data = json.load(sys.stdin); print(next((run['conclusion'] for run in data['workflow_runs'] if run['name'] == 'Test'), ''))")
+          echo "::set-output name=test_status::${test_status}"
+
+      - name: Deploy if both Lint and Test workflows are successful
+        if: ${{ steps.lint-status.outputs.lint_status == 'success' && steps.test-status.outputs.test_status == 'success' }}
         run: |
           curl -X POST -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
           -H "Content-Type: application/json" \

@@ -34,3 +34,8 @@ jobs:
 
       - name: Run Biome
         run: biome ci .
+
+      - name: Trigger Status Check
+        if: ${{ success() }}
+        run: |
+          gh workflow run deploy.yml

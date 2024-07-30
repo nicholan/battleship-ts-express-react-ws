@@ -27,8 +27,8 @@ const apiLimiter = rateLimit({
 
 export default async function main(config: typeof defaultConfig) {
 	const app = express();
-	app.set('trust proxy', 1 /* number of proxies between user and server */)
-	
+	app.set("trust proxy", 1 /* number of proxies between user and server */);
+
 	const server = http.createServer(app);
 
 	app.disable("x-powered-by");
