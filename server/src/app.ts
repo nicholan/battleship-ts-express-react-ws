@@ -20,13 +20,15 @@ const staticFilesDir = path.resolve(__dirname, "../../../client/dist");
 
 const apiLimiter = rateLimit({
 	windowMs: 1 * 60 * 1000, // 1 minute
-	max: 10000, // Limit each IP to 100 (production) or 10000 (development) requests per `window` (here, per 1 minute)
+	max: 100, // Limit each IP to 100 requests per `window` (here, per 1 minute)
 	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
 export default async function main(config: typeof defaultConfig) {
 	const app = express();
+	app.set('trust proxy', 1 /* number of proxies between user and server */)
+	
 	const server = http.createServer(app);
 
 	app.disable("x-powered-by");

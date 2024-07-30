@@ -15,20 +15,21 @@ Welcome to the Multiplayer Battleship Game! This web application allows you to p
 
 ## ✨ Features
 
-- 🕹️ **Real-time Multiplayer Gameplay**: Play Battleship with friends in real-time using WebSockets.
+- 🕹️ **Real-time Multiplayer Gameplay**: Play Battleship with friends in real-time through WebSockets.
 - 🤖 **Singleplayer Gameplay**: You can also play against computer in offline mode!
 - 🎨 **Responsive Design**: Optimized for all devices, from desktops to mobile phones.
 - ♿ **Accessibility**: Designed with accessibility in mind to ensure a great experience for all users.
-- 🔒 **Type-safe API Calls**: Utilizes tRPC for type-safe communication between frontend and backend.
+- 🔒 **Type-safe API Calls**: Utilizes tRPC and Zod for type-safe communication between frontend and backend.
 
 ## 🛠️ Tech Stack
 
 - **Typescript**: Fully written in [Typescript](https://www.typescriptlang.org/)!
 - **Frontend**: Built with [React](https://reactjs.org/), styled with [TailwindCSS](https://tailwindcss.com/), bundled with [Vite](https://vitejs.dev/).
 - **Backend**: Backend running on [Express](https://expressjs.com/) and [Node.js](https://nodejs.org/).
-- **Database**: [MongoDB](https://www.mongodb.com/) for storing player and game data for 24 hours.
+- **Database**: [MongoDB](https://www.mongodb.com/)
 - **WebSockets**: [ws](https://github.com/websockets/ws) for real-time gameplay.
-- **Type-safe API**: [tRPC](https://trpc.io/) for End-to-end typesafe API.
+- **Data fetching**: [tRPC](https://trpc.io/) for End-to-end typesafe API.
+- **Type validation**: [Zod](https://zod.dev/) 
 - **Testing**: [Vitest](https://vitest.dev/) for unit tests, [Playwright](https://playwright.dev/) for end-to-end testing.
 - **Hosting**: Demo deployed and playable on [Render.com](https://battleship-nicholan.onrender.com/).
 
