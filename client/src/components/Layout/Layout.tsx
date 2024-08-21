@@ -135,7 +135,7 @@ export function Layout() {
 						"font-roboto text-sm md:text-base lg:text-lg",
 					])}
 				>
-					Nicholas Anttila 2023
+					Nicholas Anttila {new Date().getFullYear()}
 				</p>
 				<div className="absolute flex flex-row gap-4 items-center right-5 md:right-10 lg:right-20 top-0 h-full">
 					<Tooltip position="top" tooltipText="Github" id="tooltip-github">
@@ -149,7 +149,7 @@ export function Layout() {
 					</Tooltip>
 					<Tooltip position="top" tooltipText="LinkedIn" id="tooltip-linkedin">
 						<Link
-							to={"linkedin.com"}
+							to={"www.linkedin.com/in/nicholas-anttila-827620178"}
 							aria-describedby="tooltip-linkedin"
 							aria-label="Go to Linkedin profile"
 						>

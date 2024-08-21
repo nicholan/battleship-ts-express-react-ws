@@ -1,4 +1,6 @@
 
+
+
 ---
 
 # 🛳️ Multiplayer Battleship Game
@@ -24,6 +26,19 @@ Welcome to the Multiplayer Battleship Game! This web application allows you to p
 - **Data validation**: [Zod](https://zod.dev/) for schema declarations and validation.
 - **Testing**: [Vitest](https://vitest.dev/) for unit tests, [Playwright](https://playwright.dev/) for end-to-end testing.
 - **Hosting**: Demo deployed and playable on [Render.com](https://battleship-nicholan.onrender.com/).
+
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 10px;">
+
+  <img src="./images/PlayerInvite.png" alt="Invite player" style="width: 100%;">
+  
+  <img src="./images/GameStarted.png" alt="Game started" style="width: 100%;">
+  
+  <img src="./images/GameEnd.png" alt="Game end" style="width: 100%;">
+  
+  <img src="./images/Rematch.png" alt="Rematch" style="width: 100%;">
+
+</div>
 
 ## 🚀 Quick installation
 
