@@ -149,7 +149,7 @@ export function Layout() {
 					</Tooltip>
 					<Tooltip position="top" tooltipText="LinkedIn" id="tooltip-linkedin">
 						<Link
-							to={"www.linkedin.com/in/nicholas-anttila-827620178"}
+							to={"https://linkedin.com/in/nicholas-anttila-827620178"}
 							aria-describedby="tooltip-linkedin"
 							aria-label="Go to Linkedin profile"
 						>
