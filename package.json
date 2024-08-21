@@ -47,10 +47,5 @@
 		"@types/websocket": "^1.0.5",
 		"concurrently": "^8.2.2",
 		"typescript": "^5.0.2"
-	},
-	"packageManager": "pnpm@9.6.0",
-	"engines": {
-		"pnpm": "9.6.0",
-		"node": "20.15.1"
 	}
 }
